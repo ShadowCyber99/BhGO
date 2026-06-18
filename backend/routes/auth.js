@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 const db = require('../db');
 const auth = require('../middleware/auth');
 
@@ -10,21 +11,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'cabride-super-secret-key-change-in
 
 // @route   POST /api/auth/register
 // @desc    Register a rider or driver
-router.post('/register', async (req, res) => {
+router.post('/register', [
+  body('name', 'Name is required and must be max 50 characters').not().isEmpty().trim().escape().isLength({ max: 50 }),
+  body('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  body('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
+  body('role', 'Role must be either rider or driver').isIn(['rider', 'driver']),
+  body('vehicleName', 'Vehicle name is required for drivers').if(body('role').equals('driver')).not().isEmpty().trim().escape(),
+  body('vehicleType', 'Vehicle type is required for drivers').if(body('role').equals('driver')).not().isEmpty().trim().escape(),
+  body('vehicleNumber', 'Please enter a valid Indian number plate (e.g. MH 12 AB 1234)').if(body('role').equals('driver')).matches(/^[A-Z]{2}[ -]?[0-9]{1,2}[ -]?[A-Z]{1,2}[ -]?[0-9]{4}$/i)
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // Return first error message to match frontend expectations
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+
   const { name, email, password, role, vehicleName, vehicleType, vehicleNumber } = req.body;
-
-  // Basic validation
-  if (!name || !email || !password || !role) {
-    return res.status(400).json({ error: 'Please enter all required fields' });
-  }
-
-  if (role !== 'rider' && role !== 'driver') {
-    return res.status(400).json({ error: 'Role must be either rider or driver' });
-  }
-
-  if (role === 'driver' && (!vehicleName || !vehicleType || !vehicleNumber)) {
-    return res.status(400).json({ error: 'Drivers must provide vehicle details' });
-  }
 
   try {
     // Encrypt password
@@ -78,12 +80,16 @@ router.post('/register', async (req, res) => {
 
 // @route   POST /api/auth/login
 // @desc    Authenticate user & get token
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Please enter all fields' });
+router.post('/login', [
+  body('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  body('password', 'Password is required').exists()
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
   }
+
+  const { email, password } = req.body;
 
   try {
     // Fetch user

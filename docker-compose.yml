@@ -29,7 +29,7 @@ services:
       DB_USER: devops
       DB_PASSWORD: Shadow99@@
       DB_NAME: cab_ride
-      JWT_SECRET: your_super_secret_jwt_key
+      JWT_SECRET: super_secret_jwt_key_superapp_2026_!@#
     ports:
       - "5000:5000"
 
@@ -38,7 +38,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - EXPO_PUBLIC_API_URL=https://bharatgo.duckdns.org/api
+        - EXPO_PUBLIC_API_URL=http://bharatgo.duckdns.org/api
     container_name: cabride-frontend
     restart: unless-stopped
     depends_on:

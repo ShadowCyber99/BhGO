@@ -147,19 +147,19 @@ async function startSimulation() {
           if (dist < 0.2) { // 200m
             if (ghost.status === 'driving_to_pickup') {
               ghost.status = 'waiting';
-              ghost.socket.emit('arrive_at_pickup', { rideId: ghost.activeRide.id });
+              ghost.socket.emit('update_ride_status', { rideId: ghost.activeRide.id, status: 'arrived' });
               console.log(`📍 Ghost ${ghost.name} arrived at pickup!`);
               
               setTimeout(() => {
                 ghost.status = 'riding_to_dropoff';
-                ghost.targetLocation = { lat: parseFloat(ghost.activeRide.dropoff_lat), lng: parseFloat(ghost.activeRide.dropoff_lng) };
-                ghost.socket.emit('start_ride', { rideId: ghost.activeRide.id });
+                ghost.targetLocation = { lat: parseFloat(ghost.activeRide.dropoffLat), lng: parseFloat(ghost.activeRide.dropoffLng) };
+                ghost.socket.emit('update_ride_status', { rideId: ghost.activeRide.id, status: 'started' });
                 console.log(`🚗 Ghost ${ghost.name} started the ride!`);
               }, 3000);
             } else if (ghost.status === 'riding_to_dropoff') {
               ghost.status = 'idle';
               ghost.targetLocation = null;
-              ghost.socket.emit('complete_ride', { rideId: ghost.activeRide.id });
+              ghost.socket.emit('update_ride_status', { rideId: ghost.activeRide.id, status: 'completed' });
               console.log(`🏁 Ghost ${ghost.name} completed the ride!`);
               ghost.activeRide = null;
               ghost.riderId = null;

@@ -32,6 +32,17 @@ export default function RegisterScreen({ onNavigateToLogin }) {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     if (role === 'driver' && (!vehicleName || !vehicleNumber)) {
       setError('Please enter your vehicle details');
       return;

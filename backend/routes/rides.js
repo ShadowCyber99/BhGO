@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { body, validationResult } = require('express-validator');
 const db = require('../db');
 const auth = require('../middleware/auth');
 
@@ -36,12 +37,22 @@ router.get('/drivers', auth, async (req, res) => {
 
 // @route   POST /api/rides/request
 // @desc    Create a new ride request
-router.post('/request', auth, async (req, res) => {
-  const { serviceCategory, vehiclePreference, pickupAddress, dropoffAddress, pickupLat, pickupLng, dropoffLat, dropoffLng, fare, paymentMode } = req.body;
-
-  if (!serviceCategory || !pickupAddress || !dropoffAddress || !pickupLat || !pickupLng || !dropoffLat || !dropoffLng || !fare) {
-    return res.status(400).json({ error: 'Please provide all details including service category and fare' });
+router.post('/request', auth, [
+  body('serviceCategory', 'Invalid service category').not().isEmpty().trim().escape(),
+  body('pickupAddress', 'Pickup address is required').not().isEmpty().trim().escape(),
+  body('dropoffAddress', 'Dropoff address is required').not().isEmpty().trim().escape(),
+  body('pickupLat', 'Valid pickup latitude is required').isFloat({ min: -90, max: 90 }),
+  body('pickupLng', 'Valid pickup longitude is required').isFloat({ min: -180, max: 180 }),
+  body('dropoffLat', 'Valid dropoff latitude is required').isFloat({ min: -90, max: 90 }),
+  body('dropoffLng', 'Valid dropoff longitude is required').isFloat({ min: -180, max: 180 }),
+  body('fare', 'Fare must be a positive number').isFloat({ min: 0.1 })
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
   }
+
+  const { serviceCategory, vehiclePreference, pickupAddress, dropoffAddress, pickupLat, pickupLng, dropoffLat, dropoffLng, fare, paymentMode } = req.body;
 
   try {
     const crypto = require('crypto');
