@@ -528,14 +528,12 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                 ) : (
                   restaurants.filter(r => {
                     const isMatchCategory = r.category === foodCategoryTab || (!r.category && foodCategoryTab === 'food');
-                    const citiesList = ['Delhi', 'Mumbai', 'Bangalore', 'Kolkata', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad'];
-                    const rCity = citiesList[r.id % citiesList.length];
-                    const isCityMatch = rCity === selectedCity.name || r.category === 'grocery'; // Make all groceries available globally
+                    const isCityMatch = (r.city && r.city === selectedCity.name) || r.category === 'grocery'; // Make groceries global for now, or use real city mapping if updated
                     return isMatchCategory && isCityMatch;
                   }).map(r => (
                     <TouchableOpacity key={r.id} style={styles.restaurantCard} onPress={() => openRestaurant(r)}>
                       <Text style={{ fontSize: 40 }}>{r.image_url}</Text>
-                      <Text style={styles.restaurantName}>{r.name} - {selectedCity.name}</Text>
+                      <Text style={styles.restaurantName}>{r.name}</Text>
                       <Text style={styles.restaurantCuisine}>{r.cuisine} • ⭐ {r.rating}</Text>
                     </TouchableOpacity>
                   ))
@@ -1071,6 +1069,7 @@ const getStyles = (colors) => StyleSheet.create({
   
   helperHeader: { color: colors.textMuted, fontSize: 13, fontWeight: 'bold', marginBottom: 10 },
   customRouteBox: { backgroundColor: colors.surfaceLight, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.surfaceLight, gap: 10, zIndex: 50 },
+  routeInput: { backgroundColor: 'rgba(255,255,255,0.05)', color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: colors.surfaceLight, marginBottom: 8 },
   suggestionsBox: { position: 'absolute', top: 52, left: 0, right: 0, backgroundColor: colors.surface, borderRadius: 8, borderWidth: 1, borderColor: colors.primary, maxHeight: 150, overflow: 'hidden', zIndex: 999 },
   suggestionItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: colors.surfaceLight },
   suggestionText: { color: colors.text, fontSize: 13 },
@@ -1113,9 +1112,9 @@ const getStyles = (colors) => StyleSheet.create({
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20, zIndex: 9999 },
   modalCard: { width: '100%', maxWidth: 450, padding: 24, backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.glassBorder },
-  cityOptionBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  cityOptionBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: colors.surfaceLight, borderWidth: 1, borderColor: colors.glassBorder },
   cityOptionBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  cityOptionText: { color: colors.textMuted, fontWeight: 'bold' },
+  cityOptionText: { color: colors.text, fontWeight: 'bold' },
   
   supportTabBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.05)' },
   supportTabActive: { backgroundColor: colors.parcelColor },

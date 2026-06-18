@@ -101,11 +101,13 @@ router.get('/active', auth, async (req, res) => {
               u_rider.name as rider_name,
               u_driver.name as driver_name, u_driver.rating as driver_rating,
               d.vehicle_name, d.vehicle_type, d.vehicle_number,
-              d.latitude as driver_lat, d.longitude as driver_lng
+              d.latitude as driver_lat, d.longitude as driver_lng,
+              o.items_json, o.total_amount
        FROM rides r
        JOIN users u_rider ON r.rider_id = u_rider.id
        LEFT JOIN users u_driver ON r.driver_id = u_driver.id
        LEFT JOIN drivers d ON r.driver_id = d.user_id
+       LEFT JOIN orders o ON r.id = o.ride_id
        WHERE (r.rider_id = $1 OR r.driver_id = $1) 
          AND r.status IN ('requested', 'accepted', 'arrived', 'started')
        ORDER BY r.created_at DESC LIMIT 1`,
@@ -142,6 +144,8 @@ router.get('/active', auth, async (req, res) => {
         status: row.status,
         payment_status: row.payment_status,
         payment_mode: row.payment_mode,
+        itemsJson: row.items_json ? row.items_json : null,
+        orderTotal: row.total_amount ? parseFloat(row.total_amount) : null,
         createdAt: row.created_at
       }
     });

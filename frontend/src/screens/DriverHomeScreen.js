@@ -406,6 +406,7 @@ export default function DriverHomeScreen() {
           dropoff={(activeRide || incomingRequest) ? { lat: (activeRide || incomingRequest).dropoffLat, lng: (activeRide || incomingRequest).dropoffLng } : null}
           driver={user?.driverDetails ? { lat: simulatedPos?.lat || user.driverDetails.latitude, lng: simulatedPos?.lng || user.driverDetails.longitude, name: 'You' } : null}
           nearbyDrivers={[]} 
+          rideStatus={activeRide?.status || (incomingRequest ? 'requested' : null)}
         />
       </View>
 
@@ -660,6 +661,15 @@ export default function DriverHomeScreen() {
             )}
             <Text style={styles.addressLine}>🔴 Dropoff: {activeRide.dropoffAddress}</Text>
             <Text style={styles.passengerText}>👤 Customer: {activeRide.riderName || 'Passenger'}</Text>
+            
+            {activeRide.serviceCategory === 'food' && activeRide.itemsJson && (
+              <View style={{ marginTop: 12, backgroundColor: 'rgba(255,255,255,0.05)', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.surfaceLight }}>
+                <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 8 }}>🍔 Order Items (Total: ₹{activeRide.orderTotal})</Text>
+                {activeRide.itemsJson.map((item, idx) => (
+                  <Text key={idx} style={{ color: colors.textMuted, fontSize: 13 }}>• {item.name} {item.is_veg && '🌿'} (₹{item.price})</Text>
+                ))}
+              </View>
+            )}
           </View>
 
           <View style={styles.actionBlock}>

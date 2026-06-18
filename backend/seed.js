@@ -22,6 +22,23 @@ async function seed() {
     await pool.query(sql);
     console.log('✅ Database seeded successfully with schema.sql!');
     
+    console.log('🔄 Expanding Restaurants and Menus to all cities...');
+    const CITIES = ['Mumbai', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat', 'Chandigarh', 'Mohali', 'Kharar', 'Ludhiana', 'Amritsar', 'Jalandhar'];
+    const restsRes = await pool.query("SELECT * FROM restaurants WHERE city = 'Delhi'");
+    for (const city of CITIES) {
+      for (const r of restsRes.rows) {
+        const newR = await pool.query(
+          "INSERT INTO restaurants (name, cuisine, rating, image_url, category, city) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+          [r.name, r.cuisine, r.rating, r.image_url, r.category, city]
+        );
+        await pool.query(
+          "INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_url) SELECT $1, name, description, price, is_veg, image_url FROM menu_items WHERE restaurant_id = $2",
+          [newR.rows[0].id, r.id]
+        );
+      }
+    }
+    console.log('✅ Expansion Complete!');
+    
     // Dynamically seed users using bcrypt for proper hashing
     const bcrypt = require('bcryptjs');
     const salt = await bcrypt.genSalt(10);

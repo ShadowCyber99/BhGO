@@ -62,14 +62,18 @@ export default function MapView({
   driver,     // { lat, lng, name, vehicleType, serviceCategory }
   nearbyDrivers = [], // [ { latitude, longitude, vehicleType, serviceCategory } ]
   cityCenter, // { lat, lng }
+  rideStatus, // 'requested', 'accepted', 'arrived', 'started', 'completed', 'cancelled'
 }) {
   const { colors, isDarkMode } = useTheme();
   const styles = getStyles(colors);
   
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [hasCentered, setHasCentered] = useState(false);
+  const [osrmRoute, setOsrmRoute] = useState([]);
+  const [routeStats, setRouteStats] = useState({ distance: 0, duration: 0 });
+  const [routeColor, setRouteColor] = useState(colors.primary);
 
-  // Auto-center map only ONCE when data first becomes available, or explicitly when city changes
+  // Auto-center map
   useEffect(() => {
     if (cityCenter?.lat && cityCenter?.lng) {
       setMapCenter([cityCenter.lat, cityCenter.lng]);
@@ -87,23 +91,80 @@ export default function MapView({
     }
   }, [pickup, driver, nearbyDrivers, hasCentered, cityCenter]);
 
-  // Route path coordinates
-  const polylineCoords = [];
-  if (pickup?.lat && pickup?.lng) polylineCoords.push([pickup.lat, pickup.lng]);
-  if (driver?.lat && driver?.lng && !dropoff) polylineCoords.unshift([driver.lat, driver.lng]); // Driver to pickup
-  if (dropoff?.lat && dropoff?.lng) polylineCoords.push([dropoff.lat, dropoff.lng]); // Pickup to dropoff
+  // Fetch OSRM Route based on status
+  useEffect(() => {
+    let start = null;
+    let end = null;
+    let rColor = colors.primary;
+
+    if (rideStatus === 'accepted' || rideStatus === 'arrived') {
+      // Driver is going to pickup
+      if (driver?.lat && pickup?.lat) {
+        start = driver;
+        end = pickup;
+        rColor = '#F97316'; // Orange
+      }
+    } else if (rideStatus === 'started') {
+      // Driver is going to dropoff
+      if (driver?.lat && dropoff?.lat) {
+        start = driver;
+        end = dropoff;
+        rColor = '#10B981'; // Green
+      } else if (pickup?.lat && dropoff?.lat) {
+        start = pickup;
+        end = dropoff;
+        rColor = '#10B981';
+      }
+    } else {
+      // Default: show pickup to dropoff
+      if (pickup?.lat && dropoff?.lat) {
+        start = pickup;
+        end = dropoff;
+        rColor = colors.primary;
+      }
+    }
+
+    setRouteColor(rColor);
+
+    if (start && end) {
+      const fetchRoute = async () => {
+        try {
+          const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            // OSRM returns [lng, lat], Leaflet needs [lat, lng]
+            const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+            setOsrmRoute(coords);
+            setRouteStats({
+              distance: (route.distance / 1000).toFixed(1), // km
+              duration: Math.ceil(route.duration / 60) // mins
+            });
+          }
+        } catch (err) {
+          console.error("OSRM Fetch Error:", err);
+          // Fallback to straight line
+          setOsrmRoute([[start.lat, start.lng], [end.lat, end.lng]]);
+        }
+      };
+      fetchRoute();
+    } else {
+      setOsrmRoute([]);
+      setRouteStats({ distance: 0, duration: 0 });
+    }
+  }, [rideStatus, pickup, dropoff, driver?.lat, driver?.lng]);
 
   return (
     <View style={styles.container}>
       <MapContainer 
         center={mapCenter} 
-        key={mapCenter.join(',')} // Force map to initially center, but allow free panning later
+        key={mapCenter.join(',')} 
         zoom={14} 
         style={{ height: '400px', width: '100%', borderRadius: 16 }}
         zoomControl={false}
       >
         <ChangeView center={mapCenter} />
-        {/* Beautiful high-quality OpenStreetMap layer */}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
           url={isDarkMode 
@@ -111,7 +172,6 @@ export default function MapView({
             : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"}
         />
 
-        {/* 1. Draw Nearby Drivers */}
         {nearbyDrivers.map((dr, idx) => (
           dr.latitude && dr.longitude && (
             <Marker 
@@ -124,21 +184,18 @@ export default function MapView({
           )
         ))}
 
-        {/* 2. Draw Pickup Marker */}
         {pickup?.lat && pickup?.lng && (
           <Marker position={[pickup.lat, pickup.lng]} icon={icons.pickup}>
             <Popup>Pickup: {pickup.address}</Popup>
           </Marker>
         )}
 
-        {/* 3. Draw Dropoff Marker */}
         {dropoff?.lat && dropoff?.lng && (
           <Marker position={[dropoff.lat, dropoff.lng]} icon={icons.dropoff}>
             <Popup>Dropoff: {dropoff.address}</Popup>
           </Marker>
         )}
 
-        {/* 4. Draw Active Assigned Driver */}
         {driver?.lat && driver?.lng && (
           <Marker 
             position={[driver.lat, driver.lng]} 
@@ -148,13 +205,12 @@ export default function MapView({
           </Marker>
         )}
 
-        {/* 5. Draw Active Route Line */}
-        {polylineCoords.length > 1 && (
+        {osrmRoute.length > 1 && (
           <Polyline 
-            positions={polylineCoords} 
-            color={colors.primary} 
-            weight={4}
-            dashArray="10, 10"
+            positions={osrmRoute} 
+            color={routeColor} 
+            weight={5}
+            opacity={0.8}
           />
         )}
       </MapContainer>
@@ -162,6 +218,12 @@ export default function MapView({
       {/* HUD Overlay */}
       <View style={styles.hud}>
         <Text style={styles.hudText}>🌍 Live Super App Map</Text>
+        {routeStats.distance > 0 && (
+          <View style={{ marginTop: 4, flexDirection: 'row', gap: 10 }}>
+            <Text style={{ color: '#0f172a', fontSize: 11 }}>🛣️ {routeStats.distance} km</Text>
+            <Text style={{ color: '#0f172a', fontSize: 11 }}>⏱️ {routeStats.duration} min</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -182,8 +244,8 @@ const getStyles = (colors) => StyleSheet.create({
     top: 12,
     left: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e2e8f0',
@@ -191,6 +253,7 @@ const getStyles = (colors) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    zIndex: 1000,
   },
   hudText: {
     color: '#0f172a',

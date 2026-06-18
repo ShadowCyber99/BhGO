@@ -62,7 +62,8 @@ CREATE TABLE restaurants (
     cuisine VARCHAR(50) NOT NULL,
     rating DECIMAL(3,2) DEFAULT 4.5,
     image_url TEXT,
-    category VARCHAR(20) DEFAULT 'food'
+    category VARCHAR(20) DEFAULT 'food',
+    city VARCHAR(50) DEFAULT 'Delhi'
 );
 
 CREATE TABLE menu_items (

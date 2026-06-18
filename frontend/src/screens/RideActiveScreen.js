@@ -160,6 +160,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         pickup={{ lat: ride.pickupLat, lng: ride.pickupLng, address: ride.pickupAddress }}
         dropoff={{ lat: ride.dropoffLat, lng: ride.dropoffLng, address: ride.dropoffAddress }}
         driver={ride.driverLat ? { lat: ride.driverLat, lng: ride.driverLng, name: ride.driverName } : null}
+        rideStatus={ride.status}
       />
 
       <GlassCard style={styles.consoleCard}>
