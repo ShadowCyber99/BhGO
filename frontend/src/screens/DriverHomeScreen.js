@@ -145,14 +145,25 @@ export default function DriverHomeScreen() {
       });
 
       socket.on('ride_status_update', (data) => {
-        if (activeRide && data.ride.id === activeRide.id) {
-          if (data.ride.status === 'completed' || data.ride.status === 'cancelled') {
-            setActiveRide(null);
-            setIncomingRequest(null);
-          } else {
-            setActiveRide(prev => ({ ...prev, ...data.ride }));
+        setActiveRide(prevActiveRide => {
+          // If we already have this ride active
+          if (prevActiveRide && prevActiveRide.id === data.ride.id) {
+            if (data.ride.status === 'completed' || data.ride.status === 'cancelled') {
+              setIncomingRequest(null);
+              return null;
+            }
+            return { ...prevActiveRide, ...data.ride };
           }
-        }
+          
+          // If we don't have an active ride, and this update is assigned to us (we just accepted it)
+          if (!prevActiveRide && data.ride.driverId === user.id) {
+            if (data.ride.status !== 'completed' && data.ride.status !== 'cancelled') {
+              return data.ride;
+            }
+          }
+          
+          return prevActiveRide;
+        });
       });
 
       socket.on('ride_cancelled', (data) => {

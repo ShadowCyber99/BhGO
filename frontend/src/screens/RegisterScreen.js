@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
+import { logoSvgBase64 } from '../constants/logo';
 
 export default function RegisterScreen({ onNavigateToLogin }) {
   const { register } = useAuth();
@@ -84,12 +85,12 @@ export default function RegisterScreen({ onNavigateToLogin }) {
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.logoText}>Cab<Text style={styles.logoBold}>Ride</Text></Text>
+          <Image source={{ uri: logoSvgBase64 }} style={{ width: 160, height: 50, marginBottom: 12 }} resizeMode="contain" />
           <Text style={styles.tagline}>Create your account to start traveling</Text>
         </View>
 
         <GlassCard style={styles.card}>
-          <Text style={styles.title}>Join CabRide</Text>
+          <Text style={styles.title}>Join BharatGo</Text>
           <Text style={styles.subtitle}>Select your transit role to get configured</Text>
 
           {error ? <Text style={styles.errorText}>⚠️ {error}</Text> : null}

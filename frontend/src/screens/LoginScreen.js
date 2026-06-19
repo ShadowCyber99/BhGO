@@ -109,7 +109,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>New to CabRide? </Text>
+            <Text style={styles.footerText}>New to BharatGo? </Text>
             <TouchableOpacity onPress={onNavigateToRegister}>
               <Text style={styles.footerLink}>Create Account</Text>
             </TouchableOpacity>

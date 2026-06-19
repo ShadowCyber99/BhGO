@@ -132,9 +132,21 @@ io.on('connection', (socket) => {
       await db.query("UPDATE drivers SET is_available = false WHERE user_id = $1", [driverId]);
 
       const updatedRide = {
-        ...ride,
+        id: ride.id,
+        refId: ride.ref_id,
+        riderId: ride.rider_id,
+        serviceCategory: ride.service_category,
+        pickupAddress: ride.pickup_address,
+        dropoffAddress: ride.dropoff_address,
+        pickupLat: parseFloat(ride.pickup_lat),
+        pickupLng: parseFloat(ride.pickup_lng),
+        dropoffLat: parseFloat(ride.dropoff_lat),
+        dropoffLng: parseFloat(ride.dropoff_lng),
+        fare: parseFloat(ride.fare),
         status: 'accepted',
-        driver_id: driverId,
+        paymentMode: ride.payment_mode,
+        paymentStatus: ride.payment_status,
+        driverId: driverId,
         driverName: driver.name,
         driverRating: parseFloat(driver.rating),
         vehicleName: driver.vehicle_name,
@@ -173,19 +185,53 @@ io.on('connection', (socket) => {
 
       await db.query(queryStr, queryParams);
       
-      const rideRes = await db.query('SELECT * FROM rides WHERE id = $1', [rideId]);
+      const rideRes = await db.query(
+        `SELECT r.*, u_driver.name as driver_name, u_driver.rating as driver_rating, 
+                d.vehicle_name, d.vehicle_number, d.vehicle_type, 
+                d.latitude as driver_lat, d.longitude as driver_lng 
+         FROM rides r 
+         LEFT JOIN users u_driver ON r.driver_id = u_driver.id 
+         LEFT JOIN drivers d ON r.driver_id = d.user_id 
+         WHERE r.id = $1`, 
+        [rideId]
+      );
       if (rideRes.rows.length === 0) return;
-      const ride = rideRes.rows[0];
+      const row = rideRes.rows[0];
 
       // If completed, free driver
       if (status === 'completed') {
-        await db.query("UPDATE drivers SET is_available = true WHERE user_id = $1", [ride.driver_id]);
+        await db.query("UPDATE drivers SET is_available = true WHERE user_id = $1", [row.driver_id]);
         io.emit('drivers_changed');
       }
 
+      const updatedRide = {
+        id: row.id,
+        refId: row.ref_id,
+        riderId: row.rider_id,
+        serviceCategory: row.service_category,
+        pickupAddress: row.pickup_address,
+        dropoffAddress: row.dropoff_address,
+        pickupLat: parseFloat(row.pickup_lat),
+        pickupLng: parseFloat(row.pickup_lng),
+        dropoffLat: parseFloat(row.dropoff_lat),
+        dropoffLng: parseFloat(row.dropoff_lng),
+        fare: parseFloat(row.fare),
+        status: row.status,
+        paymentMode: row.payment_mode,
+        paymentStatus: row.payment_status,
+        driverId: row.driver_id,
+        driverName: row.driver_name,
+        driverRating: row.driver_rating ? parseFloat(row.driver_rating) : null,
+        vehicleName: row.vehicle_name,
+        vehicleNumber: row.vehicle_number,
+        vehicleType: row.vehicle_type,
+        driverLat: row.driver_lat ? parseFloat(row.driver_lat) : null,
+        driverLng: row.driver_lng ? parseFloat(row.driver_lng) : null
+      };
+
       // Notify passenger and driver
-      io.to(`user_${ride.rider_id}`).emit('ride_status_update', { ride });
-      io.to(`user_${ride.driver_id}`).emit('ride_status_update', { ride });
+      io.to(`user_${row.rider_id}`).emit('ride_status_update', { ride: updatedRide });
+      io.to(`user_${row.driver_id}`).emit('ride_status_update', { ride: updatedRide });
 
     } catch (err) {
       console.error('Update Ride Status Error:', err.message);
