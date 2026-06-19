@@ -72,6 +72,7 @@ export default function MapView({
   const [osrmRoute, setOsrmRoute] = useState([]);
   const [routeStats, setRouteStats] = useState({ distance: 0, duration: 0 });
   const [routeColor, setRouteColor] = useState(colors.primary);
+  const [animatedDriverPos, setAnimatedDriverPos] = useState(null);
 
   // Auto-center map
   useEffect(() => {
@@ -155,6 +156,36 @@ export default function MapView({
     }
   }, [rideStatus, pickup, dropoff, driver?.lat, driver?.lng]);
 
+  // Animate Driver Marker along the route
+  useEffect(() => {
+    if (rideStatus === 'completed' && dropoff?.lat) {
+      setAnimatedDriverPos([dropoff.lat, dropoff.lng]);
+    } else if (rideStatus === 'arrived' && pickup?.lat) {
+      setAnimatedDriverPos([pickup.lat, pickup.lng]);
+    } else if (osrmRoute.length > 0 && (rideStatus === 'accepted' || rideStatus === 'started')) {
+      let step = 0;
+      setAnimatedDriverPos(osrmRoute[0]);
+      
+      // Calculate delay to make the animation take about 10 seconds total
+      const delay = Math.max(20, Math.floor(10000 / osrmRoute.length));
+
+      const interval = setInterval(() => {
+        step += 1;
+        if (step < osrmRoute.length) {
+          setAnimatedDriverPos(osrmRoute[step]);
+        } else {
+          clearInterval(interval);
+        }
+      }, delay);
+      
+      return () => clearInterval(interval);
+    } else if (driver?.lat && driver?.lng) {
+      setAnimatedDriverPos([driver.lat, driver.lng]);
+    } else {
+      setAnimatedDriverPos(null);
+    }
+  }, [osrmRoute, rideStatus, dropoff, pickup, driver?.lat, driver?.lng]);
+
   return (
     <View style={styles.container}>
       <MapContainer 
@@ -196,12 +227,12 @@ export default function MapView({
           </Marker>
         )}
 
-        {driver?.lat && driver?.lng && (
+        {(animatedDriverPos || (driver?.lat && driver?.lng)) && (
           <Marker 
-            position={[driver.lat, driver.lng]} 
-            icon={icons[driver.serviceCategory] || icons.ride}
+            position={animatedDriverPos || [driver.lat, driver.lng]} 
+            icon={driver ? (icons[driver.serviceCategory] || icons.ride) : icons.ride}
           >
-            <Popup>Active Driver: {driver.name}</Popup>
+            <Popup>Active Driver: {driver?.name || 'Driver'}</Popup>
           </Marker>
         )}
 

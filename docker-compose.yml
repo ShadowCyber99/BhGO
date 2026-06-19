@@ -36,7 +36,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - EXPO_PUBLIC_API_URL=http://bharatgo.duckdns.org/api
+        - EXPO_PUBLIC_API_URL=https://bharatgo.duckdns.org/api
     container_name: cabride-frontend
     restart: unless-stopped
     depends_on:
