@@ -51,26 +51,37 @@ const FAMOUS_PLACES = [
 ];
 
 const HOSPITALS = [
-  { id: 1, name: '🏥 AIIMS', city: 'Delhi', address: 'Ansari Nagar, New Delhi', lat: 28.5659, lng: 77.2093 },
-  { id: 2, name: '🏥 Safdarjung Hospital', city: 'Delhi', address: 'Ring Road, New Delhi', lat: 28.5684, lng: 77.2059 },
-  { id: 3, name: '🏥 Apollo Hospital', city: 'Delhi', address: 'Sarita Vihar, Delhi', lat: 28.5360, lng: 77.2844 },
-  { id: 4, name: '🏥 Lilavati Hospital', city: 'Mumbai', address: 'Bandra West, Mumbai', lat: 19.0514, lng: 72.8256 },
-  { id: 5, name: '🏥 Tata Memorial', city: 'Mumbai', address: 'Parel, Mumbai', lat: 19.0044, lng: 72.8436 },
-  { id: 6, name: '🏥 Fortis Hospital', city: 'Mumbai', address: 'Mulund, Mumbai', lat: 19.1601, lng: 72.9365 },
-  { id: 7, name: '🏥 Manipal Hospital', city: 'Bangalore', address: 'Old Airport Road, Bangalore', lat: 12.9585, lng: 77.6496 },
-  { id: 8, name: '🏥 Narayana Hrudayalaya', city: 'Bangalore', address: 'Bommasandra, Bangalore', lat: 12.8166, lng: 77.6835 },
-  { id: 9, name: '🏥 NIMHANS', city: 'Bangalore', address: 'Hosur Road, Bangalore', lat: 12.9381, lng: 77.5936 },
-  { id: 10, name: '🏥 Apollo Health City', city: 'Hyderabad', address: 'Jubilee Hills, Hyderabad', lat: 17.4124, lng: 78.4082 },
-  { id: 11, name: '🏥 Yashoda Hospital', city: 'Hyderabad', address: 'Secunderabad, Hyderabad', lat: 17.4410, lng: 78.5042 },
-  { id: 12, name: '🏥 CMC Vellore', city: 'Chennai', address: 'Vellore (Near Chennai)', lat: 12.9255, lng: 79.1352 },
-  { id: 13, name: '🏥 MIOT International', city: 'Chennai', address: 'Manapakkam, Chennai', lat: 13.0183, lng: 80.1764 },
-  { id: 14, name: '🏥 AMRI Hospital', city: 'Kolkata', address: 'Dhakuria, Kolkata', lat: 22.5074, lng: 88.3653 },
-  { id: 15, name: '🏥 Ruby General', city: 'Kolkata', address: 'Kasba, Kolkata', lat: 22.5137, lng: 88.4037 },
-  { id: 16, name: '🏥 Ruby Hall Clinic', city: 'Pune', address: 'Sassoon Road, Pune', lat: 18.5303, lng: 73.8749 },
-  { id: 17, name: '🏥 Deenanath Mangeshkar', city: 'Pune', address: 'Erandwane, Pune', lat: 18.5040, lng: 73.8232 },
-  { id: 18, name: '🏥 Zydus Hospital', city: 'Ahmedabad', address: 'Thaltej, Ahmedabad', lat: 23.0617, lng: 72.5222 },
-  { id: 19, name: '🏥 SMS Hospital', city: 'Jaipur', address: 'Ashok Nagar, Jaipur', lat: 26.8996, lng: 75.8157 },
-  { id: 20, name: '🏥 Kiran Hospital', city: 'Surat', address: 'Katargam, Surat', lat: 21.2173, lng: 72.8276 }
+  { id: 1, name: '🏥 AIIMS (Govt)', city: 'Delhi', address: 'Ansari Nagar, New Delhi', lat: 28.5659, lng: 77.2093 },
+  { id: 2, name: '🏥 Safdarjung Hospital (Govt)', city: 'Delhi', address: 'Ring Road, New Delhi', lat: 28.5684, lng: 77.2059 },
+  { id: 3, name: '🏥 Apollo Hospital (Private)', city: 'Delhi', address: 'Sarita Vihar, Delhi', lat: 28.5360, lng: 77.2844 },
+  { id: 4, name: '🏥 Max Super Speciality (Private)', city: 'Delhi', address: 'Saket, Delhi', lat: 28.5273, lng: 77.2140 },
+  { id: 5, name: '🏥 KEM Hospital (Govt)', city: 'Mumbai', address: 'Parel, Mumbai', lat: 19.0028, lng: 72.8422 },
+  { id: 6, name: '🏥 Lilavati Hospital (Private)', city: 'Mumbai', address: 'Bandra West, Mumbai', lat: 19.0514, lng: 72.8256 },
+  { id: 7, name: '🏥 Victoria Hospital (Govt)', city: 'Bangalore', address: 'Fort Road, Bangalore', lat: 12.9622, lng: 77.5755 },
+  { id: 8, name: '🏥 Manipal Hospital (Private)', city: 'Bangalore', address: 'Old Airport Road, Bangalore', lat: 12.9585, lng: 77.6496 },
+  { id: 9, name: '🏥 Osmania General Hospital (Govt)', city: 'Hyderabad', address: 'Afzal Gunj, Hyderabad', lat: 17.3768, lng: 78.4719 },
+  { id: 10, name: '🏥 Apollo Health City (Private)', city: 'Hyderabad', address: 'Jubilee Hills, Hyderabad', lat: 17.4124, lng: 78.4082 },
+  { id: 11, name: '🏥 Rajiv Gandhi Govt General Hospital', city: 'Chennai', address: 'Park Town, Chennai', lat: 13.0818, lng: 80.2764 },
+  { id: 12, name: '🏥 MIOT International (Private)', city: 'Chennai', address: 'Manapakkam, Chennai', lat: 13.0183, lng: 80.1764 },
+  { id: 13, name: '🏥 SSKM Hospital (Govt)', city: 'Kolkata', address: 'Bhowanipore, Kolkata', lat: 22.5398, lng: 88.3444 },
+  { id: 14, name: '🏥 AMRI Hospital (Private)', city: 'Kolkata', address: 'Dhakuria, Kolkata', lat: 22.5074, lng: 88.3653 },
+  { id: 15, name: '🏥 Sassoon General Hospital (Govt)', city: 'Pune', address: 'Near Pune Station, Pune', lat: 18.5284, lng: 73.8732 },
+  { id: 16, name: '🏥 Ruby Hall Clinic (Private)', city: 'Pune', address: 'Sassoon Road, Pune', lat: 18.5303, lng: 73.8749 },
+  { id: 17, name: '🏥 Civil Hospital (Govt)', city: 'Ahmedabad', address: 'Asarwa, Ahmedabad', lat: 23.0526, lng: 72.6033 },
+  { id: 18, name: '🏥 Zydus Hospital (Private)', city: 'Ahmedabad', address: 'Thaltej, Ahmedabad', lat: 23.0617, lng: 72.5222 },
+  { id: 19, name: '🏥 SMS Hospital (Govt)', city: 'Jaipur', address: 'Ashok Nagar, Jaipur', lat: 26.8996, lng: 75.8157 },
+  { id: 20, name: '🏥 Fortis Escorts (Private)', city: 'Jaipur', address: 'Malviya Nagar, Jaipur', lat: 26.8458, lng: 75.8078 },
+  { id: 21, name: '🏥 New Civil Hospital (Govt)', city: 'Surat', address: 'Khatodra Wadi, Surat', lat: 21.1824, lng: 72.8123 },
+  { id: 22, name: '🏥 Kiran Hospital (Private)', city: 'Surat', address: 'Katargam, Surat', lat: 21.2173, lng: 72.8276 },
+  { id: 23, name: '🏥 PGIMER (Govt)', city: 'Chandigarh', address: 'Sector 12, Chandigarh', lat: 30.7675, lng: 76.7725 },
+  { id: 24, name: '🏥 Fortis Hospital (Private)', city: 'Chandigarh', address: 'Phase 8, Mohali', lat: 30.6974, lng: 76.7214 },
+  { id: 25, name: '🏥 Civil Hospital (Govt)', city: 'Mohali', address: 'Phase 6, Mohali', lat: 30.7302, lng: 76.7118 },
+  { id: 26, name: '🏥 Civil Hospital (Govt)', city: 'Ludhiana', address: 'Near Bharat Nagar Chowk', lat: 30.9006, lng: 75.8453 },
+  { id: 27, name: '🏥 DMC Hospital (Private)', city: 'Ludhiana', address: 'Civil Lines, Ludhiana', lat: 30.9168, lng: 75.8286 },
+  { id: 28, name: '🏥 Civil Hospital (Govt)', city: 'Amritsar', address: 'Rambagh, Amritsar', lat: 31.6360, lng: 74.8812 },
+  { id: 29, name: '🏥 SGRD Institute (Private)', city: 'Amritsar', address: 'Mehta Road, Amritsar', lat: 31.6429, lng: 74.9126 },
+  { id: 30, name: '🏥 Civil Hospital (Govt)', city: 'Jalandhar', address: 'Central Town, Jalandhar', lat: 31.3216, lng: 75.5802 },
+  { id: 31, name: '🏥 PIMS Hospital (Private)', city: 'Jalandhar', address: 'Garha Road, Jalandhar', lat: 31.2987, lng: 75.5940 }
 ];
 
 const DEMO_ROUTES = [
@@ -118,6 +129,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   
   const [serviceCategory, setServiceCategory] = useState('ride'); 
   const [vehiclePreference, setVehiclePreference] = useState('any');
+  const [parcelWeight, setParcelWeight] = useState('');
   const [baseDistance, setBaseDistance] = useState(0);
   const [fare, setFare] = useState(0);
 
@@ -253,6 +265,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
           perKmRate = 10;
           break;
         case 'economy':
+        case 'cab':
         case 'any':
           baseFare = 40;
           perKmRate = 12;
@@ -663,7 +676,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                             setDropoffCoords({ lat: h.lat, lng: h.lng });
                             if (!pickupAddress) {
                               setPickupAddress('Current Location (Emergency)');
-                              setPickupCoords({ lat: 40.73, lng: -73.99 });
+                              setPickupCoords({ lat: selectedCity.lat, lng: selectedCity.lng });
                             }
                             setBaseDistance(8.5);
                           }}
@@ -695,12 +708,12 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                   </>
                 )}
 
-                {/* Vehicle Selection for Ride and Parcel */}
-                {(serviceCategory === 'ride' || serviceCategory === 'parcel') && (
+                {/* Vehicle Selection for Ride */}
+                {serviceCategory === 'ride' && (
                   <View style={{ marginTop: 10, marginBottom: 20 }}>
                     <Text style={styles.helperHeader}>🚘 Select Vehicle Preference</Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                      {['any', ...(serviceCategory === 'ride' ? ['auto', 'economy', 'premium', 'suv'] : ['bike', 'van'])].map(v => (
+                      {['any', 'bike', 'auto', 'economy', 'premium', 'suv'].map(v => (
                         <TouchableOpacity 
                           key={v}
                           style={[styles.vehicleBtn, vehiclePreference === v && styles.vehicleBtnActive]}
@@ -710,6 +723,31 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                         </TouchableOpacity>
                       ))}
                     </View>
+                  </View>
+                )}
+
+                {/* Parcel Weight Input */}
+                {serviceCategory === 'parcel' && (
+                  <View style={{ marginTop: 10, marginBottom: 20 }}>
+                    <Text style={styles.helperHeader}>📦 Parcel Details</Text>
+                    <TextInput 
+                      style={styles.routeInput} 
+                      placeholder="Parcel Weight in kg (e.g., 15)"
+                      placeholderTextColor={colors.textMuted}
+                      keyboardType="numeric"
+                      value={parcelWeight}
+                      onChangeText={(val) => {
+                        setParcelWeight(val);
+                        if (parseFloat(val) <= 20) {
+                          setVehiclePreference('bike');
+                        } else {
+                          setVehiclePreference('cab');
+                        }
+                      }}
+                    />
+                    <Text style={{color: colors.textMuted, fontSize: 12, marginTop: 4, paddingHorizontal: 12}}>
+                      {parcelWeight ? `Vehicle auto-assigned: ${parseFloat(parcelWeight) <= 20 ? 'Bike' : 'Cab'} (based on weight)` : 'Enter weight to auto-assign vehicle'}
+                    </Text>
                   </View>
                 )}
               </GlassCard>

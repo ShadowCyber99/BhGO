@@ -43,17 +43,19 @@ for (const city of INDIAN_CITIES) {
 
     allRestaurants.push(`(${rId}, '${restName}', 'Multi-Cuisine', ${rating}, '${emoji}', '${category}')`);
 
-    // Add 4 menu items for this restaurant
+    // Add 5 menu items for this restaurant
     if (isGrocery) {
-      allMenuRows.push(`(${rId}, 'Milk 1L', 'Fresh toned milk', 65.00, true, '🥛')`);
-      allMenuRows.push(`(${rId}, 'Bread Packet', 'White sliced bread', 45.00, true, '🍞')`);
-      allMenuRows.push(`(${rId}, 'Eggs 6pcs', 'Farm fresh eggs', 60.00, false, '🥚')`);
-      allMenuRows.push(`(${rId}, 'Maggi Noodles', 'Instant noodles 4-pack', 56.00, true, '🍜')`);
+      allMenuRows.push(`(${rId}, 'Amul Taaza Milk 1L', 'Fresh toned milk', 68.00, true, '🥛')`);
+      allMenuRows.push(`(${rId}, 'Britannia White Bread', 'White sliced bread 400g', 50.00, true, '🍞')`);
+      allMenuRows.push(`(${rId}, 'Farm Fresh Eggs 6pcs', 'Brown eggs pack', 48.00, false, '🥚')`);
+      allMenuRows.push(`(${rId}, 'Maggi Masala Noodles', 'Instant noodles 4-pack 280g', 56.00, true, '🍜')`);
+      allMenuRows.push(`(${rId}, 'Ashirvaad Atta 5kg', 'Whole wheat flour', 245.00, true, '🌾')`);
     } else {
-      allMenuRows.push(`(${rId}, 'Paneer Tikka', 'Tandoori cottage cheese', 250.00, true, '🧀')`);
-      allMenuRows.push(`(${rId}, 'Chicken Biryani', 'Aromatic rice & chicken', 350.00, false, '🍚')`);
-      allMenuRows.push(`(${rId}, 'Butter Naan', 'Tandoori flatbread', 50.00, true, '🫓')`);
-      allMenuRows.push(`(${rId}, 'Gulab Jamun', 'Sweet milk dumplings', 90.00, true, '🍡')`);
+      allMenuRows.push(`(${rId}, 'Paneer Tikka', 'Tandoori cottage cheese with chutney', 280.00, true, '🧀')`);
+      allMenuRows.push(`(${rId}, 'Chicken Dum Biryani', 'Aromatic rice & chicken cooked in spices', 320.00, false, '🍚')`);
+      allMenuRows.push(`(${rId}, 'Garlic Butter Naan', 'Tandoori flatbread with garlic & butter', 55.00, true, '🫓')`);
+      allMenuRows.push(`(${rId}, 'Gulab Jamun (2 pcs)', 'Sweet milk dumplings in syrup', 80.00, true, '🍡')`);
+      allMenuRows.push(`(${rId}, 'Masala Dosa', 'Crispy crepe with spiced potato filling', 120.00, true, '🥘')`);
     }
     rId++;
   }

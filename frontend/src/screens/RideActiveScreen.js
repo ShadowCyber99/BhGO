@@ -213,6 +213,20 @@ export default function RideActiveScreen({ onNavigateToHome }) {
           </View>
         )}
 
+        {ride.status === 'arrived' && (
+          <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.danger, marginBottom: 16 }}>
+            <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>🛡️ Pre-Ride Safety Checklist</Text>
+            {ride.serviceCategory === 'ambulance' ? (
+              <Text style={{ color: colors.text, fontSize: 14 }}>• Ensure seatbelts are buckled securely{'\n'}• Check stretcher is secured & medical equipment is ready</Text>
+            ) : ride.vehiclePreference === 'bike' ? (
+              <Text style={{ color: colors.text, fontSize: 14 }}>• Ensure helmets are worn by BOTH driver and rider/parcel</Text>
+            ) : (
+              <Text style={{ color: colors.text, fontSize: 14 }}>• Ensure seatbelts are buckled securely</Text>
+            )}
+            <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 12, fontStyle: 'italic' }}>Please ensure these safety measures are met before the driver starts the trip.</Text>
+          </View>
+        )}
+
         {/* LIVE CHAT BOX */}
         {chatOpen && (
           <KeyboardAvoidingView behavior="padding" style={styles.chatBox}>

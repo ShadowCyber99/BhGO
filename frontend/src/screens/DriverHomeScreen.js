@@ -20,6 +20,8 @@ export default function DriverHomeScreen() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  const [safetyChecked, setSafetyChecked] = useState(false);
 
   // Chat State
   const [chatOpen, setChatOpen] = useState(false);
@@ -56,6 +58,9 @@ export default function DriverHomeScreen() {
   const [supportTab, setSupportTab] = useState('faq');
   const [botMessages, setBotMessages] = useState([{ text: 'Hi Driver! I am your AI assistant. Need help with a trip, penalty, or earnings?', sender: 'bot' }]);
   const [botInput, setBotInput] = useState('');
+  
+  const [complaintText, setComplaintText] = useState('');
+  const [complaintSubmitted, setComplaintSubmitted] = useState(false);
 
   const sendBotMessage = () => {
     if(!botInput.trim()) return;
@@ -137,9 +142,8 @@ export default function DriverHomeScreen() {
         if (!activeRide && !incomingRequest) {
           setIncomingRequest(data);
           
-          // Initialize simulated movement to pickup location instantly for the Map
           if (user?.driverDetails) {
-            setSimulatedPos({ lat: user.driverDetails.latitude, lng: user.driverDetails.longitude });
+            // No need to set simulatedPos manually, MapView.js handles live map animation flawlessly!
           }
         }
       });
@@ -239,7 +243,12 @@ export default function DriverHomeScreen() {
         socket.emit('update_ride_status', { rideId: activeRide.id, status: nextStatus });
         setActiveRide(prev => ({ ...prev, status: nextStatus }));
       }
-      if (nextStatus === 'completed') setTimeout(() => setActiveRide(null), 500);
+      if (nextStatus === 'completed') {
+        setTimeout(() => {
+          setActiveRide(null);
+          setSafetyChecked(false);
+        }, 500);
+      }
     } catch(err) {
       setError(err.message);
     } finally {
@@ -247,55 +256,8 @@ export default function DriverHomeScreen() {
     }
   };
 
-  // Live Vehicle Movement Simulation
-  const [simulatedPos, setSimulatedPos] = useState(null);
-
-  useEffect(() => {
-    if (!activeRide || !simulatedPos) return;
-
-    let targetLat = null;
-    let targetLng = null;
-
-    if (activeRide.status === 'accepted') {
-      targetLat = activeRide.pickupLat;
-      targetLng = activeRide.pickupLng;
-    } else if (activeRide.status === 'started') {
-      targetLat = activeRide.dropoffLat;
-      targetLng = activeRide.dropoffLng;
-    } else {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setSimulatedPos(prev => {
-        if (!prev) return prev;
-        
-        // Simple linear interpolation
-        const step = 0.0003; // ~30 meters per tick
-        let newLat = prev.lat;
-        let newLng = prev.lng;
-        
-        const latDiff = targetLat - prev.lat;
-        const lngDiff = targetLng - prev.lng;
-        const dist = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
-
-        if (dist < step) {
-          newLat = targetLat;
-          newLng = targetLng;
-        } else {
-          newLat += (latDiff / dist) * step;
-          newLng += (lngDiff / dist) * step;
-        }
-
-        // Notify backend of movement
-        if (socket) socket.emit('update_location', { userId: user.id, latitude: newLat, longitude: newLng });
-
-        return { lat: newLat, lng: newLng };
-      });
-    }, 1500);
-
-    return () => clearInterval(interval);
-  }, [activeRide, socket, user?.id]);
+  // Removed manual simulatedPos calculation to prevent NaN crashes on the map component.
+  // The MapView.js now natively interpolates the route path point-by-point.
 
   const handleDeclineOffer = () => setIncomingRequest(null);
 
@@ -415,7 +377,7 @@ export default function DriverHomeScreen() {
           cityCenter={selectedCity} 
           pickup={(activeRide || incomingRequest) ? { lat: (activeRide || incomingRequest).pickupLat, lng: (activeRide || incomingRequest).pickupLng } : null}
           dropoff={(activeRide || incomingRequest) ? { lat: (activeRide || incomingRequest).dropoffLat, lng: (activeRide || incomingRequest).dropoffLng } : null}
-          driver={user?.driverDetails ? { lat: simulatedPos?.lat || user.driverDetails.latitude, lng: simulatedPos?.lng || user.driverDetails.longitude, name: 'You' } : null}
+          driver={user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', serviceCategory: user.driverDetails.service_category } : null}
           nearbyDrivers={[]} 
           rideStatus={activeRide?.status || (incomingRequest ? 'requested' : null)}
         />
@@ -584,10 +546,13 @@ export default function DriverHomeScreen() {
             
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
               <TouchableOpacity onPress={() => setSupportTab('faq')} style={[styles.supportTabBtn, supportTab === 'faq' && styles.supportTabActive]}>
-                <Text style={styles.supportTabText}>Guides & FAQ</Text>
+                <Text style={styles.supportTabText}>Guides</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setSupportTab('bot')} style={[styles.supportTabBtn, supportTab === 'bot' && styles.supportTabActive]}>
-                <Text style={styles.supportTabText}>AI Assistant</Text>
+                <Text style={styles.supportTabText}>Assistant</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSupportTab('complaint')} style={[styles.supportTabBtn, supportTab === 'complaint' && styles.supportTabActive]}>
+                <Text style={styles.supportTabText}>Complaint</Text>
               </TouchableOpacity>
             </View>
 
@@ -630,6 +595,37 @@ export default function DriverHomeScreen() {
                 
                 <Text style={{ color: colors.primary, fontWeight: 'bold' }}>4. Weekly Payouts</Text>
                 <Text style={{ color: colors.textDim, marginBottom: 8, fontSize: 12 }}>Earnings are aggregated and transferred weekly. Check your 'My Earnings' tab for a visual breakdown of your weekly statistics.</Text>
+              </ScrollView>
+            )}
+
+            {supportTab === 'complaint' && (
+              <ScrollView style={{ maxHeight: 350, marginBottom: 20 }}>
+                {complaintSubmitted ? (
+                  <View style={{ padding: 20, backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: colors.success }}>
+                    <Text style={{ color: colors.success, fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>Complaint Submitted Successfully!</Text>
+                    <Text style={{ color: colors.text, textAlign: 'center', marginTop: 8 }}>Our support team will review this and contact you within 24 hours.</Text>
+                  </View>
+                ) : (
+                  <View>
+                    <Text style={{ color: colors.text, marginBottom: 8 }}>Describe your issue or complaint:</Text>
+                    <TextInput
+                      style={[styles.chatInput, { height: 100, textAlignVertical: 'top', borderWidth: 1, borderColor: colors.surfaceLight }]}
+                      placeholder="Passenger behavior, app issues, payment disputes..."
+                      placeholderTextColor={colors.textMuted}
+                      multiline
+                      value={complaintText}
+                      onChangeText={setComplaintText}
+                    />
+                    <CustomButton 
+                      title="Submit Complaint" 
+                      onPress={() => {
+                        if (complaintText.trim()) setComplaintSubmitted(true);
+                      }} 
+                      variant="danger" 
+                      style={{ marginTop: 12 }} 
+                    />
+                  </View>
+                )}
               </ScrollView>
             )}
 
@@ -690,7 +686,29 @@ export default function DriverHomeScreen() {
             </View>
 
             {activeRide.status === 'accepted' && <CustomButton title="I Have Arrived at Pickup" onPress={() => handleUpdateStatus('arrived')} style={styles.actionBtn} />}
-            {activeRide.status === 'arrived' && <CustomButton title="Start Trip / Board Passenger" onPress={() => handleUpdateStatus('started')} style={styles.actionBtn} />}
+            
+            {activeRide.status === 'arrived' && (
+              <View style={{ flex: 1, marginLeft: 16 }}>
+                <TouchableOpacity 
+                  onPress={() => setSafetyChecked(!safetyChecked)}
+                  style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: safetyChecked ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: safetyChecked ? colors.success : colors.danger, marginBottom: 8 }}
+                >
+                  <Text style={{ marginRight: 8, fontSize: 18 }}>{safetyChecked ? '✅' : '⬜'}</Text>
+                  <Text style={{ color: colors.text, fontSize: 12, flex: 1 }}>
+                    {activeRide.serviceCategory === 'ambulance' ? 'Seatbelts buckled, Stretcher & Medical kit ready' :
+                     (activeRide.vehiclePreference === 'bike' || activeRide.serviceCategory === 'bike') ? 'Helmets worn by both' :
+                     'Seatbelts buckled securely'}
+                  </Text>
+                </TouchableOpacity>
+                <CustomButton 
+                  title="Start Trip / Board Passenger" 
+                  onPress={() => handleUpdateStatus('started')} 
+                  style={[styles.actionBtn, !safetyChecked && { opacity: 0.5 }]} 
+                  disabled={!safetyChecked}
+                />
+              </View>
+            )}
+
             {activeRide.status === 'started' && <CustomButton title="Complete Trip & Collect Payout" onPress={() => handleUpdateStatus('completed')} style={[styles.actionBtn, { backgroundColor: colors.success }]} />}
           </View>
         </GlassCard>
