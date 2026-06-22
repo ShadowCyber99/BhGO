@@ -177,7 +177,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
 
               <Text style={styles.selectorLabel}>Vehicle Service Type</Text>
               <View style={styles.vehicleTypeSelector}>
-                {['economy', 'premium', 'suv'].map((type) => (
+                {['economy', 'premium', 'suv', 'bike'].map((type) => (
                   <TouchableOpacity
                     key={type}
                     style={[

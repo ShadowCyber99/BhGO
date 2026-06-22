@@ -1,146 +1,6 @@
--- Drop existing tables to ensure clean wipe for Indian Context redesign
-DROP TABLE IF EXISTS reviews CASCADE;
-DROP TABLE IF EXISTS chat_messages CASCADE;
-DROP TABLE IF EXISTS orders CASCADE;
-DROP TABLE IF EXISTS menu_items CASCADE;
-DROP TABLE IF EXISTS restaurants CASCADE;
-DROP TABLE IF EXISTS rides CASCADE;
-DROP TABLE IF EXISTS drivers CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+const fs = require('fs');
 
--- Create tables
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('rider', 'driver')),
-    rating DECIMAL(3,2) DEFAULT 5.00,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE drivers (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    service_category VARCHAR(20) NOT NULL, 
-    vehicle_name VARCHAR(100) NOT NULL,
-    vehicle_type VARCHAR(20) NOT NULL, 
-    vehicle_number VARCHAR(50) NOT NULL,
-    latitude DECIMAL(10,8),
-    longitude DECIMAL(11,8),
-    is_online BOOLEAN DEFAULT false,
-    is_available BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE rides (
-    id SERIAL PRIMARY KEY,
-    ref_id VARCHAR(50) UNIQUE,
-    rider_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    driver_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    service_category VARCHAR(20) NOT NULL,
-    vehicle_preference VARCHAR(20) DEFAULT 'any',
-    pickup_address TEXT NOT NULL,
-    dropoff_address TEXT NOT NULL,
-    pickup_lat DECIMAL(10,8) NOT NULL,
-    pickup_lng DECIMAL(11,8) NOT NULL,
-    dropoff_lat DECIMAL(10,8) NOT NULL,
-    dropoff_lng DECIMAL(11,8) NOT NULL,
-    fare DECIMAL(10,2) NOT NULL,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('requested', 'accepted', 'arrived', 'started', 'completed', 'cancelled')),
-    payment_status VARCHAR(20) DEFAULT 'paid',
-    payment_mode VARCHAR(20) DEFAULT 'digital',
-    cancelled_by VARCHAR(20),
-    driver_penalty DECIMAL(10,2) DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE restaurants (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    cuisine VARCHAR(50) NOT NULL,
-    rating DECIMAL(3,2) DEFAULT 4.5,
-    image_url TEXT,
-    category VARCHAR(20) DEFAULT 'food',
-    city VARCHAR(50) DEFAULT 'Delhi'
-);
-
-CREATE TABLE menu_items (
-    id SERIAL PRIMARY KEY,
-    restaurant_id INTEGER REFERENCES restaurants(id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    price DECIMAL(10,2) NOT NULL,
-    is_veg BOOLEAN DEFAULT true,
-    image_url TEXT
-);
-
-CREATE TABLE orders (
-    id SERIAL PRIMARY KEY,
-    ride_id INTEGER REFERENCES rides(id) ON DELETE CASCADE,
-    restaurant_id INTEGER REFERENCES restaurants(id) ON DELETE CASCADE,
-    total_amount DECIMAL(10,2) NOT NULL,
-    items_json JSONB NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE chat_messages (
-    id SERIAL PRIMARY KEY,
-    ride_id INTEGER REFERENCES rides(id) ON DELETE CASCADE,
-    sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    message_text TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE reviews (
-    id SERIAL PRIMARY KEY,
-    ride_id INTEGER REFERENCES rides(id) ON DELETE CASCADE,
-    driver_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    rider_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    tags JSONB,
-    comment TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Seed Restaurants (15 Food, 6 Groceries)
-INSERT INTO restaurants (id, name, cuisine, rating, image_url, category) VALUES 
-(1, 'Bukhara Authentic', 'North Indian', 4.9, '🥘', 'food'),
-(2, 'Indian Accent', 'Modern Indian', 4.8, '🍛', 'food'),
-(3, 'Haldirams Classics', 'Snacks & Sweets', 4.7, '🥟', 'food'),
-(4, 'Saravana Bhavan', 'South Indian', 4.8, '🥞', 'food'),
-(5, 'Paradise Biryani', 'Hyderabadi', 4.6, '🍚', 'food'),
-(6, 'Karim''s', 'Mughlai', 4.7, '🍗', 'food'),
-(7, 'Moti Mahal Delux', 'North Indian', 4.5, '🍲', 'food'),
-(8, 'Oh! Calcutta', 'Bengali', 4.8, '🐟', 'food'),
-(9, 'Punjabi Dhaba', 'Punjabi', 4.4, '🍢', 'food'),
-(10, 'Chaat Corner', 'Street Food', 4.6, '🍟', 'food'),
-(11, 'Mainland China', 'Indo-Chinese', 4.5, '🍜', 'food'),
-(12, 'Dakshin', 'South Indian', 4.7, '🥥', 'food'),
-(13, 'Bikanervala', 'Sweets & Snacks', 4.6, '🥨', 'food'),
-(14, 'Rajdhani Thali', 'Rajasthani', 4.8, '🍱', 'food'),
-(15, 'Tunday Kababi', 'Awadhi', 4.9, '🥩', 'food'),
-
--- Grocery Stores
-(16, 'BigBasket Local', 'Groceries', 4.7, '🛒', 'grocery'),
-(17, 'BlinkIt Fresh', 'Daily Essentials', 4.8, '🛍️', 'grocery'),
-(18, 'Reliance Smart', 'Supermarket', 4.5, '🏬', 'grocery'),
-(19, 'D-Mart Specials', 'Discount Groceries', 4.6, '🏪', 'grocery'),
-(20, 'Nature''s Basket', 'Premium Grocery', 4.8, '🥑', 'grocery'),
-(21, 'Local Kirana', 'Neighborhood Store', 4.4, '🏪', 'grocery'),
-
--- New Additions
-(22, 'Apollo Pharmacy', 'Medicines & Health', 4.8, '💊', 'grocery'),
-(23, 'Croma Express', 'Electronics', 4.5, '🔌', 'grocery'),
-(24, 'Licious', 'Fresh Meat & Seafood', 4.7, '🥩', 'grocery'),
-(25, 'Sweet Tooth Desserts', 'Desserts & Cakes', 4.9, '🎂', 'food'),
-(26, 'Subway Sandwiches', 'Healthy Fast Food', 4.3, '🥪', 'food');
-
--- Reset Sequence for restaurants
-SELECT setval('restaurants_id_seq', 26);
-
--- Seed Menu Items (30+ Food)
+const content = `-- Seed Menu Items (30+ Food)
 INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_url) VALUES 
 -- Bukhara
 (1, 'Dal Makhani', 'Slow cooked black lentils with cream.', 450.00, TRUE, '🍲'),
@@ -256,3 +116,13 @@ INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_u
 -- Subway Sandwiches
 (26, 'Paneer Tikka Sub (15cm)', 'Toasted sub with fresh veggies.', 180.00, TRUE, '🥪'),
 (26, 'Chicken Teriyaki Sub (15cm)', 'Classic chicken sub.', 220.00, FALSE, '🌯');
+`;
+
+const lines = fs.readFileSync('schema.sql', 'utf8').split('\\n');
+let idx = lines.findIndex(l => l.startsWith('-- Seed Menu Items'));
+if (idx !== -1) {
+  fs.writeFileSync('schema.sql', lines.slice(0, idx).join('\\n') + '\\n' + content);
+  console.log('Successfully updated schema.sql');
+} else {
+  console.log('Could not find marker in schema.sql');
+}

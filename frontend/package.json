@@ -2,6 +2,9 @@
   "name": "cabride-frontend",
   "version": "1.0.0",
   "scripts": {
+    "prestart": "node copy_icon.js",
+    "preweb": "node copy_icon.js",
+    "prebuild": "node copy_icon.js",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
