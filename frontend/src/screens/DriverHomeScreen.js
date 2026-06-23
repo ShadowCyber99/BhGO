@@ -15,7 +15,7 @@ export default function DriverHomeScreen() {
   
   const [isOnline, setIsOnline] = useState(user?.driverDetails?.isOnline || false);
   const [activeRide, setActiveRide] = useState(null);
-  const [incomingRequest, setIncomingRequest] = useState(null);
+  const [incomingRequests, setIncomingRequests] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -61,6 +61,13 @@ export default function DriverHomeScreen() {
   
   const [complaintText, setComplaintText] = useState('');
   const [complaintSubmitted, setComplaintSubmitted] = useState(false);
+
+  const [ticker, setTicker] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTicker(t => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const sendBotMessage = () => {
     if(!botInput.trim()) return;
@@ -139,12 +146,12 @@ export default function DriverHomeScreen() {
           if (!matchesStart || !matchesDest) return; // Ignore this request
         }
 
-        if (!activeRide && !incomingRequest) {
-          setIncomingRequest(data);
-          
-          if (user?.driverDetails) {
-            // No need to set simulatedPos manually, MapView.js handles live map animation flawlessly!
-          }
+        if (!activeRide) {
+          setIncomingRequests(prev => {
+            if (prev.find(r => r.id === data.id)) return prev;
+            // Attach a requestedAt timestamp to power the local UI countdown if desired
+            return [...prev, { ...data, requestedAt: Date.now() }];
+          });
         }
       });
 
@@ -153,7 +160,6 @@ export default function DriverHomeScreen() {
           // If we already have this ride active
           if (prevActiveRide && prevActiveRide.id === data.ride.id) {
             if (data.ride.status === 'completed' || data.ride.status === 'cancelled') {
-              setIncomingRequest(null);
               return null;
             }
             return { ...prevActiveRide, ...data.ride };
@@ -173,15 +179,12 @@ export default function DriverHomeScreen() {
       socket.on('ride_cancelled', (data) => {
         setError(data.message);
         setActiveRide(null);
-        setIncomingRequest(null);
+        setIncomingRequests([]);
         setTimeout(() => setError(''), 6000);
       });
 
       socket.on('ride_unavailable', (data) => {
-        setIncomingRequest((prev) => {
-          if (prev && prev.id === data.rideId) return null;
-          return prev;
-        });
+        setIncomingRequests(prev => prev.filter(r => r.id !== data.rideId));
       });
 
 
@@ -199,7 +202,7 @@ export default function DriverHomeScreen() {
         socket.off('receive_chat_message');
       };
     }
-  }, [socket, isOnline, activeRide?.id, incomingRequest, routeMode, specificRouteStart, specificRouteEnd, serviceFilter]);
+  }, [socket, isOnline, activeRide?.id, routeMode, specificRouteStart, specificRouteEnd, serviceFilter]);
 
   const handleToggleOnline = async () => {
     setActionLoading(true);
@@ -222,12 +225,11 @@ export default function DriverHomeScreen() {
     }
   };
 
-  const handleAcceptOffer = async () => {
-    if (!incomingRequest) return;
+  const handleAcceptOffer = async (req) => {
     setActionLoading(true);
     try {
-      if (socket) socket.emit('accept_ride', { rideId: incomingRequest.id, driverId: user.id });
-      setIncomingRequest(null);
+      if (socket) socket.emit('accept_ride', { rideId: req.id, driverId: user.id });
+      setIncomingRequests([]);
     } catch(err) {
       setError(err.message);
     } finally {
@@ -259,7 +261,9 @@ export default function DriverHomeScreen() {
   // Removed manual simulatedPos calculation to prevent NaN crashes on the map component.
   // The MapView.js now natively interpolates the route path point-by-point.
 
-  const handleDeclineOffer = () => setIncomingRequest(null);
+  const handleDeclineOffer = (reqId) => {
+    setIncomingRequests(prev => prev.filter(r => r.id !== reqId));
+  };
 
   const sendChat = () => {
     if (!chatText.trim() || !activeRide) return;
@@ -375,36 +379,49 @@ export default function DriverHomeScreen() {
       <View style={{ height: 350, borderRadius: 16, overflow: 'hidden', marginBottom: 20, borderWidth: 1, borderColor: colors.surfaceLight }}>
         <MapView 
           cityCenter={selectedCity} 
-          pickup={(activeRide || incomingRequest) ? { lat: (activeRide || incomingRequest).pickupLat, lng: (activeRide || incomingRequest).pickupLng } : null}
-          dropoff={(activeRide || incomingRequest) ? { lat: (activeRide || incomingRequest).dropoffLat, lng: (activeRide || incomingRequest).dropoffLng } : null}
-          driver={user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', serviceCategory: user.driverDetails.service_category } : null}
+          pickup={(activeRide || incomingRequests.length > 0) ? { lat: activeRide ? activeRide.pickupLat : incomingRequests[0].pickupLat, lng: activeRide ? activeRide.pickupLng : incomingRequests[0].pickupLng } : null}
+          dropoff={(activeRide || incomingRequests.length > 0) ? { lat: activeRide ? activeRide.dropoffLat : incomingRequests[0].dropoffLat, lng: activeRide ? activeRide.dropoffLng : incomingRequests[0].dropoffLng } : null}
+          driver={user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', vehicleType: user.driverDetails.vehicleType, serviceCategory: user.driverDetails.service_category } : null}
           nearbyDrivers={[]} 
-          rideStatus={activeRide?.status || (incomingRequest ? 'requested' : null)}
+          rideStatus={activeRide?.status || (incomingRequests.length > 0 ? 'requested' : null)}
         />
       </View>
 
       {error ? <Text style={styles.errorText}>⚠️ {error}</Text> : null}
 
-      {incomingRequest && !activeRide && (
-        <GlassCard style={styles.offerCard}>
-          <Text style={styles.offerTag}>⚡ INCOMING DISPATCH OFFER</Text>
-          <Text style={styles.offerAddress}>Pickup: {incomingRequest.pickupAddress}</Text>
-          {incomingRequest.waypoints && incomingRequest.waypoints.length > 0 && (
-            <Text style={styles.offerAddress}>Stops: {incomingRequest.waypoints.join(' ➡️ ')}</Text>
-          )}
-          <Text style={styles.offerAddress}>Dropoff: {incomingRequest.dropoffAddress}</Text>
-          
-          <View style={styles.offerFooter}>
-            <View>
-              <Text style={styles.offerFareLabel}>Guaranteed Fare</Text>
-              <Text style={styles.offerFareVal}>₹{incomingRequest.fare}</Text>
-            </View>
-            <View style={styles.offerButtons}>
-              <TouchableOpacity onPress={handleDeclineOffer} style={styles.declineBtn}><Text style={styles.declineText}>Decline</Text></TouchableOpacity>
-              <TouchableOpacity onPress={handleAcceptOffer} style={styles.acceptBtn}><Text style={styles.acceptText}>Accept Offer</Text></TouchableOpacity>
-            </View>
-          </View>
-        </GlassCard>
+      {incomingRequests.length > 0 && !activeRide && (
+        <View style={{ marginTop: 20 }}>
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold', marginBottom: 12 }}>⚡ INCOMING DISPATCH OFFERS ({incomingRequests.length})</Text>
+          {incomingRequests.map((req) => {
+            const timeElapsed = Math.floor((Date.now() - (req.requestedAt || Date.now())) / 1000);
+            const timeLeft = Math.max(0, 180 - timeElapsed); // 3 minutes = 180 seconds
+
+            return (
+              <GlassCard key={req.id} style={[styles.offerCard, { marginBottom: 16 }]}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={styles.offerTag}>🔥 {req.serviceCategory.toUpperCase()} REQUEST</Text>
+                  <Text style={{ color: colors.danger, fontWeight: 'bold' }}>⏳ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</Text>
+                </View>
+                <Text style={styles.offerAddress}>Pickup: {req.pickupAddress}</Text>
+                {req.waypoints && req.waypoints.length > 0 && (
+                  <Text style={styles.offerAddress}>Stops: {req.waypoints.join(' ➡️ ')}</Text>
+                )}
+                <Text style={styles.offerAddress}>Dropoff: {req.dropoffAddress}</Text>
+                
+                <View style={styles.offerFooter}>
+                  <View>
+                    <Text style={styles.offerFareLabel}>Guaranteed Fare</Text>
+                    <Text style={styles.offerFareVal}>₹{req.fare}</Text>
+                  </View>
+                  <View style={styles.offerButtons}>
+                    <TouchableOpacity onPress={() => handleDeclineOffer(req.id)} style={styles.declineBtn}><Text style={styles.declineText}>Decline</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleAcceptOffer(req)} style={styles.acceptBtn}><Text style={styles.acceptText}>Accept</Text></TouchableOpacity>
+                  </View>
+                </View>
+              </GlassCard>
+            );
+          })}
+        </View>
       )}
 
       <Modal visible={showCityPicker} transparent animationType="slide">
@@ -696,7 +713,7 @@ export default function DriverHomeScreen() {
                   <Text style={{ marginRight: 8, fontSize: 18 }}>{safetyChecked ? '✅' : '⬜'}</Text>
                   <Text style={{ color: colors.text, fontSize: 12, flex: 1 }}>
                     {activeRide.serviceCategory === 'ambulance' ? 'Seatbelts buckled, Stretcher & Medical kit ready' :
-                     (activeRide.vehiclePreference === 'bike' || activeRide.serviceCategory === 'bike') ? 'Helmets worn by both' :
+                     (activeRide.vehicleType === 'bike' || activeRide.vehiclePreference === 'bike' || activeRide.serviceCategory === 'bike') ? 'helmet wear both riders for bike ride' :
                      'Seatbelts buckled securely'}
                   </Text>
                 </TouchableOpacity>
@@ -714,7 +731,7 @@ export default function DriverHomeScreen() {
         </GlassCard>
       )}
 
-      {!activeRide && !incomingRequest && (
+      {!activeRide && incomingRequests.length === 0 && (
         <GlassCard style={styles.idleCard}>
           <Text style={styles.idleTitle}>{isOnline ? '⏳ Standing by for incoming requests...' : '💤 You are currently offline'}</Text>
           <Text style={styles.idleSub}>{isOnline ? 'Keep this console open. Dispatches will display here immediately.' : 'Toggle your status to ONLINE at the top right to start receiving service requests.'}</Text>

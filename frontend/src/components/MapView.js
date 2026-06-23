@@ -44,6 +44,11 @@ const icons = {
     iconSize: [32, 32],
     iconAnchor: [16, 32],
   }),
+  bike: new L.Icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1986/1986937.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  }),
   pickup: new L.Icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/1483/1483336.png',
     iconSize: [24, 24],
@@ -54,6 +59,14 @@ const icons = {
     iconSize: [24, 24],
     iconAnchor: [12, 24],
   })
+};
+
+const getDriverIcon = (driverObj) => {
+  if (!driverObj) return icons.ride;
+  if (driverObj.serviceCategory === 'ambulance') return icons.ambulance;
+  if (driverObj.vehicleType === 'bike') return icons.bike;
+  if (driverObj.serviceCategory === 'food') return icons.food;
+  return icons.ride; // Cab/Car fallback
 };
 
 export default function MapView({ 
@@ -208,7 +221,7 @@ export default function MapView({
             <Marker 
               key={idx} 
               position={[dr.latitude, dr.longitude]} 
-              icon={icons[dr.serviceCategory] || icons.ride}
+              icon={getDriverIcon(dr)}
             >
               <Popup>{dr.name} - {dr.vehicleName}</Popup>
             </Marker>
@@ -230,7 +243,7 @@ export default function MapView({
         {(animatedDriverPos || (driver?.lat && driver?.lng)) && (
           <Marker 
             position={animatedDriverPos || [driver.lat, driver.lng]} 
-            icon={driver ? (icons[driver.serviceCategory] || icons.ride) : icons.ride}
+            icon={getDriverIcon(driver)}
           >
             <Popup>Active Driver: {driver?.name || 'Driver'}</Popup>
           </Marker>

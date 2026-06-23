@@ -108,6 +108,27 @@ io.on('connection', (socket) => {
 
     // Standard Socket Broadcast to actual online drivers (if any exist)
     socket.broadcast.emit('new_ride_requested', rideData);
+
+    // Add a 3-minute timeout to expire the request if no driver accepts
+    const timeoutId = setTimeout(async () => {
+      try {
+        const rideRes = await db.query('SELECT status FROM rides WHERE id = $1', [rideId]);
+        if (rideRes.rows.length > 0 && rideRes.rows[0].status === 'requested') {
+          console.log(`⏰ Ride ${rideId} timed out after 3 minutes. Automarking as cancelled.`);
+          await db.query("UPDATE rides SET status = 'cancelled', cancelled_by = 'system', driver_penalty = 0 WHERE id = $1", [rideId]);
+          
+          // Notify the rider
+          io.to(`user_${riderId}`).emit('ride_timeout', { rideId });
+          
+          // Tell all drivers to remove it from their screen
+          socket.broadcast.emit('ride_unavailable', { rideId });
+        }
+      } catch (err) {
+        console.error('Timeout check error:', err.message);
+      }
+    }, 3 * 60 * 1000); // 3 minutes
+
+    registerSimTracker(rideId, 'timeout', timeoutId);
   });
 
   // Driver explicitly accepts a ride

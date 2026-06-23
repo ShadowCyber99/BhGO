@@ -78,12 +78,19 @@ export default function RideActiveScreen({ onNavigateToHome }) {
           setChatMessages(prev => [...prev, msg]);
         }
       });
+      socket.on('ride_timeout', (data) => {
+        if (ride.id === data.rideId) {
+          setRide(prev => ({ ...prev, status: 'cancelled' }));
+          setError('No drivers available. Request timed out.');
+        }
+      });
 
       return () => {
         socket.off('ride_status_update');
         socket.off('driver_location_changed');
         socket.off('eta_update');
         socket.off('receive_chat_message');
+        socket.off('ride_timeout');
       };
     }
   }, [socket, ride?.id]);
@@ -101,7 +108,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>⚠️ {error || 'No active trip found'}</Text>
-        <CustomButton title="Back to Dashboard" onPress={onNavigateToHome} style={styles.backBtn} />
+        <CustomButton title="Try Again / Back to Dashboard" onPress={onNavigateToHome} style={styles.backBtn} />
       </View>
     );
   }
@@ -159,7 +166,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
       <MapView
         pickup={{ lat: ride.pickupLat, lng: ride.pickupLng, address: ride.pickupAddress }}
         dropoff={{ lat: ride.dropoffLat, lng: ride.dropoffLng, address: ride.dropoffAddress }}
-        driver={ride.driverLat ? { lat: ride.driverLat, lng: ride.driverLng, name: ride.driverName } : null}
+        driver={ride.driverLat ? { lat: ride.driverLat, lng: ride.driverLng, name: ride.driverName, vehicleType: ride.vehicleType, serviceCategory: ride.serviceCategory } : null}
         rideStatus={ride.status}
       />
 
@@ -218,8 +225,8 @@ export default function RideActiveScreen({ onNavigateToHome }) {
             <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>🛡️ Pre-Ride Safety Checklist</Text>
             {ride.serviceCategory === 'ambulance' ? (
               <Text style={{ color: colors.text, fontSize: 14 }}>• Ensure seatbelts are buckled securely{'\n'}• Check stretcher is secured & medical equipment is ready</Text>
-            ) : ride.vehiclePreference === 'bike' ? (
-              <Text style={{ color: colors.text, fontSize: 14 }}>• Ensure helmets are worn by BOTH driver and rider/parcel</Text>
+            ) : ride.vehicleType === 'bike' || ride.vehiclePreference === 'bike' ? (
+              <Text style={{ color: colors.text, fontSize: 14 }}>• helmet wear both riders for bike ride</Text>
             ) : (
               <Text style={{ color: colors.text, fontSize: 14 }}>• Ensure seatbelts are buckled securely</Text>
             )}
