@@ -22,6 +22,10 @@ export default function DriverHomeScreen() {
   const [error, setError] = useState('');
   
   const [safetyChecked, setSafetyChecked] = useState(false);
+  
+  // OTP State
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpInput, setOtpInput] = useState('');
 
   // Chat State
   const [chatOpen, setChatOpen] = useState(false);
@@ -47,6 +51,18 @@ export default function DriverHomeScreen() {
   ];
   const [selectedCity, setSelectedCity] = useState(INDIAN_CITIES[0]);
   const [showCityPicker, setShowCityPicker] = useState(false);
+  const [demandZones, setDemandZones] = useState([]);
+
+  useEffect(() => {
+    // Generate mock demand zones around the selected city (surge areas)
+    const zones = Array.from({ length: 3 + Math.floor(Math.random() * 4) }).map(() => ({
+      lat: selectedCity.lat + (Math.random() - 0.5) * 0.08,
+      lng: selectedCity.lng + (Math.random() - 0.5) * 0.08,
+      intensity: 0.3 + Math.random() * 0.4,
+      radius: 800 + Math.random() * 1200
+    }));
+    setDemandZones(zones);
+  }, [selectedCity]);
 
   // Earnings State
   const [showEarningsModal, setShowEarningsModal] = useState(false);
@@ -163,6 +179,11 @@ export default function DriverHomeScreen() {
       });
 
       socket.on('ride_status_update', (data) => {
+        if (data.ride.status === 'started') {
+          setShowOtpModal(false);
+          setOtpInput('');
+        }
+        
         setActiveRide(prevActiveRide => {
           // If we already have this ride active
           if (prevActiveRide && prevActiveRide.id === data.ride.id) {
@@ -207,6 +228,11 @@ export default function DriverHomeScreen() {
         }
       });
 
+      socket.on('ride_error', (data) => {
+        setError(data.message);
+        setOtpInput(''); // Reset OTP input on error
+      });
+
       return () => {
         socket.off('new_ride_requested');
         socket.off('ride_status_update');
@@ -214,6 +240,7 @@ export default function DriverHomeScreen() {
         socket.off('ride_unavailable');
         socket.off('receive_chat_message');
         socket.off('driver_location_changed');
+        socket.off('ride_error');
       };
     }
   }, [socket, isOnline, activeRide?.id, routeMode, specificRouteStart, specificRouteEnd, serviceFilter]);
@@ -251,13 +278,17 @@ export default function DriverHomeScreen() {
     }
   };
 
-  const handleUpdateStatus = async (nextStatus) => {
+  const handleUpdateStatus = async (nextStatus, providedOtp = null) => {
     if (!activeRide) return;
     setActionLoading(true);
     try {
       if (socket) {
-        socket.emit('update_ride_status', { rideId: activeRide.id, status: nextStatus });
-        setActiveRide(prev => ({ ...prev, status: nextStatus }));
+        socket.emit('update_ride_status', { rideId: activeRide.id, status: nextStatus, otp: providedOtp });
+        
+        // If starting with OTP, rely on socket event to update the status in UI, else update instantly
+        if (nextStatus !== 'started') {
+          setActiveRide(prev => ({ ...prev, status: nextStatus }));
+        }
       }
       if (nextStatus === 'completed') {
         setTimeout(() => {
@@ -397,6 +428,7 @@ export default function DriverHomeScreen() {
           dropoff={(activeRide || incomingRequests.length > 0) ? { lat: activeRide ? activeRide.dropoffLat : incomingRequests[0].dropoffLat, lng: activeRide ? activeRide.dropoffLng : incomingRequests[0].dropoffLng } : null}
           driver={(activeRide?.driverLat && activeRide?.driverLng) ? { lat: activeRide.driverLat, lng: activeRide.driverLng, name: 'You', vehicleType: user?.driverDetails?.vehicleType, serviceCategory: user?.driverDetails?.service_category } : user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', vehicleType: user.driverDetails.vehicleType, serviceCategory: user.driverDetails.service_category } : null}
           nearbyDrivers={[]} 
+          demandZones={demandZones}
           rideStatus={activeRide?.status || (incomingRequests.length > 0 ? 'requested' : null)}
         />
       </View>
@@ -733,7 +765,7 @@ export default function DriverHomeScreen() {
                 </TouchableOpacity>
                 <CustomButton 
                   title="Start Trip / Board Passenger" 
-                  onPress={() => handleUpdateStatus('started')} 
+                  onPress={() => setShowOtpModal(true)} 
                   style={[styles.actionBtn, !safetyChecked && { opacity: 0.5 }]} 
                   disabled={!safetyChecked}
                 />
@@ -751,6 +783,46 @@ export default function DriverHomeScreen() {
           <Text style={styles.idleSub}>{isOnline ? 'Keep this console open. Dispatches will display here immediately.' : 'Toggle your status to ONLINE at the top right to start receiving service requests.'}</Text>
         </GlassCard>
       )}
+
+      {/* OTP MODAL */}
+      <Modal visible={showOtpModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <GlassCard style={styles.modalCard}>
+            <Text style={{ color: colors.text, fontSize: 20, fontWeight: 'bold', marginBottom: 12, textAlign: 'center' }}>Enter Rider PIN</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center', marginBottom: 20 }}>
+              Ask the rider for their 4-digit PIN to securely start the trip.
+            </Text>
+            
+            <TextInput 
+              style={[styles.chatInput, { fontSize: 32, letterSpacing: 8, textAlign: 'center', fontWeight: 'bold', paddingVertical: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.primary }]}
+              keyboardType="number-pad"
+              maxLength={4}
+              value={otpInput}
+              onChangeText={setOtpInput}
+              placeholder="0000"
+              placeholderTextColor={colors.textMuted}
+            />
+
+            {error ? <Text style={{ color: colors.danger, textAlign: 'center', marginBottom: 16 }}>{error}</Text> : null}
+
+            <CustomButton 
+              title="Verify & Start Trip" 
+              onPress={() => {
+                setError('');
+                if (otpInput.length === 4) {
+                  handleUpdateStatus('started', otpInput);
+                } else {
+                  setError('PIN must be 4 digits.');
+                }
+              }} 
+              variant="primary" 
+              style={{ marginBottom: 12 }}
+            />
+            <CustomButton title="Cancel" onPress={() => { setShowOtpModal(false); setOtpInput(''); setError(''); }} variant="outline" />
+          </GlassCard>
+        </View>
+      </Modal>
+
     </ScrollView>
   );
 }

@@ -121,6 +121,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const [customPickup, setCustomPickup] = useState('');
   const [customDropoff, setCustomDropoff] = useState('');
   const [waypoints, setWaypoints] = useState([]); // Array of strings
+  const [waypointCoords, setWaypointCoords] = useState([]); // Array of {lat, lng}
   
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
@@ -373,9 +374,10 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     }
   };
 
-  const handleCalculateCustomRoute = () => {
+  const handleCalculateCustomRoute = async () => {
     if (!customPickup || !customDropoff) return setError('Please enter both pickup and dropoff addresses');
     setError('');
+    setLoading(true);
     
     // Check if custom string matches any famous place to grab exact coords, else mock it
     const pMatch = FAMOUS_PLACES.find(p => customPickup.includes(p.name));
@@ -386,16 +388,45 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     const dLat = dMatch ? dMatch.lat : selectedCity.lat + (Math.random() * 0.05);
     const dLng = dMatch ? dMatch.lng : selectedCity.lng + (Math.random() * 0.05);
     
-    const latDiff = pLat - dLat;
-    const lngDiff = pLng - dLng;
-    const distanceKm = Math.sqrt(latDiff*latDiff + lngDiff*lngDiff) * 111;
-    const baseDist = Math.max(2.5, distanceKm);
+    // Mock waypoint coords
+    const activeWps = waypoints.filter(w => w.trim() !== '');
+    const wCoords = activeWps.map(() => ({
+      lat: selectedCity.lat + (Math.random() * 0.05),
+      lng: selectedCity.lng + (Math.random() * 0.05)
+    }));
+    setWaypointCoords(wCoords);
+
+    let baseDist = 2.5;
+    try {
+      // True Distance Calculation using OSRM
+      const wpString = wCoords.length > 0 ? wCoords.map(w => `${w.lng},${w.lat}`).join(';') : '';
+      const coordsString = wpString ? `${pLng},${pLat};${wpString};${dLng},${dLat}` : `${pLng},${pLat};${dLng},${dLat}`;
+      const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=false`;
+      
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (data.routes && data.routes.length > 0) {
+        baseDist = data.routes[0].distance / 1000; // OSRM returns meters, convert to km
+      } else {
+        // Fallback to Euclidean
+        const latDiff = pLat - dLat;
+        const lngDiff = pLng - dLng;
+        baseDist = Math.max(2.5, Math.sqrt(latDiff*latDiff + lngDiff*lngDiff) * 111 + (wCoords.length * 5));
+      }
+    } catch (err) {
+      // Fallback
+      const latDiff = pLat - dLat;
+      const lngDiff = pLng - dLng;
+      baseDist = Math.max(2.5, Math.sqrt(latDiff*latDiff + lngDiff*lngDiff) * 111 + (wCoords.length * 5));
+    }
 
     setPickupAddress(customPickup);
     setPickupCoords({ lat: pLat, lng: pLng });
     setDropoffAddress(customDropoff);
     setDropoffCoords({ lat: dLat, lng: dLng });
     setBaseDistance(baseDist);
+    setLoading(false);
   };
 
   const initiatePayment = () => {
@@ -434,9 +465,16 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   };
 
   const doRequestRide = async () => {
+    let fullPickup = pickupAddress;
+    const activeWps = waypoints.filter(w => w.trim() !== '');
+    if (activeWps.length > 0) {
+      fullPickup += ` (via ${activeWps.join(', ')})`;
+    }
+
     const payload = {
-      serviceCategory, vehiclePreference, pickupAddress, dropoffAddress,
-      waypoints: waypoints.filter(w => w.trim() !== ''),
+      serviceCategory, vehiclePreference, pickupAddress: fullPickup, dropoffAddress,
+      waypoints: activeWps,
+      waypointCoords: waypointCoords,
       pickupLat: pickupCoords.lat, pickupLng: pickupCoords.lng,
       dropoffLat: dropoffCoords.lat, dropoffLng: dropoffCoords.lng, fare, paymentMode
     };
@@ -602,7 +640,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       ) : (
         /* STANDARD RIDE / PARCEL / AMBULANCE VIEW */
         <>
-          <MapView cityCenter={selectedCity} pickup={pickupCoords} dropoff={dropoffCoords} nearbyDrivers={nearbyDrivers} />
+          <MapView cityCenter={selectedCity} pickup={pickupCoords} dropoff={dropoffCoords} waypoints={waypointCoords} nearbyDrivers={nearbyDrivers} />
 
           <View style={styles.dashboard}>
             <View style={styles.leftCol}>
@@ -800,6 +838,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                 <Text style={{ color: colors.textMuted, marginTop: 8, fontSize: 12 }}>{paymentMode === 'cash' ? 'Validating request.' : 'Authorizing digital wallet.'}</Text>
               </View>
             ) : (
+              <>
                 <Text style={{ color: colors.text, marginBottom: 12 }}>Payment Method</Text>
                 
                 <TouchableOpacity 

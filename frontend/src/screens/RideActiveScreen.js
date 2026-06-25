@@ -258,6 +258,14 @@ export default function RideActiveScreen({ onNavigateToHome }) {
           </View>
         )}
 
+        {(ride.status === 'accepted' || ride.status === 'arrived') && ride.otp && (
+          <View style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.success, marginBottom: 16, alignItems: 'center' }}>
+            <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: 'bold', marginBottom: 4, textTransform: 'uppercase' }}>Secure Ride PIN</Text>
+            <Text style={{ color: colors.success, fontSize: 32, fontWeight: '900', letterSpacing: 8 }}>{ride.otp}</Text>
+            <Text style={{ color: colors.text, fontSize: 14, marginTop: 8, textAlign: 'center' }}>Share this PIN with your driver to start the trip.</Text>
+          </View>
+        )}
+
         {/* LIVE CHAT BOX */}
         {chatOpen && (
           <KeyboardAvoidingView behavior="padding" style={styles.chatBox}>

@@ -174,7 +174,8 @@ io.on('connection', (socket) => {
         vehicleNumber: driver.vehicle_number,
         vehicleType: driver.vehicle_type,
         driverLat: parseFloat(driver.latitude),
-        driverLng: parseFloat(driver.longitude)
+        driverLng: parseFloat(driver.longitude),
+        otp: ride.otp
       };
 
       // Notify passenger and driver
@@ -192,9 +193,17 @@ io.on('connection', (socket) => {
 
   // Driver updates ride status
   socket.on('update_ride_status', async (data) => {
-    const { rideId, status } = data;
+    const { rideId, status, otp } = data;
     try {
       console.log(`🔄 Ride ${rideId} status updated to ${status}`);
+      
+      if (status === 'started') {
+        const rideCheck = await db.query("SELECT otp FROM rides WHERE id = $1", [rideId]);
+        if (rideCheck.rows.length > 0 && rideCheck.rows[0].otp && rideCheck.rows[0].otp !== otp) {
+          socket.emit('ride_error', { message: 'Invalid OTP. Please ask the rider for the correct PIN.' });
+          return;
+        }
+      }
       
       let queryStr = "UPDATE rides SET status = $1 WHERE id = $2 RETURNING *";
       let queryParams = [status, rideId];
@@ -247,7 +256,8 @@ io.on('connection', (socket) => {
         vehicleNumber: row.vehicle_number,
         vehicleType: row.vehicle_type,
         driverLat: row.driver_lat ? parseFloat(row.driver_lat) : null,
-        driverLng: row.driver_lng ? parseFloat(row.driver_lng) : null
+        driverLng: row.driver_lng ? parseFloat(row.driver_lng) : null,
+        otp: row.otp
       };
 
       // Notify passenger and driver

@@ -57,13 +57,14 @@ router.post('/request', auth, [
   try {
     const crypto = require('crypto');
     const ref_id = 'REF-' + crypto.randomBytes(3).toString('hex').toUpperCase() + Math.floor(Math.random()*1000);
+    const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit OTP
 
     // Insert new ride request
     const rideRes = await db.query(
-      `INSERT INTO rides (ref_id, rider_id, service_category, vehicle_preference, pickup_address, dropoff_address, pickup_lat, pickup_lng, dropoff_lat, dropoff_lng, fare, status, payment_mode) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'requested', $12) 
+      `INSERT INTO rides (ref_id, rider_id, service_category, vehicle_preference, pickup_address, dropoff_address, pickup_lat, pickup_lng, dropoff_lat, dropoff_lng, fare, status, payment_mode, otp) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'requested', $12, $13) 
        RETURNING *`,
-      [ref_id, req.user.id, serviceCategory, vehiclePreference || 'any', pickupAddress, dropoffAddress, pickupLat, pickupLng, dropoffLat, dropoffLng, fare, paymentMode || 'digital']
+      [ref_id, req.user.id, serviceCategory, vehiclePreference || 'any', pickupAddress, dropoffAddress, pickupLat, pickupLng, dropoffLat, dropoffLng, fare, paymentMode || 'digital', otp]
     );
 
     const ride = rideRes.rows[0];
@@ -83,6 +84,7 @@ router.post('/request', auth, [
       status: ride.status,
       paymentMode: ride.payment_mode,
       paymentStatus: ride.payment_status,
+      otp: ride.otp,
       createdAt: ride.created_at
     });
 
@@ -146,6 +148,7 @@ router.get('/active', auth, async (req, res) => {
         payment_mode: row.payment_mode,
         itemsJson: row.items_json ? row.items_json : null,
         orderTotal: row.total_amount ? parseFloat(row.total_amount) : null,
+        otp: row.otp,
         createdAt: row.created_at
       }
     });

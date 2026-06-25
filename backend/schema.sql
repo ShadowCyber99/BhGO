@@ -50,6 +50,7 @@ CREATE TABLE rides (
     status VARCHAR(20) NOT NULL CHECK (status IN ('requested', 'accepted', 'arrived', 'started', 'completed', 'cancelled')),
     payment_status VARCHAR(20) DEFAULT 'paid',
     payment_mode VARCHAR(20) DEFAULT 'digital',
+    otp VARCHAR(4),
     cancelled_by VARCHAR(20),
     driver_penalty DECIMAL(10,2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

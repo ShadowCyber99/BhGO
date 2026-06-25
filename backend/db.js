@@ -280,6 +280,7 @@ const query = async (text, params = []) => {
     const status = params[8];
     const service_category = params[9] || 'ride';
     const vehicle_preference = params[10] || 'any';
+    const otp = params[12]; // Note: params index might shift based on query, but it is $13 in rides.js (so index 12)
 
     const newRide = {
       id: inMemoryDb.rides.length + 1,
@@ -295,6 +296,7 @@ const query = async (text, params = []) => {
       status,
       service_category,
       vehicle_preference,
+      otp,
       payment_status: 'paid',
       created_at: new Date(),
       updated_at: new Date()
@@ -333,7 +335,8 @@ const query = async (text, params = []) => {
         driver_lat: driverDetailsObj ? driverDetailsObj.latitude : null,
         driver_lng: driverDetailsObj ? driverDetailsObj.longitude : null,
         rider_name: riderUserObj ? riderUserObj.name : 'Passenger',
-        payment_status: activeRide.payment_status || 'paid'
+        payment_status: activeRide.payment_status || 'paid',
+        otp: activeRide.otp
       }] };
     }
     return { rows: [] };

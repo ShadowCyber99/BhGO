@@ -3,7 +3,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
 // Import Leaflet dependencies
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 
 // Import Leaflet CSS (required for proper map rendering)
@@ -72,6 +72,8 @@ const getDriverIcon = (driverObj) => {
 export default function MapView({ 
   pickup,     // { lat, lng, address }
   dropoff,    // { lat, lng, address }
+  waypoints = [], // [ { lat, lng } ]
+  demandZones = [], // [ { lat, lng, intensity, radius } ]
   driver,     // { lat, lng, name, vehicleType, serviceCategory }
   nearbyDrivers = [], // [ { latitude, longitude, vehicleType, serviceCategory } ]
   cityCenter, // { lat, lng }
@@ -120,15 +122,11 @@ export default function MapView({
         rColor = '#F97316'; // Orange
       }
     } else if (rideStatus === 'started') {
-      // Driver is going to dropoff
-      if (driver?.lat && dropoff?.lat) {
-        start = driver;
-        end = dropoff;
-        rColor = '#10B981'; // Green
-      } else if (pickup?.lat && dropoff?.lat) {
+      // Driver is going to dropoff. They should be at the pickup location.
+      if (pickup?.lat && dropoff?.lat) {
         start = pickup;
         end = dropoff;
-        rColor = '#10B981';
+        rColor = '#10B981'; // Green
       }
     } else {
       // Default: show pickup to dropoff
@@ -148,7 +146,12 @@ export default function MapView({
       
       const fetchRoute = async () => {
         try {
-          const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+          // Only include waypoints if we are showing the full route (pickup to dropoff) or if the trip has started.
+          const includeWaypoints = waypoints && waypoints.length > 0 && ((start === pickup && end === dropoff) || rideStatus === 'started');
+          const wpString = includeWaypoints ? waypoints.map(w => `${w.lng},${w.lat}`).join(';') : '';
+          const coordsString = wpString ? `${start.lng},${start.lat};${wpString};${end.lng},${end.lat}` : `${start.lng},${start.lat};${end.lng},${end.lat}`;
+          
+          const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`;
           const res = await fetch(url);
           const data = await res.json();
           if (data.routes && data.routes.length > 0) {
@@ -174,7 +177,7 @@ export default function MapView({
       setRouteStats({ distance: 0, duration: 0 });
       lastFetchedStatusRef.current = null;
     }
-  }, [rideStatus, pickup, dropoff, driver?.lat, driver?.lng]);
+  }, [rideStatus, pickup?.lat, pickup?.lng, dropoff?.lat, dropoff?.lng, driver?.lat, driver?.lng]);
 
   // Animate Driver Marker along the route
   useEffect(() => {
@@ -204,7 +207,7 @@ export default function MapView({
     } else {
       setAnimatedDriverPos(null);
     }
-  }, [osrmRoute, rideStatus, dropoff, pickup, driver?.lat, driver?.lng]);
+  }, [osrmRoute, rideStatus, dropoff?.lat, dropoff?.lng, pickup?.lat, pickup?.lng, driver?.lat, driver?.lng]);
 
   return (
     <View style={styles.container}>
@@ -241,11 +244,28 @@ export default function MapView({
           </Marker>
         )}
 
+        {waypoints.map((wp, idx) => (
+          wp?.lat && wp?.lng && (
+            <Marker key={`wp-${idx}`} position={[wp.lat, wp.lng]} icon={icons.pickup}>
+              <Popup>Stop {idx + 1}</Popup>
+            </Marker>
+          )
+        ))}
+
         {dropoff?.lat && dropoff?.lng && (
           <Marker position={[dropoff.lat, dropoff.lng]} icon={icons.dropoff}>
             <Popup>Dropoff: {dropoff.address}</Popup>
           </Marker>
         )}
+
+        {demandZones.map((zone, idx) => (
+          <Circle 
+            key={`zone-${idx}`}
+            center={[zone.lat, zone.lng]}
+            radius={zone.radius || 1500}
+            pathOptions={{ color: 'transparent', fillColor: '#ef4444', fillOpacity: zone.intensity || 0.4 }}
+          />
+        ))}
 
         {(animatedDriverPos || (driver?.lat && driver?.lng)) && (
           <Marker 
