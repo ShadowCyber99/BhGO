@@ -25,6 +25,8 @@ export default function RideActiveScreen({ onNavigateToHome }) {
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const [reviewTags, setReviewTags] = useState([]);
   const [reviewComment, setReviewComment] = useState('');
+  
+  const [requestTimeElapsed, setRequestTimeElapsed] = useState(0);
 
   const POSITIVE_TAGS = ['Clean Car', 'Polite', 'Safe Driving', 'Great Route', 'Fast'];
   const NEGATIVE_TAGS = ['Rude', 'Late', 'Unsafe Driving', 'Dirty Car', 'Wrong Route'];
@@ -63,6 +65,25 @@ export default function RideActiveScreen({ onNavigateToHome }) {
   useEffect(() => {
     fetchActiveRide();
   }, []);
+
+  useEffect(() => {
+    let interval;
+    if (ride?.status === 'requested') {
+      interval = setInterval(() => {
+        setRequestTimeElapsed(prev => {
+          if (prev >= 180) {
+            setRide(r => ({ ...r, status: 'cancelled' }));
+            setError('No drivers available. Request timed out.');
+            return 180;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } else {
+      setRequestTimeElapsed(0);
+    }
+    return () => clearInterval(interval);
+  }, [ride?.status]);
 
   useEffect(() => {
     if (socket && ride) {
@@ -195,6 +216,9 @@ export default function RideActiveScreen({ onNavigateToHome }) {
           <View style={styles.searchPulseBox}>
             <View style={styles.radarRing} />
             <Text style={styles.radarText}>📡 Sending coordinate ping...</Text>
+            <Text style={{ color: colors.warning, fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>
+              ⏳ {Math.floor((180 - requestTimeElapsed) / 60)}:{(180 - requestTimeElapsed) % 60 < 10 ? '0' : ''}{(180 - requestTimeElapsed) % 60}
+            </Text>
           </View>
         )}
 

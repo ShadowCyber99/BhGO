@@ -148,7 +148,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
-  const [paymentMode, setPaymentMode] = useState('digital'); // 'digital' or 'cash'
+  const [paymentMode, setPaymentMode] = useState('upi'); // 'digital', 'cash', or 'upi'
   const [isSurgeActive, setIsSurgeActive] = useState(false);
 
   // Support State
@@ -800,9 +800,35 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                 <Text style={{ color: colors.textMuted, marginTop: 8, fontSize: 12 }}>{paymentMode === 'cash' ? 'Validating request.' : 'Authorizing digital wallet.'}</Text>
               </View>
             ) : (
-              <>
                 <Text style={{ color: colors.text, marginBottom: 12 }}>Payment Method</Text>
                 
+                <TouchableOpacity 
+                  style={[styles.paymentMethodCard, paymentMode === 'upi' && styles.paymentMethodActive]} 
+                  onPress={() => setPaymentMode('upi')}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <Text style={{ fontSize: 24 }}>📱</Text>
+                    <View>
+                      <Text style={{ color: colors.text, fontWeight: 'bold' }}>UPI / Scan QR</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>GPay, PhonePe, Paytm, BHIM</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                {paymentMode === 'upi' && (
+                  <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 12, borderRadius: 8, marginBottom: 12, alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', gap: 16, marginBottom: 12 }}>
+                      <Text style={{ fontSize: 30 }}>🇬</Text>
+                      <Text style={{ fontSize: 30 }}>🅿️</Text>
+                      <Text style={{ fontSize: 30 }}>🅱️</Text>
+                    </View>
+                    <View style={{ width: 120, height: 120, backgroundColor: '#FFF', padding: 8, borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 60, color: '#000' }}>🔲</Text>
+                    </View>
+                    <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Scan to Pay ₹{paymentAmount.toFixed(2)}</Text>
+                  </View>
+                )}
+
                 <TouchableOpacity 
                   style={[styles.paymentMethodCard, paymentMode === 'digital' && styles.paymentMethodActive]} 
                   onPress={() => setPaymentMode('digital')}
@@ -820,10 +846,12 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                   style={[styles.paymentMethodCard, paymentMode === 'cash' && styles.paymentMethodActive]} 
                   onPress={() => setPaymentMode('cash')}
                 >
-                  <Text style={{ fontSize: 24 }}>💵</Text>
-                  <View>
-                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>Cash / Pay on Delivery</Text>
-                    <Text style={{ color: colors.textMuted, fontSize: 12 }}>Have exact change ready.</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <Text style={{ fontSize: 24 }}>💵</Text>
+                    <View>
+                      <Text style={{ color: colors.text, fontWeight: 'bold' }}>Cash / Pay on Delivery</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>Have exact change ready.</Text>
+                    </View>
                   </View>
                 </TouchableOpacity>
 

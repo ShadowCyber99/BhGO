@@ -86,6 +86,7 @@ export default function MapView({
   const [routeStats, setRouteStats] = useState({ distance: 0, duration: 0 });
   const [routeColor, setRouteColor] = useState(colors.primary);
   const [animatedDriverPos, setAnimatedDriverPos] = useState(null);
+  const lastFetchedStatusRef = React.useRef(null);
 
   // Auto-center map
   useEffect(() => {
@@ -141,6 +142,10 @@ export default function MapView({
     setRouteColor(rColor);
 
     if (start && end) {
+      if (lastFetchedStatusRef.current === rideStatus && osrmRoute.length > 0) {
+        return; // Prevent recalculating route continuously as driver moves
+      }
+      
       const fetchRoute = async () => {
         try {
           const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
@@ -161,11 +166,13 @@ export default function MapView({
           // Fallback to straight line
           setOsrmRoute([[start.lat, start.lng], [end.lat, end.lng]]);
         }
+        lastFetchedStatusRef.current = rideStatus;
       };
       fetchRoute();
     } else {
       setOsrmRoute([]);
       setRouteStats({ distance: 0, duration: 0 });
+      lastFetchedStatusRef.current = null;
     }
   }, [rideStatus, pickup, dropoff, driver?.lat, driver?.lng]);
 
@@ -179,8 +186,8 @@ export default function MapView({
       let step = 0;
       setAnimatedDriverPos(osrmRoute[0]);
       
-      // Calculate delay to make the animation take about 10 seconds total
-      const delay = Math.max(20, Math.floor(10000 / osrmRoute.length));
+      // Calculate delay to make the animation take about 30 seconds total for a smoother experience
+      const delay = Math.max(20, Math.floor(30000 / osrmRoute.length));
 
       const interval = setInterval(() => {
         step += 1;

@@ -69,6 +69,13 @@ export default function DriverHomeScreen() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    setIncomingRequests(prev => prev.filter(req => {
+      const timeElapsed = Math.floor((Date.now() - (req.requestedAt || Date.now())) / 1000);
+      return timeElapsed < 180;
+    }));
+  }, [ticker]);
+
   const sendBotMessage = () => {
     if(!botInput.trim()) return;
     const newMsg = { text: botInput, sender: 'user' };
