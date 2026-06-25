@@ -64,7 +64,7 @@ const icons = {
 const getDriverIcon = (driverObj) => {
   if (!driverObj) return icons.ride;
   if (driverObj.serviceCategory === 'ambulance') return icons.ambulance;
-  if (driverObj.vehicleType === 'bike') return icons.bike;
+  if (driverObj.vehicleType === 'bike' || driverObj.vehiclePreference === 'bike') return icons.bike;
   if (driverObj.serviceCategory === 'food') return icons.food;
   return icons.ride; // Cab/Car fallback
 };

@@ -194,12 +194,19 @@ export default function DriverHomeScreen() {
         }
       });
 
+      socket.on('driver_location_changed', (data) => {
+        if (activeRide && parseInt(data.driverId) === parseInt(user.id)) {
+          setActiveRide(prev => prev ? { ...prev, driverLat: parseFloat(data.latitude), driverLng: parseFloat(data.longitude) } : null);
+        }
+      });
+
       return () => {
         socket.off('new_ride_requested');
         socket.off('ride_status_update');
         socket.off('ride_cancelled');
         socket.off('ride_unavailable');
         socket.off('receive_chat_message');
+        socket.off('driver_location_changed');
       };
     }
   }, [socket, isOnline, activeRide?.id, routeMode, specificRouteStart, specificRouteEnd, serviceFilter]);
@@ -381,7 +388,7 @@ export default function DriverHomeScreen() {
           cityCenter={selectedCity} 
           pickup={(activeRide || incomingRequests.length > 0) ? { lat: activeRide ? activeRide.pickupLat : incomingRequests[0].pickupLat, lng: activeRide ? activeRide.pickupLng : incomingRequests[0].pickupLng } : null}
           dropoff={(activeRide || incomingRequests.length > 0) ? { lat: activeRide ? activeRide.dropoffLat : incomingRequests[0].dropoffLat, lng: activeRide ? activeRide.dropoffLng : incomingRequests[0].dropoffLng } : null}
-          driver={user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', vehicleType: user.driverDetails.vehicleType, serviceCategory: user.driverDetails.service_category } : null}
+          driver={(activeRide?.driverLat && activeRide?.driverLng) ? { lat: activeRide.driverLat, lng: activeRide.driverLng, name: 'You', vehicleType: user?.driverDetails?.vehicleType, serviceCategory: user?.driverDetails?.service_category } : user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', vehicleType: user.driverDetails.vehicleType, serviceCategory: user.driverDetails.service_category } : null}
           nearbyDrivers={[]} 
           rideStatus={activeRide?.status || (incomingRequests.length > 0 ? 'requested' : null)}
         />
