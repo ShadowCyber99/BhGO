@@ -64,6 +64,8 @@ const inMemoryDb = {
       vehicle_type: 'cab',
       service_category: 'ride',
       vehicle_number: 'CAB-ECO-99',
+      aadhar_number: '123456789012',
+      driving_license: 'DL-1420110012345',
       latitude: 40.7142,
       longitude: -74.0080,
       is_online: true,
@@ -77,6 +79,8 @@ const inMemoryDb = {
       vehicle_type: 'ambulance_van',
       service_category: 'ambulance',
       vehicle_number: 'CAB-PRM-77',
+      aadhar_number: '987654321098',
+      driving_license: 'DL-1420110098765',
       latitude: 40.7100,
       longitude: -74.0020,
       is_online: true,
@@ -90,6 +94,8 @@ const inMemoryDb = {
       vehicle_type: 'bike',
       service_category: 'food',
       vehicle_number: 'CAB-SUV-55',
+      aadhar_number: '456789012345',
+      driving_license: 'DL-1420110045678',
       latitude: 40.7200,
       longitude: -74.0150,
       is_online: true,
@@ -218,16 +224,22 @@ const query = async (text, params = []) => {
   // 5. Create Driver details: `INSERT INTO drivers ...`
   if (sql.includes('insert into drivers') && sql.includes('returning *')) {
     const user_id = parseInt(params[0]);
-    const vehicle_name = params[1];
-    const vehicle_type = params[2];
-    const vehicle_number = params[3];
+    const service_category = params[1];
+    const vehicle_name = params[2];
+    const vehicle_type = params[3];
+    const vehicle_number = params[4];
+    const aadhar_number = params[5];
+    const driving_license = params[6];
 
     const newDriver = {
       id: inMemoryDb.drivers.length + 1,
       user_id,
+      service_category,
       vehicle_name,
       vehicle_type,
       vehicle_number,
+      aadhar_number,
+      driving_license,
       latitude: 40.7128 + (Math.random() - 0.5) * 0.02,
       longitude: -74.0060 + (Math.random() - 0.5) * 0.02,
       is_online: true,

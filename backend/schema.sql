@@ -26,6 +26,8 @@ CREATE TABLE drivers (
     vehicle_name VARCHAR(100) NOT NULL,
     vehicle_type VARCHAR(20) NOT NULL, 
     vehicle_number VARCHAR(50) NOT NULL,
+    aadhar_number VARCHAR(12) NOT NULL,
+    driving_license VARCHAR(20) NOT NULL,
     latitude DECIMAL(10,8),
     longitude DECIMAL(11,8),
     is_online BOOLEAN DEFAULT false,

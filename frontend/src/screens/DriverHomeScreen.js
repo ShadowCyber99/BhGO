@@ -149,7 +149,32 @@ export default function DriverHomeScreen() {
   useEffect(() => {
     if (socket && isOnline) {
       socket.on('new_ride_requested', (data) => {
-        // Enforce Driver's Service Preference
+        // Strict Authorization Rules
+        const myServiceCat = user?.driverDetails?.service_category;
+        const myVehicleType = user?.driverDetails?.vehicleType;
+
+        // 1. Ambulance strict match
+        if (data.serviceCategory === 'ambulance' && myServiceCat !== 'ambulance') return;
+        if (myServiceCat === 'ambulance' && data.serviceCategory !== 'ambulance') return;
+
+        // 2. Food/Grocery/Parcel strict match -> ONLY bikes
+        if (data.serviceCategory === 'food' || data.serviceCategory === 'parcel') {
+          if (myVehicleType !== 'bike') return; // Only bike riders can deliver food/parcel
+        }
+
+        // 3. Cab & Bike Ride strict match
+        if (data.serviceCategory === 'ride') {
+          if (myServiceCat !== 'ride') return;
+          
+          if (data.vehiclePreference === 'bike') {
+            if (myVehicleType !== 'bike') return; // cab driver should not get bike ride
+          } else if (data.vehiclePreference !== 'any') {
+            // differentiate economy, SUV, premium
+            if (myVehicleType !== data.vehiclePreference) return;
+          }
+        }
+
+        // Enforce Driver's temporary UI Service Preference (if any)
         if (serviceFilter !== 'all' && data.serviceCategory !== serviceFilter) return;
 
         // Enforce Driver's Route Preference

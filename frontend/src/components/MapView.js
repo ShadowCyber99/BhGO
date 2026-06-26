@@ -50,14 +50,14 @@ const icons = {
     iconAnchor: [16, 32],
   }),
   pickup: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1483/1483336.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/10332/10332152.png', // Green start flag
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
   }),
   dropoff: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1483/1483155.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/10332/10332145.png', // Red finish flag
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
   })
 };
 

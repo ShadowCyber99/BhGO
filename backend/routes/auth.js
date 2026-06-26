@@ -18,7 +18,9 @@ router.post('/register', [
   body('role', 'Role must be either rider or driver').isIn(['rider', 'driver']),
   body('vehicleName', 'Vehicle name is required for drivers').if(body('role').equals('driver')).not().isEmpty().trim().escape(),
   body('vehicleType', 'Vehicle type is required for drivers').if(body('role').equals('driver')).not().isEmpty().trim().escape(),
-  body('vehicleNumber', 'Please enter a valid Indian number plate (e.g. MH 12 AB 1234)').if(body('role').equals('driver')).matches(/^[A-Z]{2}[ -]?[0-9]{1,2}[ -]?[A-Z]{1,2}[ -]?[0-9]{4}$/i)
+  body('vehicleNumber', 'Please enter a valid Indian number plate (e.g. MH 12 AB 1234)').if(body('role').equals('driver')).matches(/^[A-Z]{2}[ -]?[0-9]{1,2}[ -]?[A-Z]{1,2}[ -]?[0-9]{4}$/i),
+  body('aadharNumber', 'Aadhar Number must be exactly 12 digits').if(body('role').equals('driver')).matches(/^\d{12}$/),
+  body('drivingLicense', 'Driving License must be up to 16 characters').if(body('role').equals('driver')).isLength({ min: 5, max: 16 }).trim().escape()
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -26,7 +28,7 @@ router.post('/register', [
     return res.status(400).json({ error: errors.array()[0].msg });
   }
 
-  const { name, email, password, role, vehicleName, vehicleType, vehicleNumber } = req.body;
+  const { name, email, password, role, vehicleName, vehicleType, vehicleNumber, aadharNumber, drivingLicense } = req.body;
 
   try {
     // Encrypt password
@@ -45,8 +47,8 @@ router.post('/register', [
     if (role === 'driver') {
       const driverServiceCategory = req.body.serviceCategory || 'ride';
       await db.query(
-        'INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [user.id, driverServiceCategory, vehicleName, vehicleType, vehicleNumber]
+        'INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number, aadhar_number, driving_license) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [user.id, driverServiceCategory, vehicleName, vehicleType, vehicleNumber, aadharNumber, drivingLicense]
       );
     }
 

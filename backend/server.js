@@ -147,6 +147,21 @@ io.on('connection', (socket) => {
       if (driverRes.rows.length === 0) return;
       const driver = driverRes.rows[0];
 
+      // Security: Strict matching rules
+      if (ride.service_category === 'ambulance' && driver.service_category !== 'ambulance') {
+        return socket.emit('ride_error', { message: 'Unauthorized: Only Ambulance drivers can accept this request.' });
+      }
+      if (ride.service_category === 'food' || ride.service_category === 'parcel') {
+        if (driver.vehicle_type !== 'bike') return socket.emit('ride_error', { message: 'Unauthorized: Only bike riders can deliver food/parcel.' });
+      }
+      if (ride.service_category === 'ride') {
+        if (driver.service_category !== 'ride') return socket.emit('ride_error', { message: 'Unauthorized: Incorrect service category.' });
+        if (ride.vehicle_preference === 'bike' && driver.vehicle_type !== 'bike') return socket.emit('ride_error', { message: 'Unauthorized: Rider requested a bike.' });
+        if (ride.vehicle_preference !== 'any' && ride.vehicle_preference !== 'bike' && driver.vehicle_type !== ride.vehicle_preference) {
+           return socket.emit('ride_error', { message: `Unauthorized: Rider requested ${ride.vehicle_preference} cab.` });
+        }
+      }
+
       // Update ride
       await db.query("UPDATE rides SET status = 'accepted', driver_id = $1 WHERE id = $2", [driverId, rideId]);
       // Update driver to unavailable

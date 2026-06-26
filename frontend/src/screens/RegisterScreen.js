@@ -23,6 +23,9 @@ export default function RegisterScreen({ onNavigateToLogin }) {
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [vehicleType, setVehicleType] = useState('economy'); // 'economy', 'premium', 'suv'
   const [serviceCategory, setServiceCategory] = useState('ride'); // 'ride', 'ambulance', 'parcel'
+  // Driver Auth States
+  const [aadharNumber, setAadharNumber] = useState('');
+  const [drivingLicense, setDrivingLicense] = useState('');
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,8 +47,8 @@ export default function RegisterScreen({ onNavigateToLogin }) {
       return;
     }
 
-    if (role === 'driver' && (!vehicleName || !vehicleNumber)) {
-      setError('Please enter your vehicle details');
+    if (role === 'driver' && (!vehicleName || !vehicleNumber || !aadharNumber || !drivingLicense)) {
+      setError('Please fill in all vehicle and authentic details');
       return;
     }
 
@@ -53,6 +56,15 @@ export default function RegisterScreen({ onNavigateToLogin }) {
       const plateRegex = /^[A-Z]{2}[ -]?[0-9]{1,2}[ -]?[A-Z]{1,2}[ -]?[0-9]{4}$/i;
       if (!plateRegex.test(vehicleNumber)) {
         setError('Please enter a valid Indian number plate (e.g. MH 12 AB 1234)');
+        return;
+      }
+      const aadharRegex = /^\d{12}$/;
+      if (!aadharRegex.test(aadharNumber)) {
+        setError('Aadhar Number must be exactly 12 digits');
+        return;
+      }
+      if (drivingLicense.length < 5) {
+        setError('Please enter a valid Driving License Number');
         return;
       }
     }
@@ -65,7 +77,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
       email,
       password,
       role,
-      ...(role === 'driver' ? { serviceCategory, vehicleName, vehicleNumber, vehicleType } : {})
+      ...(role === 'driver' ? { serviceCategory, vehicleName, vehicleNumber, vehicleType, aadharNumber, drivingLicense } : {})
     };
 
     try {
@@ -151,6 +163,24 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                 placeholder="MH 12 AB 1234"
                 value={vehicleNumber}
                 onChangeText={(text) => setVehicleNumber(text.toUpperCase())}
+                autoCapitalize="characters"
+              />
+
+              <Text style={[styles.sectionHeader, { marginTop: 12 }]}>🆔 Verification Details</Text>
+              
+              <CustomInput
+                label="Aadhar Card Number"
+                placeholder="1234 5678 9012"
+                value={aadharNumber}
+                onChangeText={(text) => setAadharNumber(text.replace(/\D/g, '').slice(0, 12))}
+                keyboardType="number-pad"
+              />
+
+              <CustomInput
+                label="Driving License Number"
+                placeholder="DL-1420110012345"
+                value={drivingLicense}
+                onChangeText={(text) => setDrivingLicense(text.toUpperCase())}
                 autoCapitalize="characters"
               />
 
