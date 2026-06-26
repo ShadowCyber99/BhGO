@@ -151,8 +151,16 @@ io.on('connection', (socket) => {
       if (ride.service_category === 'ambulance' && driver.service_category !== 'ambulance') {
         return socket.emit('ride_error', { message: 'Unauthorized: Only Ambulance drivers can accept this request.' });
       }
-      if (ride.service_category === 'food' || ride.service_category === 'parcel') {
-        if (driver.vehicle_type !== 'bike') return socket.emit('ride_error', { message: 'Unauthorized: Only bike riders can deliver food/parcel.' });
+      if (ride.service_category === 'food') {
+        if (driver.vehicle_type !== 'bike') return socket.emit('ride_error', { message: 'Unauthorized: Only bike riders can deliver food.' });
+      }
+      if (ride.service_category === 'parcel') {
+        if (ride.vehicle_preference === 'bike' && driver.vehicle_type !== 'bike') {
+          return socket.emit('ride_error', { message: 'Unauthorized: Parcel <= 25kg requires a Bike.' });
+        }
+        if (ride.vehicle_preference === 'cab' && driver.vehicle_type === 'bike') {
+          return socket.emit('ride_error', { message: 'Unauthorized: Parcel > 25kg requires a Cab.' });
+        }
       }
       if (ride.service_category === 'ride') {
         if (driver.service_category !== 'ride') return socket.emit('ride_error', { message: 'Unauthorized: Incorrect service category.' });

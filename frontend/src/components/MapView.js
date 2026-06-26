@@ -22,48 +22,78 @@ function ChangeView({ center }) {
   return null;
 }
 
+const createModernMarker = (color, svgContent) => {
+  return new L.divIcon({
+    html: `
+      <div style="
+        position: relative;
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(135deg, ${color} 0%, #00000033 100%);
+        background-color: ${color};
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      ">
+        <div style="
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-top: 10px solid white;
+        "></div>
+        <div style="
+          position: absolute;
+          bottom: -7px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 5px solid transparent;
+          border-right: 5px solid transparent;
+          border-top: 7px solid ${color};
+        "></div>
+        ${svgContent}
+      </div>
+    `,
+    className: 'custom-modern-marker',
+    iconSize: [38, 48],
+    iconAnchor: [19, 48],
+  });
+};
+
+const svgIcons = {
+  car: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="11" rx="2" ry="2"></rect><path d="M4 8L6 4h12l2 4"></path><circle cx="7" cy="19" r="2"></circle><circle cx="17" cy="19" r="2"></circle></svg>`,
+  ambulance: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M12 9v6M9 12h6"></path><circle cx="7" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg>`,
+  bike: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="4"></circle><circle cx="18" cy="16" r="4"></circle><path d="M6 16l4-8h4"></path><path d="M14 8l4 8"></path><path d="M10 8h-3"></path></svg>`,
+  parcel: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M12 5v5"></path></svg>`,
+  food: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9v1h14V9c0-3.87-3.13-7-7-7z"></path><path d="M3 14h18v3c0 1.66-1.34 3-3 3H6c-1.66 0-3-1.34-3-3v-3z"></path><path d="M4 11h16v1H4z"></path></svg>`,
+  pickup: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"></circle></svg>`,
+  dropoff: `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="4" y="4" width="16" height="16"></rect></svg>`
+};
+
 // Custom map markers for different service categories
 const icons = {
-  ride: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048314.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-  }),
-  ambulance: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1118/1118128.png',
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-  }),
-  parcel: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2769/2769339.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-  }),
-  food: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/737/737967.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-  }),
-  bike: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1986/1986937.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-  }),
-  pickup: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/10332/10332152.png', // Green start flag
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-  }),
-  dropoff: new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/10332/10332145.png', // Red finish flag
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-  })
+  ride: createModernMarker('#6366F1', svgIcons.car),
+  ambulance: createModernMarker('#EF4444', svgIcons.ambulance),
+  parcel: createModernMarker('#8B5CF6', svgIcons.parcel),
+  food: createModernMarker('#F97316', svgIcons.food),
+  bike: createModernMarker('#F59E0B', svgIcons.bike),
+  pickup: createModernMarker('#10B981', svgIcons.pickup),
+  dropoff: createModernMarker('#EF4444', svgIcons.dropoff)
 };
 
 const getDriverIcon = (driverObj) => {
   if (!driverObj) return icons.ride;
-  if (driverObj.serviceCategory === 'ambulance') return icons.ambulance;
+  if (driverObj.serviceCategory === 'ambulance' || driverObj.vehicleType === 'ambulance') return icons.ambulance;
   if (driverObj.vehicleType === 'bike' || driverObj.vehiclePreference === 'bike') return icons.bike;
   if (driverObj.serviceCategory === 'food') return icons.food;
   return icons.ride; // Cab/Car fallback

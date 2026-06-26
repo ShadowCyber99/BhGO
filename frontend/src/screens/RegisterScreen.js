@@ -22,7 +22,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
   const [vehicleName, setVehicleName] = useState('');
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [vehicleType, setVehicleType] = useState('economy'); // 'economy', 'premium', 'suv'
-  const [serviceCategory, setServiceCategory] = useState('ride'); // 'ride', 'ambulance', 'parcel'
+  const [driverType, setDriverType] = useState('cab'); // 'cab', 'bike', 'ambulance'
   // Driver Auth States
   const [aadharNumber, setAadharNumber] = useState('');
   const [drivingLicense, setDrivingLicense] = useState('');
@@ -72,12 +72,26 @@ export default function RegisterScreen({ onNavigateToLogin }) {
     setError('');
     setLoading(true);
 
+    let finalServiceCategory = 'ride';
+    let finalVehicleType = vehicleType;
+
+    if (driverType === 'bike') {
+      finalServiceCategory = 'ride';
+      finalVehicleType = 'bike';
+    } else if (driverType === 'ambulance') {
+      finalServiceCategory = 'ambulance';
+      finalVehicleType = 'ambulance';
+    } else {
+      finalServiceCategory = 'ride';
+      finalVehicleType = vehicleType;
+    }
+
     const payload = {
       name,
       email,
       password,
       role,
-      ...(role === 'driver' ? { serviceCategory, vehicleName, vehicleNumber, vehicleType, aadharNumber, drivingLicense } : {})
+      ...(role === 'driver' ? { serviceCategory: finalServiceCategory, vehicleName, vehicleNumber, vehicleType: finalVehicleType, aadharNumber, drivingLicense } : {})
     };
 
     try {
@@ -184,47 +198,51 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                 autoCapitalize="characters"
               />
 
-              <Text style={styles.selectorLabel}>Service Category</Text>
+              <Text style={styles.selectorLabel}>Driver Type</Text>
               <View style={styles.vehicleTypeSelector}>
-                {['ride', 'ambulance', 'parcel'].map((cat) => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[
-                      styles.typeButton,
-                      serviceCategory === cat && styles.activeTypeButton
-                    ]}
-                    onPress={() => setServiceCategory(cat)}
-                  >
-                    <Text style={[
-                      styles.typeButtonText,
-                      serviceCategory === cat && styles.activeTypeButtonText
-                    ]}>
-                      {cat.toUpperCase()}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={styles.selectorLabel}>Vehicle Service Type</Text>
-              <View style={styles.vehicleTypeSelector}>
-                {['economy', 'premium', 'suv', 'bike'].map((type) => (
+                {['cab', 'bike', 'ambulance'].map((type) => (
                   <TouchableOpacity
                     key={type}
                     style={[
                       styles.typeButton,
-                      vehicleType === type && styles.activeTypeButton
+                      driverType === type && styles.activeTypeButton
                     ]}
-                    onPress={() => setVehicleType(type)}
+                    onPress={() => setDriverType(type)}
                   >
                     <Text style={[
                       styles.typeButtonText,
-                      vehicleType === type && styles.activeTypeButtonText
+                      driverType === type && styles.activeTypeButtonText
                     ]}>
                       {type.toUpperCase()}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
+
+              {driverType === 'cab' && (
+                <>
+                  <Text style={styles.selectorLabel}>Cab Vehicle Tier</Text>
+                  <View style={styles.vehicleTypeSelector}>
+                    {['economy', 'premium', 'suv'].map((type) => (
+                      <TouchableOpacity
+                        key={type}
+                        style={[
+                          styles.typeButton,
+                          vehicleType === type && styles.activeTypeButton
+                        ]}
+                        onPress={() => setVehicleType(type)}
+                      >
+                        <Text style={[
+                          styles.typeButtonText,
+                          vehicleType === type && styles.activeTypeButtonText
+                        ]}>
+                          {type.toUpperCase()}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
             </View>
           )}
 

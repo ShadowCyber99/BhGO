@@ -151,6 +151,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentMode, setPaymentMode] = useState('upi'); // 'digital', 'cash', or 'upi'
   const [isSurgeActive, setIsSurgeActive] = useState(false);
+  const [parcelWeight, setParcelWeight] = useState('10'); // Default to 10kg
 
   // Support State
   const [showSupportModal, setShowSupportModal] = useState(false);
@@ -476,10 +477,11 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       waypoints: activeWps,
       waypointCoords: waypointCoords,
       pickupLat: pickupCoords.lat, pickupLng: pickupCoords.lng,
-      dropoffLat: dropoffCoords.lat, dropoffLng: dropoffCoords.lng, fare, paymentMode
+      dropoffLat: dropoffCoords.lat, dropoffLng: dropoffCoords.lng, fare, paymentMode,
+      parcelWeight: serviceCategory === 'parcel' ? parseFloat(parcelWeight) || 0 : undefined
     };
     const ride = await api.requestRide(payload);
-    if (socket) socket.emit('request_ride', ride);
+    if (socket) socket.emit('request_ride', { ...ride, parcelWeight: payload.parcelWeight });
     setTimeout(() => onNavigateToActiveRide(), 500);
   };
 
@@ -776,7 +778,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                       value={parcelWeight}
                       onChangeText={(val) => {
                         setParcelWeight(val);
-                        if (parseFloat(val) <= 20) {
+                        if (parseFloat(val) <= 25) {
                           setVehiclePreference('bike');
                         } else {
                           setVehiclePreference('cab');
@@ -784,7 +786,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                       }}
                     />
                     <Text style={{color: colors.textMuted, fontSize: 12, marginTop: 4, paddingHorizontal: 12}}>
-                      {parcelWeight ? `Vehicle auto-assigned: ${parseFloat(parcelWeight) <= 20 ? 'Bike' : 'Cab'} (based on weight)` : 'Enter weight to auto-assign vehicle'}
+                      {parcelWeight ? `Vehicle auto-assigned: ${parseFloat(parcelWeight) <= 25 ? 'Bike' : 'Cab'} (based on weight)` : 'Enter weight to auto-assign vehicle'}
                     </Text>
                   </View>
                 )}

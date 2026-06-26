@@ -33,7 +33,7 @@ export default function DriverHomeScreen() {
   const [chatText, setChatText] = useState('');
 
   // Driver Preference
-  const [serviceFilter, setServiceFilter] = useState(user?.driverDetails?.serviceCategory || 'all');
+  const [serviceFilter, setServiceFilter] = useState([user?.driverDetails?.serviceCategory || 'ride']);
   const [routeMode, setRouteMode] = useState('any'); // 'any' or 'specific'
   const [specificRouteStart, setSpecificRouteStart] = useState('');
   const [specificRouteEnd, setSpecificRouteEnd] = useState('');
@@ -150,16 +150,24 @@ export default function DriverHomeScreen() {
     if (socket && isOnline) {
       socket.on('new_ride_requested', (data) => {
         // Strict Authorization Rules
-        const myServiceCat = user?.driverDetails?.service_category;
+        const myServiceCat = user?.driverDetails?.serviceCategory;
         const myVehicleType = user?.driverDetails?.vehicleType;
 
         // 1. Ambulance strict match
         if (data.serviceCategory === 'ambulance' && myServiceCat !== 'ambulance') return;
         if (myServiceCat === 'ambulance' && data.serviceCategory !== 'ambulance') return;
 
-        // 2. Food/Grocery/Parcel strict match -> ONLY bikes
-        if (data.serviceCategory === 'food' || data.serviceCategory === 'parcel') {
-          if (myVehicleType !== 'bike') return; // Only bike riders can deliver food/parcel
+        // 2. Food/Grocery/Parcel strict match -> ONLY bikes (except parcels > 25kg)
+        if (data.serviceCategory === 'food') {
+          if (myVehicleType !== 'bike') return; // Only bike riders can deliver food
+        }
+        if (data.serviceCategory === 'parcel') {
+          const weight = data.parcelWeight || 0;
+          if (weight > 25) {
+            if (myVehicleType === 'bike') return; // Bike can't take > 25kg
+          } else {
+            if (myVehicleType !== 'bike') return; // Cab can't take <= 25kg
+          }
         }
 
         // 3. Cab & Bike Ride strict match
@@ -174,8 +182,8 @@ export default function DriverHomeScreen() {
           }
         }
 
-        // Enforce Driver's temporary UI Service Preference (if any)
-        if (serviceFilter !== 'all' && data.serviceCategory !== serviceFilter) return;
+        // Enforce Driver's temporary UI Service Preference (Array includes)
+        if (!serviceFilter.includes(data.serviceCategory)) return;
 
         // Enforce Driver's Route Preference
         if (routeMode === 'specific') {
@@ -341,6 +349,17 @@ export default function DriverHomeScreen() {
     setChatText('');
   };
 
+  // Earnings State
+  const [showEarningsModal, setShowEarningsModal] = useState(false);
+  const [earningsData, setEarningsData] = useState(null);
+
+  const fetchEarnings = async () => {
+    try {
+      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` } });
+      if (res.ok) setEarningsData(await res.json());
+    } catch (err) {}
+  };
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -367,6 +386,12 @@ export default function DriverHomeScreen() {
         </View>
         <View style={styles.userBox}>
           <TouchableOpacity 
+            style={[styles.onlineBtn, { borderColor: colors.primary, backgroundColor: 'transparent' }]}
+            onPress={() => { fetchEarnings(); setShowEarningsModal(true); }}
+          >
+            <Text style={[styles.onlineBtnText, { color: colors.primary }]}>💰 Earnings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
             style={[styles.onlineBtn, isOnline ? styles.onlineActive : styles.onlineOffline]}
             onPress={handleToggleOnline}
             disabled={actionLoading}
@@ -382,16 +407,31 @@ export default function DriverHomeScreen() {
       <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
         <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, fontWeight: 'bold' }}>📍 Service Filter Preference:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
-          {['all', 'ride', 'parcel', 'ambulance', 'food'].map(f => (
+          {['ride', 'parcel', 'ambulance', 'food'].filter(f => {
+            // Strict role-based rendering of tabs
+            const myServiceCat = user?.driverDetails?.serviceCategory;
+            const myVehicleType = user?.driverDetails?.vehicleType;
+            if (myServiceCat === 'ambulance') return f === 'ambulance';
+            if (myVehicleType === 'bike') return f === 'ride' || f === 'food' || f === 'parcel';
+            return f === 'ride' || f === 'parcel'; // Cab drivers
+          }).map(f => (
             <TouchableOpacity 
               key={f}
-              onPress={() => changeServiceFilter(f)}
+              onPress={() => {
+                setServiceFilter(prev => {
+                  if (prev.includes(f)) {
+                    if (prev.length === 1) return prev; // Don't allow empty filter
+                    return prev.filter(item => item !== f);
+                  }
+                  return [...prev, f];
+                });
+              }}
               style={{
                 paddingVertical: 6, paddingHorizontal: 16, borderRadius: 16, marginRight: 8,
-                backgroundColor: serviceFilter === f ? colors.primary : colors.surfaceLight,
+                backgroundColor: serviceFilter.includes(f) ? colors.primary : colors.surfaceLight,
               }}
             >
-              <Text style={{ color: serviceFilter === f ? '#000' : colors.text, fontSize: 13, fontWeight: 'bold' }}>
+              <Text style={{ color: serviceFilter.includes(f) ? '#000' : colors.text, fontSize: 13, fontWeight: 'bold' }}>
                 {f.toUpperCase()}
               </Text>
             </TouchableOpacity>
@@ -844,6 +884,52 @@ export default function DriverHomeScreen() {
               style={{ marginBottom: 12 }}
             />
             <CustomButton title="Cancel" onPress={() => { setShowOtpModal(false); setOtpInput(''); setError(''); }} variant="outline" />
+          </GlassCard>
+        </View>
+      </Modal>
+
+      {/* EARNINGS MODAL */}
+      <Modal visible={showEarningsModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <GlassCard style={styles.modalCard}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <Text style={{ color: colors.text, fontSize: 22, fontWeight: 'bold' }}>💰 Earnings Dashboard</Text>
+              <TouchableOpacity onPress={() => setShowEarningsModal(false)}>
+                <Text style={{ color: colors.textMuted, fontSize: 18 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {earningsData ? (
+              <ScrollView>
+                <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 20, borderRadius: 12, marginBottom: 20, alignItems: 'center' }}>
+                  <Text style={{ color: colors.textMuted, fontSize: 14 }}>Total Net Earnings</Text>
+                  <Text style={{ color: colors.primary, fontSize: 42, fontWeight: '900', marginTop: 8 }}>₹{earningsData.totalEarnings.toFixed(2)}</Text>
+                  {earningsData.totalPenalties > 0 && (
+                    <Text style={{ color: colors.danger, fontSize: 12, marginTop: 8 }}>- ₹{earningsData.totalPenalties.toFixed(2)} Cancellation Penalties</Text>
+                  )}
+                </View>
+
+                <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold', marginBottom: 12 }}>Earnings Breakdown</Text>
+                {earningsData.breakdown.map((b, i) => (
+                  <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.surfaceLight }}>
+                    <View>
+                      <Text style={{ color: colors.text, fontSize: 14, fontWeight: 'bold', textTransform: 'capitalize' }}>{b.category} ({b.cutPercentage}% Cut)</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>{b.rides} trips completed</Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={{ color: colors.success, fontSize: 14, fontWeight: 'bold' }}>+ ₹{b.net.toFixed(2)}</Text>
+                      <Text style={{ color: colors.textDim, fontSize: 11, textDecorationLine: 'line-through' }}>₹{b.gross.toFixed(2)}</Text>
+                    </View>
+                  </View>
+                ))}
+
+                {earningsData.breakdown.length === 0 && (
+                  <Text style={{ color: colors.textMuted, textAlign: 'center', fontStyle: 'italic', marginVertical: 20 }}>No completed trips yet.</Text>
+                )}
+              </ScrollView>
+            ) : (
+              <ActivityIndicator size="large" color={colors.primary} style={{ marginVertical: 40 }} />
+            )}
           </GlassCard>
         </View>
       </Modal>

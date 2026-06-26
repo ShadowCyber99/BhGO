@@ -52,17 +52,17 @@ async function seed() {
       "INSERT INTO users (name, email, password, role) VALUES ('Test Driver', 'driver@test.com', $1, 'driver') ON CONFLICT (email) DO NOTHING RETURNING id",
       [hash]
     );
-     
-     if (driverRes.rows.length > 0) {
+
+    if (driverRes.rows.length > 0) {
       await pool.query(
-	      "INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number, aadhar_number, driving_license, latitude, longitude, is_online, is_available) VALUES ($1, 'ride', 'Honda City', 'sedan', 'DL 1C 1234', '123456789012', 'DL-1420110012345', 28.6139, 77.2090, true, true)",
+        "INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number, aadhar_number, driving_license, latitude, longitude, is_online, is_available) VALUES ($1, 'ride', 'Honda City', 'sedan', 'DL 1C 1234', '123456789012', 'DL-1420110012345', 28.6139, 77.2090, true, true)",
         [driverRes.rows[0].id]
       );
       await pool.query(
-	      "INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number, aadhar_number, driving_license, latitude, longitude, is_online, is_available) VALUES ($1, 'food', 'Delivery Bike', 'bike', 'DL 2S 9999', '987654321098', 'DL-1420110098765', 28.6140, 77.2100, true, true)",
+        "INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number, aadhar_number, driving_license, latitude, longitude, is_online, is_available) VALUES ($1, 'food', 'Delivery Bike', 'bike', 'DL 2S 9999', '987654321098', 'DL-1420110098765', 28.6140, 77.2100, true, true)",
         [driverRes.rows[0].id]
       );
-    }	    
+    }
     console.log('✅ Seeded dummy users (rider@test.com & driver@test.com) with password: password123');
     
   } catch (err) {
