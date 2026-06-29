@@ -33,6 +33,8 @@ export const themes = {
     shadow: 'rgba(0, 0, 0, 0.6)',
     glassBg: 'rgba(18, 20, 26, 0.8)',
     glassBorder: 'rgba(212, 175, 55, 0.15)', // Subtle gold border
+    overlay: 'rgba(255, 255, 255, 0.05)',
+    overlayBorder: 'rgba(255, 255, 255, 0.1)'
   },
   light: {
     name: 'Minimal Light',
@@ -47,6 +49,8 @@ export const themes = {
     shadow: 'rgba(0, 0, 0, 0.08)',
     glassBg: 'rgba(255, 255, 255, 0.85)',
     glassBorder: 'rgba(0, 0, 0, 0.05)',
+    overlay: 'rgba(0, 0, 0, 0.05)',
+    overlayBorder: 'rgba(0, 0, 0, 0.1)'
   },
   ocean: {
     name: 'Royal Sapphire',
@@ -61,6 +65,8 @@ export const themes = {
     shadow: 'rgba(0, 0, 0, 0.5)',
     glassBg: 'rgba(11, 33, 58, 0.75)',
     glassBorder: 'rgba(56, 189, 248, 0.2)',
+    overlay: 'rgba(255, 255, 255, 0.05)',
+    overlayBorder: 'rgba(255, 255, 255, 0.1)'
   },
   sunset: {
     name: 'Twilight Gold',
@@ -75,6 +81,8 @@ export const themes = {
     shadow: 'rgba(0, 0, 0, 0.5)',
     glassBg: 'rgba(45, 25, 11, 0.75)',
     glassBorder: 'rgba(245, 158, 11, 0.2)',
+    overlay: 'rgba(255, 255, 255, 0.05)',
+    overlayBorder: 'rgba(255, 255, 255, 0.1)'
   },
   forest: {
     name: 'Emerald Executive',
@@ -89,6 +97,8 @@ export const themes = {
     shadow: 'rgba(0, 0, 0, 0.5)',
     glassBg: 'rgba(11, 47, 31, 0.75)',
     glassBorder: 'rgba(16, 185, 129, 0.2)',
+    overlay: 'rgba(255, 255, 255, 0.05)',
+    overlayBorder: 'rgba(255, 255, 255, 0.1)'
   }
 };
 

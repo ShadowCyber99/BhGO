@@ -24,7 +24,11 @@ export function AuthProvider({ children }) {
       newSocket.on('connect', () => {
         console.log('✅ WebSocket Client Connected to Backend');
         // Join user room for private ride notifications
-        newSocket.emit('join', { userId: user.id, role: user.role });
+        newSocket.emit('join', { 
+          userId: user.id, 
+          role: user.role,
+          serviceFilter: user.driverDetails?.serviceCategory
+        });
       });
 
       newSocket.on('connect_error', (err) => {

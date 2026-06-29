@@ -261,6 +261,15 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     }
   }, [serviceCategory]);
 
+  const [emergencyConsent, setEmergencyConsent] = useState(false);
+
+  useEffect(() => {
+    // When serviceCategory changes to ambulance, reset vehiclePreference to the default
+    if (serviceCategory === 'ambulance') {
+      setVehiclePreference('non_emergency');
+    }
+  }, [serviceCategory]);
+
   const calculateFare = (distanceInKm, category, vehicle) => {
     let baseFare = 40;
     let perKmRate = 12;
@@ -298,8 +307,8 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
           perKmRate = 12;
       }
     } else if (category === 'ambulance') {
-      baseFare = 500;
-      perKmRate = 25;
+      baseFare = vehicle === 'medical_emergency' ? 750 : 400;
+      perKmRate = vehicle === 'medical_emergency' ? 35 : 20;
     } else if (category === 'food') {
       baseFare = 0;
       perKmRate = 0;
@@ -802,7 +811,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                   <View style={{ marginTop: 10, marginBottom: 20 }}>
                     <Text style={styles.helperHeader}>🚘 Select Vehicle Preference</Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                      {['cab', 'bike', 'ambulance'].map(v => {
+                      {['cab', 'bike'].map(v => {
                         const isCabSelected = ['economy', 'premium', 'suv'].includes(vehiclePreference);
                         const isActive = v === 'cab' ? isCabSelected : vehiclePreference === v;
                         return (
@@ -810,9 +819,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                             key={v}
                             style={[styles.vehicleBtn, isActive && styles.vehicleBtnActive]}
                             onPress={() => {
-                              if (v === 'ambulance') {
-                                setServiceCategory('ambulance');
-                              } else if (v === 'bike') {
+                              if (v === 'bike') {
                                 setVehiclePreference('bike');
                               } else {
                                 setVehiclePreference('economy');
@@ -845,6 +852,27 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                         </View>
                       </View>
                     )}
+                  </View>
+                )}
+
+                {/* Vehicle Selection for Ambulance */}
+                {serviceCategory === 'ambulance' && (
+                  <View style={{ marginTop: 10, marginBottom: 20 }}>
+                    <Text style={styles.helperHeader}>🚑 Select Ambulance Type</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                      <TouchableOpacity 
+                        style={[styles.vehicleBtn, vehiclePreference === 'medical_emergency' && styles.vehicleBtnActive]}
+                        onPress={() => setVehiclePreference('medical_emergency')}
+                      >
+                        <Text style={[styles.vehicleBtnText, vehiclePreference === 'medical_emergency' && { color: colors.danger, fontWeight: 'bold' }]}>🚨 MEDICAL EMERGENCY</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[styles.vehicleBtn, vehiclePreference === 'non_emergency' && styles.vehicleBtnActive]}
+                        onPress={() => setVehiclePreference('non_emergency')}
+                      >
+                        <Text style={[styles.vehicleBtnText, vehiclePreference === 'non_emergency' && { color: colors.text }]}>🏥 NON-EMERGENCY</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
 
@@ -884,6 +912,20 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                   <Text style={styles.infoValue}>{serviceCategory.toUpperCase()}</Text>
                 </View>
 
+                {serviceCategory === 'ambulance' && vehiclePreference === 'medical_emergency' && (
+                  <TouchableOpacity 
+                    style={{ marginTop: 16, marginBottom: 8, padding: 12, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: emergencyConsent ? colors.danger : colors.surfaceLight, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
+                    onPress={() => setEmergencyConsent(!emergencyConsent)}
+                  >
+                    <View style={{ width: 20, height: 20, borderWidth: 2, borderColor: colors.danger, borderRadius: 4, marginRight: 10, alignItems: 'center', justifyContent: 'center' }}>
+                      {emergencyConsent && <Text style={{ color: colors.danger, fontSize: 14, fontWeight: 'bold', marginTop: -2 }}>✓</Text>}
+                    </View>
+                    <Text style={{ flex: 1, color: colors.text, fontSize: 12 }}>
+                      I acknowledge this is a critical medical emergency. I understand priority pricing applies and false reports may incur penalties.
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
                 <View style={styles.bookingFooter}>
                   {pickupCoords && (
                     <View style={styles.fareBreakdown}>
@@ -896,7 +938,13 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                       <Text style={styles.paymentInfoText}>Payment: {paymentMode === 'cash' ? '💵 Cash' : '💳 Digital (Card/Wallet)'}</Text>
                     </View>
                   )}
-                  <CustomButton title={`Pay ₹${fare.toFixed(2)} & Request`} onPress={initiatePayment} variant="primary" style={styles.requestButton} />
+                  <CustomButton 
+                    title={`Pay ₹${fare.toFixed(2)} & Request`} 
+                    onPress={initiatePayment} 
+                    variant="primary" 
+                    style={styles.requestButton} 
+                    disabled={serviceCategory === 'ambulance' && vehiclePreference === 'medical_emergency' && !emergencyConsent}
+                  />
                 </View>
               </GlassCard>
             </View>
@@ -1261,18 +1309,18 @@ const getStyles = (colors) => StyleSheet.create({
   
   helperHeader: { color: colors.textMuted, fontSize: 13, fontWeight: 'bold', marginBottom: 10 },
   customRouteBox: { backgroundColor: colors.surfaceLight, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.surfaceLight, gap: 10, zIndex: 50 },
-  routeInput: { backgroundColor: 'rgba(255,255,255,0.05)', color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: colors.surfaceLight, marginBottom: 8 },
+  routeInput: { backgroundColor: colors.overlay, color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: colors.surfaceLight, marginBottom: 8 },
   suggestionsBox: { position: 'absolute', top: 52, left: 0, right: 0, backgroundColor: colors.surface, borderRadius: 8, borderWidth: 1, borderColor: colors.primary, maxHeight: 150, overflow: 'hidden', zIndex: 999 },
   suggestionItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: colors.surfaceLight },
   suggestionText: { color: colors.text, fontSize: 13 },
 
   routesWrapper: { flexDirection: 'column', gap: 8, marginBottom: 18 },
-  routeCard: { backgroundColor: 'rgba(255, 255, 255, 0.02)', borderWidth: 1.5, borderColor: colors.surfaceLight, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 16 },
+  routeCard: { backgroundColor: colors.overlay, borderWidth: 1.5, borderColor: colors.surfaceLight, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 16 },
   activeRouteCard: { borderColor: colors.primary, backgroundColor: 'rgba(163, 230, 53, 0.08)' },
   routeNameText: { color: colors.textMuted, fontSize: 13, fontWeight: '700' },
   activeRouteNameText: { color: colors.text },
   
-  vehicleBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  vehicleBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: colors.overlay, borderWidth: 1, borderColor: colors.overlayBorder },
   vehicleBtnActive: { backgroundColor: 'rgba(163,230,53,0.2)', borderColor: colors.primary },
   vehicleBtnText: { color: colors.textMuted, fontSize: 11, fontWeight: 'bold' },
 
@@ -1287,7 +1335,7 @@ const getStyles = (colors) => StyleSheet.create({
   requestButton: { width: '100%' },
   errorText: { color: colors.danger, fontWeight: '600', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: 10, borderRadius: 8, marginBottom: 12, fontSize: 13 },
 
-  foodTabs: { flexDirection: 'row', gap: 8, backgroundColor: 'rgba(255,255,255,0.05)', padding: 4, borderRadius: 12 },
+  foodTabs: { flexDirection: 'row', gap: 8, backgroundColor: colors.overlay, padding: 4, borderRadius: 12 },
   foodTab: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
   foodTabActive: { backgroundColor: colors.foodColor },
   foodTabText: { color: colors.textMuted, fontWeight: 'bold', fontSize: 13 },
@@ -1296,10 +1344,10 @@ const getStyles = (colors) => StyleSheet.create({
   restaurantName: { color: colors.text, fontSize: 18, fontWeight: 'bold', marginTop: 12 },
   restaurantCuisine: { color: colors.textMuted, fontSize: 12, marginTop: 4, textAlign: 'center' },
   
-  menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
+  menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, borderBottomWidth: 1, borderColor: colors.overlay },
   addBtn: { backgroundColor: 'rgba(163,230,53,0.2)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: colors.primary },
   
-  paymentMethodCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(255,255,255,0.02)', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.surfaceLight, marginBottom: 12 },
+  paymentMethodCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.overlay, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.surfaceLight, marginBottom: 12 },
   paymentMethodActive: { borderColor: colors.primary, backgroundColor: 'rgba(163,230,53,0.05)' },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20, zIndex: 9999 },
@@ -1308,13 +1356,13 @@ const getStyles = (colors) => StyleSheet.create({
   cityOptionBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   cityOptionText: { color: colors.text, fontWeight: 'bold' },
   
-  supportTabBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.05)' },
+  supportTabBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6, backgroundColor: colors.overlay },
   supportTabActive: { backgroundColor: colors.parcelColor },
   supportTabText: { color: colors.textMuted, fontSize: 12, fontWeight: 'bold' },
-  chatInput: { backgroundColor: 'rgba(255,255,255,0.05)', color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
+  chatInput: { backgroundColor: colors.overlay, color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
   
   profileBtn: { backgroundColor: 'rgba(163, 230, 53, 0.1)', borderWidth: 1, borderColor: 'rgba(163, 230, 53, 0.2)', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },
-  profileMenuBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.glassBorder },
+  profileMenuBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.overlay, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.glassBorder },
   profileMenuIcon: { fontSize: 24, marginRight: 16 },
   profileMenuText: { color: colors.text, fontSize: 16, fontWeight: '600' },
 

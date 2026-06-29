@@ -360,7 +360,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
                 </Text>
               </View>
             ) : ride.payment_mode === 'digital' ? (
-              <View style={{ marginBottom: 16, backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 8 }}>
+              <View style={{ marginBottom: 16, backgroundColor: colors.overlay, padding: 16, borderRadius: 8 }}>
                 <Text style={{ color: colors.text, textAlign: 'center', fontWeight: 'bold', marginBottom: 6 }}>Refund Eligible</Text>
                 <Text style={{ color: colors.textMuted, textAlign: 'center', fontSize: 13 }}>
                   To claim your refund, go to <Text style={{color: colors.primary, fontWeight: 'bold'}}>Support &gt; Claim Refund</Text> and enter your Booking Ref ID (<Text style={{color: colors.text}}>{ride.refId}</Text>).

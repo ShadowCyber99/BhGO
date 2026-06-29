@@ -285,21 +285,24 @@ const query = async (text, params = []) => {
 
   // 7. Request Ride: `INSERT INTO rides ... RETURNING *`
   if (sql.includes('insert into rides') && sql.includes('returning *')) {
-    const rider_id = parseInt(params[0]);
-    const pickup_address = params[1];
-    const dropoff_address = params[2];
-    const pickup_lat = parseFloat(params[3]);
-    const pickup_lng = parseFloat(params[4]);
-    const dropoff_lat = parseFloat(params[5]);
-    const dropoff_lng = parseFloat(params[6]);
-    const fare = parseFloat(params[7]);
-    const status = params[8];
-    const service_category = params[9] || 'ride';
-    const vehicle_preference = params[10] || 'any';
-    const otp = params[12]; // Note: params index might shift based on query, but it is $13 in rides.js (so index 12)
+    const ref_id = params[0];
+    const rider_id = parseInt(params[1]);
+    const service_category = params[2] || 'ride';
+    const vehicle_preference = params[3] || 'any';
+    const pickup_address = params[4];
+    const dropoff_address = params[5];
+    const pickup_lat = parseFloat(params[6]);
+    const pickup_lng = parseFloat(params[7]);
+    const dropoff_lat = parseFloat(params[8]);
+    const dropoff_lng = parseFloat(params[9]);
+    const fare = parseFloat(params[10]);
+    const payment_mode = params[11];
+    const otp = params[12];
+    const status = 'requested';
 
     const newRide = {
       id: inMemoryDb.rides.length + 1,
+      ref_id,
       rider_id,
       driver_id: null,
       pickup_address,
@@ -313,6 +316,7 @@ const query = async (text, params = []) => {
       service_category,
       vehicle_preference,
       otp,
+      payment_mode,
       payment_status: 'paid',
       created_at: new Date(),
       updated_at: new Date()

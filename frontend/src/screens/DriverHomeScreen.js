@@ -33,7 +33,7 @@ export default function DriverHomeScreen() {
   const [chatText, setChatText] = useState('');
 
   // Driver Preference
-  const [serviceFilter, setServiceFilter] = useState([user?.driverDetails?.serviceCategory || 'ride']);
+  const [serviceFilter, setServiceFilter] = useState([user?.driverDetails?.serviceCategory === 'ambulance' ? 'medical_emergency' : (user?.driverDetails?.serviceCategory || 'ride')]);
   const [routeMode, setRouteMode] = useState('any'); // 'any' or 'specific'
   const [specificRouteStart, setSpecificRouteStart] = useState('');
   const [specificRouteEnd, setSpecificRouteEnd] = useState('');
@@ -154,8 +154,14 @@ export default function DriverHomeScreen() {
         const myVehicleType = user?.driverDetails?.vehicleType;
 
         // 1. Ambulance strict match
-        if (data.serviceCategory === 'ambulance' && myServiceCat !== 'ambulance') return;
-        if (myServiceCat === 'ambulance' && data.serviceCategory !== 'ambulance') return;
+        if (data.serviceCategory === 'ambulance') {
+          if (myServiceCat !== 'ambulance') return;
+          // Filter based on toggle:
+          const pref = data.vehiclePreference || 'non_emergency';
+          if (!serviceFilter.includes(pref)) return;
+        } else {
+          if (myServiceCat === 'ambulance') return; // Ambulance driver can't take other rides
+        }
 
         // 2. Food/Grocery/Parcel strict match -> ONLY bikes (except parcels > 25kg)
         if (data.serviceCategory === 'food') {
@@ -185,7 +191,8 @@ export default function DriverHomeScreen() {
         }
 
         // Enforce Driver's temporary UI Service Preference (Array includes)
-        if (!serviceFilter.includes(data.serviceCategory)) return;
+        // Skip for ambulance because they use medical_emergency/non_emergency tags above
+        if (data.serviceCategory !== 'ambulance' && !serviceFilter.includes(data.serviceCategory)) return;
 
         // Enforce Driver's Route Preference
         if (routeMode === 'specific') {
@@ -284,7 +291,7 @@ export default function DriverHomeScreen() {
     setActionLoading(true);
     const newStatus = !isOnline;
     try {
-      if (socket) socket.emit('join', { userId: user.id, role: 'driver', serviceFilter });
+      if (socket) socket.emit('join', { userId: user.id, role: 'driver', serviceFilter: serviceFilter[0] || 'all' });
       setIsOnline(newStatus);
       await refreshProfile();
     } catch (err) {
@@ -297,7 +304,7 @@ export default function DriverHomeScreen() {
   const changeServiceFilter = (filter) => {
     setServiceFilter(filter);
     if (isOnline && socket) {
-      socket.emit('join', { userId: user.id, role: 'driver', serviceFilter: filter });
+      socket.emit('join', { userId: user.id, role: 'driver', serviceFilter: filter[0] || 'all' });
     }
   };
 
@@ -403,11 +410,11 @@ export default function DriverHomeScreen() {
       <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
         <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, fontWeight: 'bold' }}>📍 Service Filter Preference:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
-          {['ride', 'parcel', 'ambulance', 'food'].filter(f => {
+          {['ride', 'parcel', 'medical_emergency', 'non_emergency', 'food'].filter(f => {
             // Strict role-based rendering of tabs
             const myServiceCat = user?.driverDetails?.serviceCategory;
             const myVehicleType = user?.driverDetails?.vehicleType;
-            if (myServiceCat === 'ambulance') return f === 'ambulance';
+            if (myServiceCat === 'ambulance') return f === 'medical_emergency' || f === 'non_emergency';
             if (myVehicleType === 'bike') return f === 'ride' || f === 'food' || f === 'parcel';
             return f === 'ride' || f === 'parcel'; // Cab drivers
           }).map(f => (
@@ -436,7 +443,7 @@ export default function DriverHomeScreen() {
       </View>
 
       {/* NEW: Route Preference UI (Hidden for Ambulance) */}
-      {serviceFilter !== 'ambulance' && (
+      {user?.driverDetails?.serviceCategory !== 'ambulance' && (
         <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
           <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, fontWeight: 'bold' }}>🛣️ Route Preference:</Text>
           <View style={{ flexDirection: 'row', marginBottom: routeMode === 'specific' ? 8 : 0 }}>
@@ -506,8 +513,8 @@ export default function DriverHomeScreen() {
             return (
               <GlassCard key={req.id} style={[styles.offerCard, { marginBottom: 16 }]}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={styles.offerTag}>
-                    🔥 {req.serviceCategory.toUpperCase()} {req.serviceCategory === 'ride' && req.vehiclePreference && req.vehiclePreference !== 'any' ? `- ${req.vehiclePreference.toUpperCase()} ` : ''}REQUEST
+                  <Text style={[styles.offerTag, req.serviceCategory === 'ambulance' && req.vehiclePreference === 'medical_emergency' && { color: colors.danger, fontWeight: 'bold' }]}>
+                    {req.serviceCategory === 'ambulance' ? (req.vehiclePreference === 'medical_emergency' ? '🚨 MEDICAL EMERGENCY' : '🏥 NON-EMERGENCY') : `🔥 ${req.serviceCategory.toUpperCase()} ${req.serviceCategory === 'ride' && req.vehiclePreference && req.vehiclePreference !== 'any' ? `- ${req.vehiclePreference.toUpperCase()} ` : ''}REQUEST`}
                   </Text>
                   <Text style={{ color: colors.danger, fontWeight: 'bold' }}>⏳ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</Text>
                 </View>
@@ -799,7 +806,7 @@ export default function DriverHomeScreen() {
             <Text style={styles.passengerText}>👤 Customer: {activeRide.riderName || 'Passenger'}</Text>
             
             {activeRide.serviceCategory === 'food' && activeRide.itemsJson && (
-              <View style={{ marginTop: 12, backgroundColor: 'rgba(255,255,255,0.05)', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.surfaceLight }}>
+              <View style={{ marginTop: 12, backgroundColor: colors.overlay, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.surfaceLight }}>
                 <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 8 }}>🍔 Order Items (Total: ₹{activeRide.orderTotal})</Text>
                 {activeRide.itemsJson.map((item, idx) => (
                   <Text key={idx} style={{ color: colors.textMuted, fontSize: 13 }}>• {item.name} {item.is_veg && '🌿'} (₹{item.price})</Text>
@@ -902,7 +909,7 @@ export default function DriverHomeScreen() {
 
             {earningsData ? (
               <ScrollView>
-                <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 20, borderRadius: 12, marginBottom: 20, alignItems: 'center' }}>
+                <View style={{ backgroundColor: colors.overlay, padding: 20, borderRadius: 12, marginBottom: 20, alignItems: 'center' }}>
                   <Text style={{ color: colors.textMuted, fontSize: 14 }}>Total Net Earnings</Text>
                   <Text style={{ color: colors.primary, fontSize: 42, fontWeight: '900', marginTop: 8 }}>₹{earningsData.totalEarnings.toFixed(2)}</Text>
                   {earningsData.totalPenalties > 0 && (
