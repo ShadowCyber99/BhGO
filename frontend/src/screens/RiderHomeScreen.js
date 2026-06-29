@@ -374,13 +374,31 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
   const geocodeAddress = async (address, city) => {
     try {
-      const query = `${address}, ${city.name}, India`;
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
-      const res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
-      const data = await res.json();
+      const cleanAddress = address.trim();
+      
+      // 1. Try with city
+      let query = `${cleanAddress}, ${city.name}, India`;
+      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+      let res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
+      let data = await res.json();
+      
       if (data && data.length > 0) {
         return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
       }
+      
+      // Wait 1 second to respect Nominatim rate limits before retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 2. Try without city (useful for suburbs like Mohali when Chandigarh is selected)
+      query = `${cleanAddress}, India`;
+      url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+      res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
+      data = await res.json();
+      
+      if (data && data.length > 0) {
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      }
+      
     } catch (err) {
       console.warn('Geocoding error:', err);
     }
