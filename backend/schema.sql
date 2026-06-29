@@ -16,6 +16,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('rider', 'driver')),
     rating DECIMAL(3,2) DEFAULT 5.00,
+    wallet_balance DECIMAL(10,2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

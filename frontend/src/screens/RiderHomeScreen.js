@@ -109,8 +109,8 @@ const DEMO_ROUTES = [
 ];
 
 export default function RiderHomeScreen({ onNavigateToActiveRide }) {
-  const { user, logout, socket } = useAuth();
-  const { colors, isDarkMode, toggleTheme, changeTheme, availableThemes, themeName } = useTheme();
+  const { user, logout, socket, refreshProfile } = useAuth();
+  const { colors, themeName, changeTheme, availableThemes } = useTheme();
   const styles = getStyles(colors);
   
   const [pickupAddress, setPickupAddress] = useState('');
@@ -228,7 +228,17 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     fetchDrivers();
     if (socket) {
       socket.on('drivers_changed', fetchDrivers);
-      return () => socket.off('drivers_changed', fetchDrivers);
+      
+      const handleWalletUpdate = (data) => {
+        alert(`💰 ${data.reason}: ₹${data.amountAdded} has been refunded to your wallet!`);
+        refreshProfile();
+      };
+      socket.on('wallet_updated', handleWalletUpdate);
+      
+      return () => {
+        socket.off('drivers_changed', fetchDrivers);
+        socket.off('wallet_updated', handleWalletUpdate);
+      }
     }
   }, [socket, serviceCategory]);
 
@@ -1176,7 +1186,10 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
               <Text style={{ fontSize: 48, marginBottom: 8 }}>👤</Text>
               <Text style={{ color: colors.text, fontSize: 24, fontWeight: 'bold' }}>{user?.name}</Text>
               <Text style={{ color: colors.textMuted, fontSize: 14 }}>{user?.email}</Text>
-              <Text style={{ color: colors.primary, fontWeight: 'bold', marginTop: 8 }}>⭐ {user?.rating || '5.00'} Rating</Text>
+              <View style={{ flexDirection: 'row', gap: 16, marginTop: 12 }}>
+                <Text style={{ color: colors.primary, fontWeight: 'bold' }}>⭐ {user?.rating || '5.00'} Rating</Text>
+                <Text style={{ color: colors.success, fontWeight: 'bold' }}>💰 Wallet: ₹{(user?.walletBalance || 0).toFixed(2)}</Text>
+              </View>
             </View>
 
             <View style={{ gap: 12, marginBottom: 24 }}>

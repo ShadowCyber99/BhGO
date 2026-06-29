@@ -37,7 +37,7 @@ router.post('/register', [
 
     // Save user
     const userRes = await db.query(
-      'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, rating, created_at',
+      'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, rating, wallet_balance, created_at',
       [name, email, passwordHash, role]
     );
 
@@ -67,6 +67,7 @@ router.post('/register', [
         email: user.email,
         role: user.role,
         rating: parseFloat(user.rating),
+        walletBalance: parseFloat(user.wallet_balance || 0),
         createdAt: user.created_at
       }
     });
@@ -132,6 +133,7 @@ router.post('/login', [
         email: user.email,
         role: user.role,
         rating: parseFloat(user.rating),
+        walletBalance: parseFloat(user.wallet_balance || 0),
         driverDetails: driverDetails ? {
           serviceCategory: driverDetails.service_category,
           vehicleName: driverDetails.vehicle_name,
@@ -172,6 +174,7 @@ router.get('/profile', auth, async (req, res) => {
         email: row.email,
         role: row.role,
         rating: parseFloat(row.rating),
+        walletBalance: parseFloat(row.wallet_balance || 0),
         createdAt: row.created_at,
         driverDetails: row.role === 'driver' ? {
           serviceCategory: row.service_category,

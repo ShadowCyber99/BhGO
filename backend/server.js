@@ -309,7 +309,14 @@ io.on('connection', (socket) => {
       // 3. Update ride status in DB
       await db.query("UPDATE rides SET status = 'cancelled', cancelled_by = 'rider', driver_penalty = 0 WHERE id = $1", [rideId]);
 
-      // 4. Free the driver if assigned
+      // 4. Refund to Wallet if paid digitally
+      if (ride.payment_mode === 'digital' && ride.status !== 'cancelled') {
+        await db.query("UPDATE users SET wallet_balance = wallet_balance + $1 WHERE id = $2", [ride.fare, ride.rider_id]);
+        console.log(`💸 Refunded ₹${ride.fare} to rider ${ride.rider_id}'s wallet.`);
+        // Note: The frontend should fetch updated user details to see the new wallet balance
+      }
+
+      // 5. Free the driver if assigned
       if (ride.driver_id) {
         await db.query("UPDATE drivers SET is_available = true WHERE user_id = $1", [ride.driver_id]);
         

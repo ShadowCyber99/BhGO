@@ -179,7 +179,8 @@ export default function DriverHomeScreen() {
             if (myVehicleType !== 'bike') return; // cab driver should not get bike ride
           } else if (pref !== 'any') {
             // differentiate economy, SUV, premium
-            if (myVehicleType !== pref) return;
+            // Allow legacy 'cab' to accept 'economy' requests
+            if (myVehicleType !== pref && myVehicleType !== 'cab') return;
           }
         }
 
@@ -371,6 +372,9 @@ export default function DriverHomeScreen() {
               <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>Driver</Text>
             </View>
             <Text style={styles.vehicleSubtitle}>{user?.driverDetails?.vehicleName} ({user?.driverDetails?.vehicleNumber})</Text>
+            <Text style={{color: colors.primary, fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase', marginTop: 2}}>
+              Type: {user?.driverDetails?.vehicleType === 'cab' ? 'ECONOMY (CAB)' : user?.driverDetails?.vehicleType}
+            </Text>
           </View>
           <TouchableOpacity onPress={() => setShowCityPicker(true)} style={styles.cityBtn}>
             <Text style={styles.cityBtnText}>📍 {selectedCity.name}</Text>
@@ -502,7 +506,9 @@ export default function DriverHomeScreen() {
             return (
               <GlassCard key={req.id} style={[styles.offerCard, { marginBottom: 16 }]}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={styles.offerTag}>🔥 {req.serviceCategory.toUpperCase()} REQUEST</Text>
+                  <Text style={styles.offerTag}>
+                    🔥 {req.serviceCategory.toUpperCase()} {req.serviceCategory === 'ride' && req.vehiclePreference && req.vehiclePreference !== 'any' ? `- ${req.vehiclePreference.toUpperCase()} ` : ''}REQUEST
+                  </Text>
                   <Text style={{ color: colors.danger, fontWeight: 'bold' }}>⏳ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</Text>
                 </View>
                 <Text style={styles.offerAddress}>Pickup: {req.pickupAddress}</Text>
@@ -620,7 +626,10 @@ export default function DriverHomeScreen() {
               <Text style={{ fontSize: 48, marginBottom: 8 }}>👨‍✈️</Text>
               <Text style={{ color: colors.text, fontSize: 24, fontWeight: 'bold' }}>{user?.name}</Text>
               <Text style={{ color: colors.textMuted, fontSize: 14 }}>{user?.email}</Text>
-              <Text style={{ color: colors.primary, fontWeight: 'bold', marginTop: 8 }}>⭐ {user?.rating || '5.00'} Rating</Text>
+              <View style={{ flexDirection: 'row', gap: 16, marginTop: 12 }}>
+                <Text style={{ color: colors.primary, fontWeight: 'bold' }}>⭐ {user?.rating || '5.00'} Rating</Text>
+                <Text style={{ color: colors.success, fontWeight: 'bold' }}>💰 Wallet: ₹{(user?.walletBalance || 0).toFixed(2)}</Text>
+              </View>
             </View>
 
             <View style={{ gap: 12, marginBottom: 24 }}>

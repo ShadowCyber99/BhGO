@@ -26,6 +26,7 @@ const inMemoryDb = {
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'rider',
       rating: 4.9,
+      wallet_balance: 0.00,
       created_at: new Date()
     },
     {
@@ -35,6 +36,7 @@ const inMemoryDb = {
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.8,
+      wallet_balance: 0.00,
       created_at: new Date()
     },
     {
@@ -44,6 +46,7 @@ const inMemoryDb = {
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.95,
+      wallet_balance: 0.00,
       created_at: new Date()
     },
     {
@@ -53,6 +56,7 @@ const inMemoryDb = {
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.75,
+      wallet_balance: 0.00,
       created_at: new Date()
     }
   ],

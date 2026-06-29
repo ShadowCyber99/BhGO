@@ -1,94 +1,94 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const baseColors = {
-  // Brand Colors (Neon Cyberpunk)
-  primary: '#00F0FF',
-  primaryHover: '#00D1FF',
-  secondary: '#FF007F',
-  secondaryHover: '#E60073',
+  // Brand Colors (Premium & Modern)
+  primary: '#D4AF37', // Gold accent
+  primaryHover: '#F3E5AB',
+  secondary: '#3B82F6', // Trust Blue
+  secondaryHover: '#60A5FA',
   
   // Service Verticals
-  rideColor: '#00F0FF',
-  ambulanceColor: '#FF1111',
-  parcelColor: '#7000FF',
-  foodColor: '#FF5500',
+  rideColor: '#D4AF37',       // Gold for Ride
+  ambulanceColor: '#EF4444',  // Ruby Red
+  parcelColor: '#8B5CF6',     // Royal Purple
+  foodColor: '#F97316',       // Warm Orange
   
   // Status Colors
-  success: '#39FF14', // Neon Green
-  danger: '#FF003C', // Neon Red
-  warning: '#FFEA00', // Neon Yellow
-  info: '#00F0FF',
+  success: '#10B981', // Emerald Green
+  danger: '#EF4444', // Ruby Red
+  warning: '#F59E0B', // Amber
+  info: '#3B82F6', // Sapphire Blue
 };
 
 export const themes = {
   dark: {
-    name: 'Cyber Dark',
+    name: 'Luxury Dark',
     ...baseColors,
-    background: '#090A0F',
-    surface: '#12141D',
-    surfaceLight: '#1C1F2E',
-    text: '#FFFFFF',
-    textMuted: '#94A3B8',
-    textDim: '#64748B',
-    shadow: 'rgba(0, 240, 255, 0.4)',
-    glassBg: 'rgba(18, 20, 29, 0.75)',
-    glassBorder: 'rgba(0, 240, 255, 0.15)', // Neon border
+    background: '#0B0C10',
+    surface: '#12141A',
+    surfaceLight: '#1F222B',
+    text: '#F3F4F6',
+    textMuted: '#9CA3AF',
+    textDim: '#6B7280',
+    shadow: 'rgba(0, 0, 0, 0.6)',
+    glassBg: 'rgba(18, 20, 26, 0.8)',
+    glassBorder: 'rgba(212, 175, 55, 0.15)', // Subtle gold border
   },
   light: {
-    name: 'Clean Light',
+    name: 'Minimal Light',
     ...baseColors,
-    primary: '#84CC16',
-    background: '#F8FAFC',
+    primary: '#0F172A',
+    background: '#F9FAFB',
     surface: '#FFFFFF',
-    surfaceLight: '#E2E8F0',
-    text: '#0F172A',
-    textMuted: '#475569',
-    textDim: '#94A3B8',
-    shadow: 'rgba(0, 0, 0, 0.1)',
+    surfaceLight: '#F3F4F6',
+    text: '#111827',
+    textMuted: '#4B5563',
+    textDim: '#9CA3AF',
+    shadow: 'rgba(0, 0, 0, 0.08)',
     glassBg: 'rgba(255, 255, 255, 0.85)',
-    glassBorder: 'rgba(0, 0, 0, 0.1)',
+    glassBorder: 'rgba(0, 0, 0, 0.05)',
   },
   ocean: {
-    name: 'Deep Ocean',
+    name: 'Royal Sapphire',
     ...baseColors,
-    primary: '#0EA5E9',
-    background: '#082F49',
-    surface: '#0369A1',
-    surfaceLight: '#0284C7',
+    primary: '#38BDF8',
+    background: '#041528',
+    surface: '#0B213A',
+    surfaceLight: '#123052',
     text: '#F0F9FF',
     textMuted: '#BAE6FD',
     textDim: '#7DD3FC',
-    shadow: 'rgba(14, 165, 233, 0.4)',
-    glassBg: 'rgba(3, 105, 161, 0.75)',
-    glassBorder: 'rgba(14, 165, 233, 0.25)',
+    shadow: 'rgba(0, 0, 0, 0.5)',
+    glassBg: 'rgba(11, 33, 58, 0.75)',
+    glassBorder: 'rgba(56, 189, 248, 0.2)',
   },
   sunset: {
-    name: 'Sunset Orange',
+    name: 'Twilight Gold',
     ...baseColors,
-    primary: '#F97316',
-    background: '#431407',
-    surface: '#7C2D12',
-    surfaceLight: '#9A3412',
+    primary: '#F59E0B',
+    background: '#1F1106',
+    surface: '#2D190B',
+    surfaceLight: '#432511',
     text: '#FFF7ED',
-    textMuted: '#FED7AA',
-    textDim: '#FDBA74',
-    shadow: 'rgba(249, 115, 22, 0.4)',
-    glassBg: 'rgba(124, 45, 18, 0.75)',
-    glassBorder: 'rgba(249, 115, 22, 0.25)',
+    textMuted: '#FDE68A',
+    textDim: '#FBBF24',
+    shadow: 'rgba(0, 0, 0, 0.5)',
+    glassBg: 'rgba(45, 25, 11, 0.75)',
+    glassBorder: 'rgba(245, 158, 11, 0.2)',
   },
   forest: {
-    name: 'Forest Green',
+    name: 'Emerald Executive',
     ...baseColors,
-    primary: '#22C55E',
-    background: '#052E16',
-    surface: '#14532D',
-    surfaceLight: '#166534',
+    primary: '#10B981',
+    background: '#061D13',
+    surface: '#0B2F1F',
+    surfaceLight: '#12452F',
     text: '#F0FDF4',
-    textMuted: '#BBF7D0',
-    textDim: '#86EFAC',
-    shadow: 'rgba(34, 197, 94, 0.4)',
-    glassBg: 'rgba(20, 83, 45, 0.75)',
-    glassBorder: 'rgba(34, 197, 94, 0.25)',
+    textMuted: '#A7F3D0',
+    textDim: '#6EE7B7',
+    shadow: 'rgba(0, 0, 0, 0.5)',
+    glassBg: 'rgba(11, 47, 31, 0.75)',
+    glassBorder: 'rgba(16, 185, 129, 0.2)',
   }
 };
 
