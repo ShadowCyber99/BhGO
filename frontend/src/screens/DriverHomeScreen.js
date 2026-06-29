@@ -174,11 +174,12 @@ export default function DriverHomeScreen() {
         if (data.serviceCategory === 'ride') {
           if (myServiceCat !== 'ride') return;
           
-          if (data.vehiclePreference === 'bike') {
+          const pref = data.vehiclePreference || 'any';
+          if (pref === 'bike') {
             if (myVehicleType !== 'bike') return; // cab driver should not get bike ride
-          } else if (data.vehiclePreference !== 'any') {
+          } else if (pref !== 'any') {
             // differentiate economy, SUV, premium
-            if (myVehicleType !== data.vehiclePreference) return;
+            if (myVehicleType !== pref) return;
           }
         }
 
@@ -349,16 +350,7 @@ export default function DriverHomeScreen() {
     setChatText('');
   };
 
-  // Earnings State
-  const [showEarningsModal, setShowEarningsModal] = useState(false);
-  const [earningsData, setEarningsData] = useState(null);
 
-  const fetchEarnings = async () => {
-    try {
-      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` } });
-      if (res.ok) setEarningsData(await res.json());
-    } catch (err) {}
-  };
 
   if (loading) {
     return (

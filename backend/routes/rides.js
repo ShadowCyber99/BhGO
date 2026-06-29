@@ -74,6 +74,7 @@ router.post('/request', auth, [
       refId: ride.ref_id,
       riderId: ride.rider_id,
       serviceCategory: ride.service_category,
+      vehiclePreference: ride.vehicle_preference,
       pickupAddress: ride.pickup_address,
       dropoffAddress: ride.dropoff_address,
       pickupLat: parseFloat(ride.pickup_lat),

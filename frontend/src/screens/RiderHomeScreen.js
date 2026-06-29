@@ -129,7 +129,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const [showCityPicker, setShowCityPicker] = useState(false);
   
   const [serviceCategory, setServiceCategory] = useState('ride'); 
-  const [vehiclePreference, setVehiclePreference] = useState('any');
+  const [vehiclePreference, setVehiclePreference] = useState('economy');
   const [parcelWeight, setParcelWeight] = useState('');
   const [baseDistance, setBaseDistance] = useState(0);
   const [fare, setFare] = useState(0);
@@ -151,7 +151,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentMode, setPaymentMode] = useState('upi'); // 'digital', 'cash', or 'upi'
   const [isSurgeActive, setIsSurgeActive] = useState(false);
-  const [parcelWeight, setParcelWeight] = useState('10'); // Default to 10kg
 
   // Support State
   const [showSupportModal, setShowSupportModal] = useState(false);
@@ -348,7 +347,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       setCustomPickup(text);
       if (text.length > 2) {
         setPickupSuggestions(FAMOUS_PLACES.filter(p => p.name.toLowerCase().includes(text.toLowerCase()) || p.city.toLowerCase().includes(text.toLowerCase())));
-        setPickupCoords(generateCoordsFromText(text, selectedCity));
       } else {
         setPickupSuggestions([]);
       }
@@ -356,7 +354,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       setCustomDropoff(text);
       if (text.length > 2) {
         setDropoffSuggestions(FAMOUS_PLACES.filter(p => p.name.toLowerCase().includes(text.toLowerCase()) || p.city.toLowerCase().includes(text.toLowerCase())));
-        setDropoffCoords(generateCoordsFromText(text, selectedCity));
       } else {
         setDropoffSuggestions([]);
       }
@@ -375,26 +372,50 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     }
   };
 
+  const geocodeAddress = async (address, city) => {
+    try {
+      const query = `${address}, ${city.name}, India`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+      const res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      }
+    } catch (err) {
+      console.warn('Geocoding error:', err);
+    }
+    return null;
+  };
+
   const handleCalculateCustomRoute = async () => {
     if (!customPickup || !customDropoff) return setError('Please enter both pickup and dropoff addresses');
     setError('');
     setLoading(true);
     
-    // Check if custom string matches any famous place to grab exact coords, else mock it
-    const pMatch = FAMOUS_PLACES.find(p => customPickup.includes(p.name));
-    const dMatch = FAMOUS_PLACES.find(p => customDropoff.includes(p.name));
+    // Check if custom string matches any famous place to grab exact coords, else geocode
+    const pMatch = FAMOUS_PLACES.find(p => customPickup.toLowerCase().includes(p.name.toLowerCase()));
+    const dMatch = FAMOUS_PLACES.find(p => customDropoff.toLowerCase().includes(p.name.toLowerCase()));
 
-    const pLat = pMatch ? pMatch.lat : selectedCity.lat + (Math.random() * 0.05);
-    const pLng = pMatch ? pMatch.lng : selectedCity.lng + (Math.random() * 0.05);
-    const dLat = dMatch ? dMatch.lat : selectedCity.lat + (Math.random() * 0.05);
-    const dLng = dMatch ? dMatch.lng : selectedCity.lng + (Math.random() * 0.05);
+    let pCoords = pMatch ? { lat: pMatch.lat, lng: pMatch.lng } : await geocodeAddress(customPickup, selectedCity);
+    let dCoords = dMatch ? { lat: dMatch.lat, lng: dMatch.lng } : await geocodeAddress(customDropoff, selectedCity);
     
-    // Mock waypoint coords
+    // Fallback to random offset if geocoding yields no results for highly obscure inputs
+    if (!pCoords) pCoords = generateCoordsFromText(customPickup, selectedCity);
+    if (!dCoords) dCoords = generateCoordsFromText(customDropoff, selectedCity);
+
+    const pLat = pCoords.lat;
+    const pLng = pCoords.lng;
+    const dLat = dCoords.lat;
+    const dLng = dCoords.lng;
+    
+    // Geocode waypoint coords
     const activeWps = waypoints.filter(w => w.trim() !== '');
-    const wCoords = activeWps.map(() => ({
-      lat: selectedCity.lat + (Math.random() * 0.05),
-      lng: selectedCity.lng + (Math.random() * 0.05)
-    }));
+    const wCoords = [];
+    for (const wp of activeWps) {
+      let wpCoord = await geocodeAddress(wp, selectedCity);
+      if (!wpCoord) wpCoord = generateCoordsFromText(wp, selectedCity);
+      wCoords.push(wpCoord);
+    }
     setWaypointCoords(wCoords);
 
     let baseDist = 2.5;
@@ -753,16 +774,49 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                   <View style={{ marginTop: 10, marginBottom: 20 }}>
                     <Text style={styles.helperHeader}>🚘 Select Vehicle Preference</Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                      {['any', 'bike', 'auto', 'economy', 'premium', 'suv'].map(v => (
-                        <TouchableOpacity 
-                          key={v}
-                          style={[styles.vehicleBtn, vehiclePreference === v && styles.vehicleBtnActive]}
-                          onPress={() => setVehiclePreference(v)}
-                        >
-                          <Text style={[styles.vehicleBtnText, vehiclePreference === v && { color: colors.text }]}>{v.toUpperCase()}</Text>
-                        </TouchableOpacity>
-                      ))}
+                      {['cab', 'bike', 'ambulance'].map(v => {
+                        const isCabSelected = ['economy', 'premium', 'suv'].includes(vehiclePreference);
+                        const isActive = v === 'cab' ? isCabSelected : vehiclePreference === v;
+                        return (
+                          <TouchableOpacity 
+                            key={v}
+                            style={[styles.vehicleBtn, isActive && styles.vehicleBtnActive]}
+                            onPress={() => {
+                              if (v === 'ambulance') {
+                                setServiceCategory('ambulance');
+                              } else if (v === 'bike') {
+                                setVehiclePreference('bike');
+                              } else {
+                                setVehiclePreference('economy');
+                              }
+                            }}
+                          >
+                            <Text style={[styles.vehicleBtnText, isActive && { color: colors.text }]}>{v.toUpperCase()}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
                     </View>
+
+                    {['economy', 'premium', 'suv'].includes(vehiclePreference) && (
+                      <View style={{ marginTop: 16 }}>
+                        <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, marginLeft: 4 }}>Select Cab Tier</Text>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                          {['economy', 'premium', 'suv'].map(tier => (
+                             <TouchableOpacity 
+                               key={tier}
+                               style={[
+                                 styles.vehicleBtn, 
+                                 vehiclePreference === tier && styles.vehicleBtnActive, 
+                                 { paddingVertical: 8, paddingHorizontal: 16 }
+                               ]}
+                               onPress={() => setVehiclePreference(tier)}
+                             >
+                               <Text style={[styles.vehicleBtnText, vehiclePreference === tier && { color: colors.text }]}>{tier.toUpperCase()}</Text>
+                             </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                    )}
                   </View>
                 )}
 
