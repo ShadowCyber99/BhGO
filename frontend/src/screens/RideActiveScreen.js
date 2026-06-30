@@ -295,6 +295,36 @@ export default function RideActiveScreen({ onNavigateToHome }) {
 
         {ride.status === 'completed' && (
           <View style={styles.receiptBox}>
+            <View style={{ marginBottom: 20, borderBottomWidth: 1, borderColor: colors.surfaceLight, paddingBottom: 16 }}>
+              <Text style={{ color: colors.success, fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
+                {ride.serviceCategory === 'ambulance' ? '🚑 ' : '✅ '}Arrived Safely
+              </Text>
+              
+              <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Pickup</Text>
+              <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.pickupAddress}</Text>
+              
+              <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Dropoff</Text>
+              <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.dropoffAddress}</Text>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                <View>
+                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Driver</Text>
+                  <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.driverName}</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Vehicle</Text>
+                  <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.vehicleName} ({ride.vehicleNumber})</Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                <View>
+                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Amount Paid</Text>
+                  <Text style={{ color: colors.primary, fontSize: 18, fontWeight: 'bold' }}>₹{ride.fare?.toFixed(2)}</Text>
+                </View>
+              </View>
+            </View>
+
             {ratingSubmitted ? (
               <Text style={{ color: colors.success, fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>Thanks for your feedback!</Text>
             ) : (

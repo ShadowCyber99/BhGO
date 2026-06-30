@@ -43,13 +43,24 @@ router.post('/register', [
 
     const user = userRes.rows[0];
 
-    // If driver, save vehicle details
+    let driverDetailsResponse = null;
     if (role === 'driver') {
       const driverServiceCategory = req.body.serviceCategory || 'ride';
-      await db.query(
+      const driverRes = await db.query(
         'INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number, aadhar_number, driving_license) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
         [user.id, driverServiceCategory, vehicleName, vehicleType, vehicleNumber, aadharNumber, drivingLicense]
       );
+      const insertedDriver = driverRes.rows[0];
+      driverDetailsResponse = {
+        serviceCategory: insertedDriver.service_category,
+        vehicleName: insertedDriver.vehicle_name,
+        vehicleType: insertedDriver.vehicle_type,
+        vehicleNumber: insertedDriver.vehicle_number,
+        isOnline: insertedDriver.is_online,
+        isAvailable: insertedDriver.is_available,
+        latitude: insertedDriver.latitude,
+        longitude: insertedDriver.longitude
+      };
     }
 
     // Generate JWT
@@ -68,7 +79,8 @@ router.post('/register', [
         role: user.role,
         rating: parseFloat(user.rating),
         walletBalance: parseFloat(user.wallet_balance || 0),
-        createdAt: user.created_at
+        createdAt: user.created_at,
+        driverDetails: driverDetailsResponse
       }
     });
 
