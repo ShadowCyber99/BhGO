@@ -48,7 +48,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
       <View style={styles.content}>
         {/* Brand Logo & Header */}
         <View style={styles.header}>
-          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, borderRadius: 10 }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
           <Text style={styles.tagline}>Future-forward urban transit, simulated live.</Text>
         </View>
 

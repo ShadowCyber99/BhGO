@@ -378,13 +378,15 @@ export default function DriverHomeScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 120, height: 40, borderRadius: 8 }} resizeMode="contain" />
-              <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>Driver</Text>
+              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 140, height: 45, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
+              <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold', marginLeft: 4}}>Driver</Text>
             </View>
-            <Text style={styles.vehicleSubtitle}>{user?.driverDetails?.vehicleName} ({user?.driverDetails?.vehicleNumber})</Text>
-            <Text style={{color: colors.primary, fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase', marginTop: 2}}>
-              Type: {user?.driverDetails?.vehicleType === 'cab' ? 'ECONOMY (CAB)' : user?.driverDetails?.vehicleType}
-            </Text>
+            <View style={{ marginTop: 6 }}>
+              <Text style={styles.vehicleSubtitle} numberOfLines={1}>{user?.driverDetails?.vehicleName} ({user?.driverDetails?.vehicleNumber})</Text>
+              <Text style={{color: colors.primary, fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase', marginTop: 2}}>
+                Type: {user?.driverDetails?.vehicleType === 'cab' ? 'ECONOMY (CAB)' : user?.driverDetails?.vehicleType}
+              </Text>
+            </View>
           </View>
           <TouchableOpacity onPress={() => setShowCityPicker(true)} style={styles.cityBtn}>
             <Text style={styles.cityBtnText}>📍 {selectedCity.name}</Text>
@@ -435,7 +437,7 @@ export default function DriverHomeScreen() {
                 backgroundColor: serviceFilter.includes(f) ? colors.primary : colors.surfaceLight,
               }}
             >
-              <Text style={{ color: serviceFilter.includes(f) ? '#000' : colors.text, fontSize: 13, fontWeight: 'bold' }}>
+              <Text style={{ color: serviceFilter.includes(f) ? (isDarkMode ? '#000' : '#FFF') : colors.text, fontSize: 13, fontWeight: 'bold' }}>
                 {f.toUpperCase()}
               </Text>
             </TouchableOpacity>
@@ -455,7 +457,7 @@ export default function DriverHomeScreen() {
                 backgroundColor: routeMode === 'any' ? colors.primary : colors.surfaceLight,
               }}
             >
-              <Text style={{ color: routeMode === 'any' ? '#000' : colors.text, fontSize: 13, fontWeight: 'bold' }}>ANY ROUTE</Text>
+              <Text style={{ color: routeMode === 'any' ? (isDarkMode ? '#000' : '#FFF') : colors.text, fontSize: 13, fontWeight: 'bold' }}>ANY ROUTE</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => setRouteMode('specific')}
@@ -464,7 +466,7 @@ export default function DriverHomeScreen() {
                 backgroundColor: routeMode === 'specific' ? colors.primary : colors.surfaceLight,
               }}
             >
-              <Text style={{ color: routeMode === 'specific' ? '#000' : colors.text, fontSize: 13, fontWeight: 'bold' }}>SPECIFIC ROUTE</Text>
+              <Text style={{ color: routeMode === 'specific' ? (isDarkMode ? '#000' : '#FFF') : colors.text, fontSize: 13, fontWeight: 'bold' }}>SPECIFIC ROUTE</Text>
             </TouchableOpacity>
           </View>
           
@@ -978,7 +980,22 @@ const getStyles = (colors) => StyleSheet.create({
   content: { padding: 24, paddingBottom: 60 },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
   loadingText: { color: colors.textMuted, marginTop: 16, fontSize: 16, fontWeight: '600' },
-  nav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  nav: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 20,
+    backgroundColor: colors.navGlass,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5
+  },
   logoText: { color: colors.text, fontSize: 26, fontWeight: '300' },
   logoBold: { color: colors.primary, fontWeight: '900' },
   vehicleSubtitle: { color: colors.textDim, fontSize: 12, marginTop: 2 },

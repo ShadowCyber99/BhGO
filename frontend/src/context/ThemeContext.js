@@ -33,6 +33,7 @@ export const themes = {
     shadow: 'rgba(0, 0, 0, 0.8)',
     glassBg: 'rgba(18, 20, 26, 0.90)', 
     glassBorder: 'rgba(249, 115, 22, 0.2)', // Orange tint
+    navGlass: 'rgba(11, 12, 16, 0.75)',
     overlay: 'rgba(255, 255, 255, 0.08)',
     overlayBorder: 'rgba(255, 255, 255, 0.15)'
   },
@@ -43,7 +44,7 @@ export const themes = {
     primaryHover: '#1E293B',
     secondary: '#F97316',
     secondaryHover: '#FB923C',
-    background: '#F3F4F6', 
+    background: '#F8FAFC', 
     surface: '#FFFFFF',
     surfaceLight: '#E5E7EB', 
     text: '#111827',
@@ -52,6 +53,7 @@ export const themes = {
     shadow: 'rgba(0, 0, 0, 0.12)',
     glassBg: 'rgba(255, 255, 255, 0.95)', 
     glassBorder: 'rgba(0, 0, 0, 0.15)',
+    navGlass: 'rgba(248, 250, 252, 0.75)',
     overlay: 'rgba(0, 0, 0, 0.08)',
     overlayBorder: 'rgba(0, 0, 0, 0.15)'
   }

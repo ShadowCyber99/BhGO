@@ -110,7 +110,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, borderRadius: 10 }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
           <Text style={styles.tagline}>Create your account to start traveling</Text>
         </View>
 

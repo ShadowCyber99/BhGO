@@ -116,7 +116,7 @@ const svgIcons = {
 
 export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const { user, logout, socket, refreshProfile } = useAuth();
-  const { colors, themeName, changeTheme, availableThemes } = useTheme();
+  const { colors, themeName, changeTheme, availableThemes, isDarkMode } = useTheme();
   const styles = getStyles(colors);
   
   const [pickupAddress, setPickupAddress] = useState('');
@@ -618,7 +618,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.nav}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 140, height: 45, borderRadius: 8 }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 140, height: 45, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
           <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>🇮🇳 India</Text>
         </View>
         <View style={styles.userBox}>
@@ -1371,7 +1371,22 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 const getStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 24, paddingBottom: 60 },
-  nav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  nav: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 20,
+    backgroundColor: colors.navGlass,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5
+  },
   logoText: { color: colors.text, fontSize: 26, fontWeight: '300' },
   logoBold: { color: colors.primary, fontWeight: '900' },
   userBox: { flexDirection: 'row', alignItems: 'center', gap: 10 },
