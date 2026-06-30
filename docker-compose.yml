@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:14-alpine
-    container_name: cabride-db
+    container_name: BharatGo-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: devops
@@ -16,7 +16,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: cabride-backend
+    container_name: BharatGo-backend
     restart: unless-stopped
     depends_on:
       - db
@@ -37,7 +37,7 @@ services:
       dockerfile: Dockerfile
       args:
         - EXPO_PUBLIC_API_URL=http://bharatgo.duckdns.org/api
-    container_name: cabride-frontend
+    container_name: BharatGo-frontend
     restart: unless-stopped
     depends_on:
       - backend

@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import { useTheme } from '../context/ThemeContext';
-import { logoSvgBase64 } from '../constants/logo';
 import GlassCard from '../components/GlassCard';
 import CustomButton from '../components/CustomButton';
 import MapView from '../components/MapView';
@@ -113,7 +112,7 @@ export default function DriverHomeScreen() {
 
   const fetchEarnings = async () => {
     try {
-      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` } });
+      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
       if (res.ok) {
         setEarningsData(await res.json());
       }
@@ -141,7 +140,7 @@ export default function DriverHomeScreen() {
   const fetchChatHistory = async (rideId) => {
     try {
       const res = await fetch(`/api/rides/${rideId}/chat`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
       });
       if (res.ok) setChatMessages(await res.json());
     } catch (e) {}
@@ -379,7 +378,7 @@ export default function DriverHomeScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Image source={{ uri: logoSvgBase64 }} style={{ width: 110, height: 35 }} resizeMode="contain" />
+              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 120, height: 40, borderRadius: 8 }} resizeMode="contain" />
               <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>Driver</Text>
             </View>
             <Text style={styles.vehicleSubtitle}>{user?.driverDetails?.vehicleName} ({user?.driverDetails?.vehicleNumber})</Text>
@@ -496,7 +495,7 @@ export default function DriverHomeScreen() {
           cityCenter={selectedCity} 
           pickup={(activeRide || incomingRequests.length > 0) ? { lat: activeRide ? activeRide.pickupLat : incomingRequests[0].pickupLat, lng: activeRide ? activeRide.pickupLng : incomingRequests[0].pickupLng } : null}
           dropoff={(activeRide || incomingRequests.length > 0) ? { lat: activeRide ? activeRide.dropoffLat : incomingRequests[0].dropoffLat, lng: activeRide ? activeRide.dropoffLng : incomingRequests[0].dropoffLng } : null}
-          driver={(activeRide?.driverLat && activeRide?.driverLng) ? { lat: activeRide.driverLat, lng: activeRide.driverLng, name: 'You', vehicleType: user?.driverDetails?.vehicleType, serviceCategory: user?.driverDetails?.service_category } : user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', vehicleType: user.driverDetails.vehicleType, serviceCategory: user.driverDetails.service_category } : null}
+          driver={(activeRide?.driverLat && activeRide?.driverLng) ? { lat: activeRide.driverLat, lng: activeRide.driverLng, name: 'You', vehicleType: user?.driverDetails?.vehicleType, serviceCategory: user?.driverDetails?.serviceCategory } : user?.driverDetails ? { lat: parseFloat(user.driverDetails.latitude) || selectedCity.lat + 0.005, lng: parseFloat(user.driverDetails.longitude) || selectedCity.lng + 0.005, name: 'You', vehicleType: user.driverDetails.vehicleType, serviceCategory: user.driverDetails.serviceCategory } : null}
           nearbyDrivers={[]} 
           demandZones={demandZones}
           rideStatus={activeRide?.status || (incomingRequests.length > 0 ? 'requested' : null)}

@@ -5,11 +5,10 @@ import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
-import { logoSvgBase64 } from '../constants/logo';
 
 export default function LoginScreen({ onNavigateToRegister }) {
   const { login } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const styles = getStyles(colors);
   
   const [email, setEmail] = useState('rider@example.com'); // Default pre-filled for easy testing!
@@ -49,7 +48,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
       <View style={styles.content}>
         {/* Brand Logo & Header */}
         <View style={styles.header}>
-          <Image source={{ uri: logoSvgBase64 }} style={{ width: 160, height: 50, marginBottom: 12 }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, borderRadius: 10 }} resizeMode="contain" />
           <Text style={styles.tagline}>Future-forward urban transit, simulated live.</Text>
         </View>
 
@@ -62,7 +61,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
 
           <CustomInput
             label="Email Address"
-            placeholder="rider@cabride.com"
+            placeholder="rider@BharatGo.com"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"

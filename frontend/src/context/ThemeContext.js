@@ -1,17 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const baseColors = {
-  // Brand Colors (Premium & Modern)
-  primary: '#D4AF37', // Gold accent
-  primaryHover: '#F3E5AB',
-  secondary: '#3B82F6', // Trust Blue
-  secondaryHover: '#60A5FA',
+  // Brand Colors based on BharatGo logo
+  primary: '#F97316', // Vibrant Orange from the logo
+  primaryHover: '#FB923C',
+  secondary: '#0F172A', // Navy Blue from 'bharat' text
+  secondaryHover: '#1E293B',
   
   // Service Verticals
-  rideColor: '#D4AF37',       // Gold for Ride
-  ambulanceColor: '#EF4444',  // Ruby Red
-  parcelColor: '#8B5CF6',     // Royal Purple
-  foodColor: '#F97316',       // Warm Orange
+  rideColor: '#F97316',       // Orange
+  ambulanceColor: '#EF4444',  // Red
+  parcelColor: '#3B82F6',     // Blue
+  foodColor: '#10B981',       // Green
   
   // Status Colors
   success: '#10B981', // Emerald Green
@@ -22,83 +22,38 @@ const baseColors = {
 
 export const themes = {
   dark: {
-    name: 'Luxury Dark',
+    name: 'BharatGo Dark',
     ...baseColors,
     background: '#0B0C10',
     surface: '#12141A',
     surfaceLight: '#1F222B',
     text: '#F3F4F6',
-    textMuted: '#D1D5DB', // Lightened from 9CA3AF for better contrast against dark backgrounds
-    textDim: '#9CA3AF',   // Lightened from 6B7280
+    textMuted: '#D1D5DB', 
+    textDim: '#9CA3AF',   
     shadow: 'rgba(0, 0, 0, 0.8)',
-    glassBg: 'rgba(18, 20, 26, 0.90)', // Increased opacity for readability
-    glassBorder: 'rgba(212, 175, 55, 0.2)',
+    glassBg: 'rgba(18, 20, 26, 0.90)', 
+    glassBorder: 'rgba(249, 115, 22, 0.2)', // Orange tint
     overlay: 'rgba(255, 255, 255, 0.08)',
     overlayBorder: 'rgba(255, 255, 255, 0.15)'
   },
   light: {
-    name: 'Minimal Light',
+    name: 'BharatGo Light',
     ...baseColors,
-    primary: '#0F172A',
-    background: '#F3F4F6', // Slightly darker than F9FAFB for contrast with pure white surface
+    primary: '#0F172A', // Use Navy for primary in light mode for better contrast
+    primaryHover: '#1E293B',
+    secondary: '#F97316',
+    secondaryHover: '#FB923C',
+    background: '#F3F4F6', 
     surface: '#FFFFFF',
-    surfaceLight: '#E5E7EB', // Darkened from F3F4F6
+    surfaceLight: '#E5E7EB', 
     text: '#111827',
-    textMuted: '#374151', // Darkened from 4B5563 for strong readability
-    textDim: '#4B5563',   // Darkened from 9CA3AF (which was too light)
+    textMuted: '#374151', 
+    textDim: '#4B5563',   
     shadow: 'rgba(0, 0, 0, 0.12)',
-    glassBg: 'rgba(255, 255, 255, 0.95)', // Increased opacity
+    glassBg: 'rgba(255, 255, 255, 0.95)', 
     glassBorder: 'rgba(0, 0, 0, 0.15)',
     overlay: 'rgba(0, 0, 0, 0.08)',
     overlayBorder: 'rgba(0, 0, 0, 0.15)'
-  },
-  ocean: {
-    name: 'Royal Sapphire',
-    ...baseColors,
-    primary: '#38BDF8',
-    background: '#041528',
-    surface: '#0B213A',
-    surfaceLight: '#123052',
-    text: '#F0F9FF',
-    textMuted: '#E0F2FE', // Lightened from BAE6FD
-    textDim: '#BAE6FD',   // Lightened from 7DD3FC
-    shadow: 'rgba(0, 0, 0, 0.7)',
-    glassBg: 'rgba(11, 33, 58, 0.90)', // Increased opacity
-    glassBorder: 'rgba(56, 189, 248, 0.3)',
-    overlay: 'rgba(255, 255, 255, 0.08)',
-    overlayBorder: 'rgba(255, 255, 255, 0.15)'
-  },
-  sunset: {
-    name: 'Twilight Gold',
-    ...baseColors,
-    primary: '#F59E0B',
-    background: '#1F1106',
-    surface: '#2D190B',
-    surfaceLight: '#432511',
-    text: '#FFF7ED',
-    textMuted: '#FEF3C7', // Lightened from FDE68A
-    textDim: '#FDE68A',   // Lightened from FBBF24
-    shadow: 'rgba(0, 0, 0, 0.7)',
-    glassBg: 'rgba(45, 25, 11, 0.90)', // Increased opacity
-    glassBorder: 'rgba(245, 158, 11, 0.3)',
-    overlay: 'rgba(255, 255, 255, 0.08)',
-    overlayBorder: 'rgba(255, 255, 255, 0.15)'
-  },
-  forest: {
-    name: 'Emerald Executive',
-    ...baseColors,
-    primary: '#10B981',
-    background: '#061D13',
-    surface: '#0B2F1F',
-    surfaceLight: '#12452F',
-    text: '#F0FDF4',
-    textMuted: '#D1FAE5', // Lightened from A7F3D0
-    textDim: '#A7F3D0',   // Lightened from 6EE7B7
-    shadow: 'rgba(0, 0, 0, 0.7)',
-    glassBg: 'rgba(11, 47, 31, 0.90)', // Increased opacity
-    glassBorder: 'rgba(16, 185, 129, 0.3)',
-    overlay: 'rgba(255, 255, 255, 0.08)',
-    overlayBorder: 'rgba(255, 255, 255, 0.15)'
   }
 };
 
@@ -109,7 +64,7 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem('cabride_theme');
+      const savedTheme = localStorage.getItem('BharatGo_theme');
       if (savedTheme && themes[savedTheme]) {
         setThemeName(savedTheme);
       } else if (savedTheme === 'light') {
@@ -121,7 +76,7 @@ export const ThemeProvider = ({ children }) => {
   const changeTheme = (name) => {
     setThemeName(name);
     try {
-      localStorage.setItem('cabride_theme', name);
+      localStorage.setItem('BharatGo_theme', name);
     } catch(e) {}
   };
 

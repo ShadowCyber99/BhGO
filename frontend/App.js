@@ -28,7 +28,7 @@ function MainApp() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#040508' }}>
         <ActivityIndicator size="large" color="#A3E635" />
-        <Text style={{ color: '#94A3B8', marginTop: 16, fontSize: 16, fontWeight: '600' }}>Initializing CabRide Space...</Text>
+        <Text style={{ color: '#94A3B8', marginTop: 16, fontSize: 16, fontWeight: '600' }}>Initializing BharatGo Space...</Text>
       </View>
     );
   }

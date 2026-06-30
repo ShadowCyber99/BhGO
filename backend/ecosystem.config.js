@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'cabride-backend',
+      name: 'BharatGo-backend',
       script: 'server.js',
       instances: 'max', // Use all available CPU cores
       exec_mode: 'cluster',

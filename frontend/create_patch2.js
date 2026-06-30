@@ -18,7 +18,7 @@ files_to_write = {
 for (let file of files) {
   const content = fs.readFileSync(path.join(__dirname, file), 'utf8');
   const b64 = Buffer.from(content).toString('base64');
-  pythonCode += `    "/home/ubuntu/cab-ride-app/frontend/${file}": "${b64}",\n`;
+  pythonCode += `    "/home/ubuntu/bharatgo-app/frontend/${file}": "${b64}",\n`;
 }
 
 pythonCode += `}

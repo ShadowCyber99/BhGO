@@ -22,7 +22,7 @@ const inMemoryDb = {
     {
       id: 1,
       name: 'John Rider',
-      email: 'rider@cabride.com',
+      email: 'rider@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'rider',
       rating: 4.9,
@@ -32,7 +32,7 @@ const inMemoryDb = {
     {
       id: 2,
       name: 'Sarah Economy Driver',
-      email: 'driver_eco@cabride.com',
+      email: 'driver_eco@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.8,
@@ -42,7 +42,7 @@ const inMemoryDb = {
     {
       id: 3,
       name: 'Michael Premium Driver',
-      email: 'driver_premium@cabride.com',
+      email: 'driver_premium@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.95,
@@ -52,7 +52,7 @@ const inMemoryDb = {
     {
       id: 4,
       name: 'Elena SUV Driver',
-      email: 'driver_suv@cabride.com',
+      email: 'driver_suv@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.75,
@@ -146,7 +146,7 @@ const initDb = async () => {
     console.warn('❌ DATABASE CONNECTION FAILED:', err.message);
     console.warn('⚡ AUTOMATIC SWITCH TO IN-MEMORY DEMO MODE');
     console.warn('💡 App will work perfectly for demo and testing without setup!');
-    console.warn('💡 To use real PostgreSQL, create the "cabride" DB and update .env');
+    console.warn('💡 To use real PostgreSQL, create the "BharatGo" DB and update .env');
     console.warn('================================================================\n');
     useFallback = true;
   }

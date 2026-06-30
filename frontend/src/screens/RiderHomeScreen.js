@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIn
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import { useTheme } from '../context/ThemeContext';
-import { logoSvgBase64 } from '../constants/logo';
 import GlassCard from '../components/GlassCard';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
@@ -108,6 +107,13 @@ const DEMO_ROUTES = [
   }
 ];
 
+const svgIcons = {
+  ride: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%236366F1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="20" height="11" rx="2" ry="2"></rect><path d="M4 8L6 4h12l2 4"></path><circle cx="7" cy="19" r="2"></circle><circle cx="17" cy="19" r="2"></circle></svg>',
+  ambulance: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M12 9v6M9 12h6"></path><circle cx="7" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg>',
+  parcel: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238B5CF6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M12 5v5"></path></svg>',
+  food: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23F97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9v1h14V9c0-3.87-3.13-7-7-7z"></path><path d="M3 14h18v3c0 1.66-1.34 3-3 3H6c-1.66 0-3-1.34-3-3v-3z"></path><path d="M4 11h16v1H4z"></path></svg>'
+};
+
 export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const { user, logout, socket, refreshProfile } = useAuth();
   const { colors, themeName, changeTheme, availableThemes } = useTheme();
@@ -192,7 +198,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     setRefundData(null);
     if (!refundRefId.trim()) return setRefundError('Please enter a Booking Ref ID');
     try {
-      const res = await fetch(`/api/rides/ref/${refundRefId.trim()}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` } });
+      const res = await fetch(`/api/rides/ref/${refundRefId.trim()}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch details');
       setRefundData(data);
@@ -206,7 +212,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       setRefundError('');
       const res = await fetch(`/api/rides/${refundData.id}/refund`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -221,7 +227,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const res = await fetch(`/api/rides/drivers?service=${serviceCategory}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` } });
+        const res = await fetch(`/api/rides/drivers?service=${serviceCategory}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
         if (res.ok) setNearbyDrivers(await res.json());
       } catch (err) {}
     };
@@ -254,7 +260,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
   useEffect(() => {
     if (serviceCategory === 'food') {
-      fetch('/api/rides/restaurants', { headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` } })
+      fetch('/api/rides/restaurants', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } })
       .then(res => { if (!res.ok) throw new Error(); return res.json(); })
       .then(data => { if (Array.isArray(data)) setRestaurants(data); })
       .catch(() => {});
@@ -425,6 +431,37 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     return null;
   };
 
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
+      const data = await res.json();
+      if (data && data.display_name) {
+        return data.display_name.split(',').slice(0, 3).join(',');
+      }
+    } catch (err) {
+      console.warn('Reverse geocoding error:', err);
+    }
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  };
+
+  const handleMapClick = async ({ lat, lng }) => {
+    if (!pickupCoords && !customPickup) {
+      const address = await reverseGeocode(lat, lng);
+      setPickupCoords({ lat, lng });
+      setCustomPickup(address);
+      setPickupAddress(address);
+    } else {
+      const address = await reverseGeocode(lat, lng);
+      setDropoffCoords({ lat, lng });
+      setCustomDropoff(address);
+      setDropoffAddress(address);
+      if (pickupCoords) {
+        const distance = Math.sqrt(Math.pow((lat - pickupCoords.lat)*111, 2) + Math.pow((lng - pickupCoords.lng)*111, 2));
+        setBaseDistance(distance);
+      }
+    }
+  };
+
   const handleCalculateCustomRoute = async () => {
     if (!customPickup || !customDropoff) return setError('Please enter both pickup and dropoff addresses');
     setError('');
@@ -548,7 +585,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     setSelectedRestaurant(rest);
     setCart([]);
     try {
-      const res = await fetch(`/api/rides/restaurants/${rest.id}/menu`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` } });
+      const res = await fetch(`/api/rides/restaurants/${rest.id}/menu`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) setMenuItems(data);
@@ -570,7 +607,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     const ride = await api.requestRide(ridePayload);
     await fetch('/api/rides/order', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` },
       body: JSON.stringify({ rideId: ride.id, restaurantId: selectedRestaurant.id, totalAmount: cartTotal + deliveryFee, itemsJson: cart })
     });
     if (socket) socket.emit('request_ride', ride);
@@ -581,7 +618,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.nav}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Image source={{ uri: logoSvgBase64 }} style={{ width: 130, height: 40 }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 140, height: 45, borderRadius: 8 }} resizeMode="contain" />
           <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>🇮🇳 India</Text>
         </View>
         <View style={styles.userBox}>
@@ -595,23 +632,59 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       </View>
 
       <View style={styles.serviceSelectorRibbon}>
-        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ride' && { borderColor: colors.rideColor, backgroundColor: 'rgba(163,230,53,0.1)' }]} onPress={() => setServiceCategory('ride')}>
-          <Text style={styles.serviceIcon}>🚕</Text>
-          <Text style={[styles.serviceText, serviceCategory === 'ride' && { color: colors.rideColor }]}>Ride</Text>
+        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ride' && { borderColor: colors.rideColor, backgroundColor: 'rgba(99,102,241,0.1)' }]} onPress={() => setServiceCategory('ride')}>
+          <Image source={{ uri: svgIcons.ride }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'ride' && { color: colors.rideColor, fontWeight: 'bold' }]}>Ride</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ambulance' && { borderColor: colors.ambulanceColor, backgroundColor: 'rgba(239,68,68,0.1)' }]} onPress={() => setServiceCategory('ambulance')}>
-          <Text style={styles.serviceIcon}>🚑</Text>
-          <Text style={[styles.serviceText, serviceCategory === 'ambulance' && { color: colors.ambulanceColor }]}>Ambulance</Text>
+          <Image source={{ uri: svgIcons.ambulance }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'ambulance' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>Ambulance</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'parcel' && { borderColor: colors.parcelColor, backgroundColor: 'rgba(56,189,248,0.1)' }]} onPress={() => setServiceCategory('parcel')}>
-          <Text style={styles.serviceIcon}>📦</Text>
-          <Text style={[styles.serviceText, serviceCategory === 'parcel' && { color: colors.parcelColor }]}>Parcel</Text>
+        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'parcel' && { borderColor: colors.parcelColor, backgroundColor: 'rgba(139,92,246,0.1)' }]} onPress={() => setServiceCategory('parcel')}>
+          <Image source={{ uri: svgIcons.parcel }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'parcel' && { color: colors.parcelColor, fontWeight: 'bold' }]}>Parcel</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'food' && { borderColor: colors.foodColor, backgroundColor: 'rgba(249,115,22,0.1)' }]} onPress={() => setServiceCategory('food')}>
-          <Text style={styles.serviceIcon}>🍔</Text>
-          <Text style={[styles.serviceText, serviceCategory === 'food' && { color: colors.foodColor }]}>Food</Text>
+          <Image source={{ uri: svgIcons.food }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'food' && { color: colors.foodColor, fontWeight: 'bold' }]}>Food</Text>
         </TouchableOpacity>
       </View>
+
+      {/* GLOBAL MAP VIEW */}
+      <MapView 
+        cityCenter={selectedCity} 
+        pickup={pickupCoords} 
+        dropoff={dropoffCoords} 
+        waypoints={waypointCoords} 
+        nearbyDrivers={nearbyDrivers} 
+        onMapClick={handleMapClick}
+      />
+      
+      {/* POPULAR TOURIST PLACES CAROUSEL */}
+      {serviceCategory !== 'food' && (
+        <View style={{ marginVertical: 16 }}>
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>🌟 Popular Tourist Places in {selectedCity.name}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+            {FAMOUS_PLACES.filter(p => p.city === selectedCity.name).map((place, idx) => (
+              <TouchableOpacity 
+                key={idx} 
+                style={{ backgroundColor: colors.surfaceLight, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}
+                onPress={() => {
+                  setDropoffAddress(`${place.name}, ${place.city}`);
+                  setCustomDropoff(`${place.name}, ${place.city}`);
+                  setDropoffCoords({ lat: place.lat, lng: place.lng });
+                  if (pickupCoords) {
+                    setBaseDistance(Math.sqrt(Math.pow((place.lat - pickupCoords.lat)*111, 2) + Math.pow((place.lng - pickupCoords.lng)*111, 2)));
+                  }
+                }}
+              >
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{place.name}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>{place.city}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       {/* FOOD MARKETPLACE VIEW */}
       {serviceCategory === 'food' ? (
@@ -701,8 +774,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       ) : (
         /* STANDARD RIDE / PARCEL / AMBULANCE VIEW */
         <>
-          <MapView cityCenter={selectedCity} pickup={pickupCoords} dropoff={dropoffCoords} waypoints={waypointCoords} nearbyDrivers={nearbyDrivers} />
-
           <View style={styles.dashboard}>
             <View style={styles.leftCol}>
               <GlassCard style={styles.glassCard}>

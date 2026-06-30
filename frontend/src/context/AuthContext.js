@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {
-        const storedToken = localStorage.getItem('cabride_token');
+        const storedToken = localStorage.getItem('BharatGo_token');
         if (storedToken) {
           setAuthToken(storedToken);
           setToken(storedToken);
@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
         }
       } catch (e) {
         console.warn('Failed to load storage/profile:', e.message);
-        localStorage.removeItem('cabride_token');
+        localStorage.removeItem('BharatGo_token');
       } finally {
         setLoading(false);
       }
@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const data = await api.login({ email, password });
-      localStorage.setItem('cabride_token', data.token);
+      localStorage.setItem('BharatGo_token', data.token);
       setAuthToken(data.token);
       setToken(data.token);
       setUser(data.user);
@@ -88,7 +88,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const data = await api.register(userData);
-      localStorage.setItem('cabride_token', data.token);
+      localStorage.setItem('BharatGo_token', data.token);
       setAuthToken(data.token);
       setToken(data.token);
       setUser(data.user);
@@ -101,7 +101,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('cabride_token');
+    localStorage.removeItem('BharatGo_token');
     setAuthToken(null);
     setToken(null);
     setUser(null);

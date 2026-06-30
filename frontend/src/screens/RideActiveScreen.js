@@ -54,7 +54,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
   const fetchChatHistory = async (rideId) => {
     try {
       const res = await fetch(`/api/rides/${rideId}/chat`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('cabride_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
       });
       if (res.ok) {
         setChatMessages(await res.json());
@@ -163,7 +163,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('cabride_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}`
         },
         body: JSON.stringify({ rating, tags: reviewTags, comment: reviewComment, driverId: ride.driverId })
       });
@@ -198,7 +198,14 @@ export default function RideActiveScreen({ onNavigateToHome }) {
       <MapView
         pickup={{ lat: ride.pickupLat, lng: ride.pickupLng, address: ride.pickupAddress }}
         dropoff={{ lat: ride.dropoffLat, lng: ride.dropoffLng, address: ride.dropoffAddress }}
-        driver={ride.driverLat ? { lat: ride.driverLat, lng: ride.driverLng, name: ride.driverName, vehicleType: ride.vehicleType, serviceCategory: ride.serviceCategory, vehiclePreference: ride.vehiclePreference } : null}
+        driver={ride.driverName || ride.serviceCategory === 'ambulance' ? { 
+          lat: ride.driverLat || ride.pickupLat, 
+          lng: ride.driverLng || ride.pickupLng, 
+          name: ride.driverName || 'Driver', 
+          vehicleType: ride.vehicleType, 
+          serviceCategory: ride.serviceCategory, 
+          vehiclePreference: ride.vehiclePreference 
+        } : null}
         rideStatus={ride.status}
       />
 
@@ -428,7 +435,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
             
             <CustomButton title="📞 Call Police (100)" onPress={() => { alert('Dialing Police...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF003C'}} />
             <CustomButton title="🚑 Call Ambulance (108)" onPress={() => { alert('Dialing Ambulance...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF1111'}} />
-            <CustomButton title="🎧 CabRide 24/7 Support" onPress={() => { alert('Connecting to Live Support...'); setSosOpen(false); }} variant="primary" style={{marginBottom: 20}} />
+            <CustomButton title="🎧 BharatGo 24/7 Support" onPress={() => { alert('Connecting to Live Support...'); setSosOpen(false); }} variant="primary" style={{marginBottom: 20}} />
             
             <CustomButton title="Cancel SOS" onPress={() => setSosOpen(false)} variant="outline" />
           </GlassCard>

@@ -1,7 +1,7 @@
 {
-  "name": "cabride-backend",
+  "name": "BharatGo-backend",
   "version": "1.0.0",
-  "description": "Backend API and WebSocket Server for CabRide 3-tier Application",
+  "description": "Backend API and WebSocket Server for BharatGo 3-tier Application",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

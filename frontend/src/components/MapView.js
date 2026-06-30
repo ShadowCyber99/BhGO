@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -64,6 +64,17 @@ function MapUpdater({ center }) {
   return null;
 }
 
+function MapClickHandler({ onMapClick }) {
+  useMapEvents({
+    click(e) {
+      if (onMapClick) {
+        onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+      }
+    }
+  });
+  return null;
+}
+
 // Leaflet requires a custom implementation to update marker positions smoothly without React re-renders
 function AnimatedDriverMarker({ initialPos, icon, osrmRoute, rideStatus, dropoff, pickup, driver, onDestinationReached }) {
   const markerRef = useRef(null);
@@ -115,6 +126,7 @@ export default function MapView({
   cityCenter,
   rideStatus,
   onDestinationReached,
+  onMapClick,
 }) {
   const { colors, isDarkMode } = useTheme();
   const styles = getStyles(colors);
@@ -235,6 +247,7 @@ export default function MapView({
         zoom={14} 
         zoomControl={false}
       >
+        <MapClickHandler onMapClick={onMapClick} />
         <TileLayer url={tileUrl} />
         <MapUpdater center={mapCenter} />
 

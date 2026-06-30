@@ -5,11 +5,10 @@ import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
-import { logoSvgBase64 } from '../constants/logo';
 
 export default function RegisterScreen({ onNavigateToLogin }) {
   const { register } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const styles = getStyles(colors);
   
   // Registration States
@@ -111,7 +110,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <Image source={{ uri: logoSvgBase64 }} style={{ width: 160, height: 50, marginBottom: 12 }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, borderRadius: 10 }} resizeMode="contain" />
           <Text style={styles.tagline}>Create your account to start traveling</Text>
         </View>
 

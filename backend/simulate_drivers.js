@@ -12,7 +12,7 @@ const pgConfig = {
   database: process.env.DB_NAME || 'cab_ride',
 };
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cabride_super_secret_key_2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'BharatGo_super_secret_key_2024';
 const SERVER_URL = 'http://localhost:5000';
 
 const pool = new Pool(pgConfig);
@@ -84,9 +84,23 @@ async function setupGhosts() {
       const services = ['ride', 'parcel', 'food', 'ambulance'];
       const service = services[i % services.length];
 
+      let vehicleName = 'Simulated Car';
+      let vehicleType = 'sedan';
+      
+      if (service === 'ambulance') {
+        vehicleName = 'LifeSupport Ambulance';
+        vehicleType = 'van';
+      } else if (service === 'parcel') {
+        vehicleName = 'Delivery Van';
+        vehicleType = 'van';
+      } else if (service === 'food') {
+        vehicleName = 'Delivery Bike';
+        vehicleType = 'bike';
+      }
+
       await pool.query(
         "INSERT INTO drivers (user_id, service_category, vehicle_name, vehicle_type, vehicle_number, latitude, longitude, is_online, is_available) VALUES ($1, $2, $3, $4, $5, $6, $7, true, true)",
-        [userId, service, 'Simulated Car', 'sedan', `GH ${i}`, lat, lng]
+        [userId, service, vehicleName, vehicleType, `GH ${i}`, lat, lng]
       );
     } else {
       userId = res.rows[0].id;
