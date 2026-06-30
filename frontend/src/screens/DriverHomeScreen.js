@@ -22,6 +22,7 @@ export default function DriverHomeScreen() {
   const [error, setError] = useState('');
   
   const [safetyChecked, setSafetyChecked] = useState(false);
+  const [reachedDropoff, setReachedDropoff] = useState(false);
   
   // OTP State
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -338,6 +339,7 @@ export default function DriverHomeScreen() {
         setTimeout(() => {
           setActiveRide(null);
           setSafetyChecked(false);
+          setReachedDropoff(false);
         }, 500);
       }
     } catch(err) {
@@ -865,7 +867,12 @@ export default function DriverHomeScreen() {
               </View>
             )}
 
-            {activeRide.status === 'started' && <CustomButton title="Complete Trip & Collect Payout" onPress={() => handleUpdateStatus('completed')} style={[styles.actionBtn, { backgroundColor: colors.success }]} />}
+            {activeRide.status === 'started' && !reachedDropoff && (
+              <CustomButton title="Vehicle Reached Dropoff" onPress={() => setReachedDropoff(true)} style={[styles.actionBtn, { backgroundColor: '#3b82f6' }]} />
+            )}
+            {activeRide.status === 'started' && reachedDropoff && (
+              <CustomButton title="Complete Trip & Collect Payout" onPress={() => handleUpdateStatus('completed')} style={[styles.actionBtn, { backgroundColor: colors.success }]} />
+            )}
           </View>
         </GlassCard>
       )}

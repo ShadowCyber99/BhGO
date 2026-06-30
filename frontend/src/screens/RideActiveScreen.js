@@ -212,6 +212,34 @@ export default function RideActiveScreen({ onNavigateToHome }) {
           )}
         </View>
 
+        <View style={{ marginBottom: 16, paddingBottom: 16, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+          <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Pickup</Text>
+          <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.pickupAddress}</Text>
+          
+          <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Dropoff</Text>
+          <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.dropoffAddress}</Text>
+
+          {ride.driverName && (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+              <View>
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>Driver</Text>
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.driverName}</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>Vehicle</Text>
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.vehicleName} ({ride.vehicleNumber})</Text>
+              </View>
+            </View>
+          )}
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+            <View>
+              <Text style={{ color: colors.textMuted, fontSize: 12 }}>Amount {ride.status === 'completed' ? 'Paid' : 'Estimate'}</Text>
+              <Text style={{ color: colors.primary, fontSize: 18, fontWeight: 'bold' }}>₹{ride.fare?.toFixed(2)}</Text>
+            </View>
+          </View>
+        </View>
+
         {ride.status === 'requested' && (
           <View style={styles.searchPulseBox}>
             <View style={styles.radarRing} />
@@ -296,33 +324,9 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         {ride.status === 'completed' && (
           <View style={styles.receiptBox}>
             <View style={{ marginBottom: 20, borderBottomWidth: 1, borderColor: colors.surfaceLight, paddingBottom: 16 }}>
-              <Text style={{ color: colors.success, fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
+              <Text style={{ color: colors.success, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>
                 {ride.serviceCategory === 'ambulance' ? '🚑 ' : '✅ '}Arrived Safely
               </Text>
-              
-              <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Pickup</Text>
-              <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.pickupAddress}</Text>
-              
-              <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Dropoff</Text>
-              <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.dropoffAddress}</Text>
-
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
-                <View>
-                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Driver</Text>
-                  <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.driverName}</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Vehicle</Text>
-                  <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.vehicleName} ({ride.vehicleNumber})</Text>
-                </View>
-              </View>
-
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
-                <View>
-                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Amount Paid</Text>
-                  <Text style={{ color: colors.primary, fontSize: 18, fontWeight: 'bold' }}>₹{ride.fare?.toFixed(2)}</Text>
-                </View>
-              </View>
             </View>
 
             {ratingSubmitted ? (
