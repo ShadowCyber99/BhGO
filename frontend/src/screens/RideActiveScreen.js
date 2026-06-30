@@ -64,7 +64,18 @@ export default function RideActiveScreen({ onNavigateToHome }) {
 
   useEffect(() => {
     fetchActiveRide();
+    if (typeof window !== 'undefined' && "Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
   }, []);
+
+  useEffect(() => {
+    if (ride?.status === 'completed') {
+      if (typeof window !== 'undefined' && "Notification" in window && Notification.permission === "granted") {
+        new Notification("Trip Completed!", { body: "You have arrived safely at your destination." });
+      }
+    }
+  }, [ride?.status]);
 
   useEffect(() => {
     let interval;
@@ -192,17 +203,14 @@ export default function RideActiveScreen({ onNavigateToHome }) {
       />
 
       <GlassCard style={styles.consoleCard}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-          <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: 'bold' }}>BOOKING REF:</Text>
-          <Text style={{ color: colors.text, fontSize: 14, fontWeight: 'monospace', letterSpacing: 1 }}>{ride.refId}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 16, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+          <Text style={{ color: colors.textMuted, fontSize: 13, fontWeight: '800', letterSpacing: 0.5 }}>BOOKING REF:</Text>
+          <Text style={{ color: colors.text, fontSize: 15, fontWeight: '900', letterSpacing: 1 }}>{ride.refId}</Text>
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <View style={styles.statusHeader}>
-            <View style={[styles.statusIndicator, { backgroundColor: statusMeta.color }]} />
-            <View>
-              <Text style={styles.statusTitle}>{statusMeta.title}</Text>
-              <Text style={styles.statusSubtitle}>{statusMeta.subtitle}</Text>
-            </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+          <View style={[styles.statusHeader, { flex: 1 }]}>
+            <Text style={{ color: statusMeta.color, fontSize: 24, fontWeight: '900', marginBottom: 6 }}>{statusMeta.title}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14, fontWeight: '500' }}>{statusMeta.subtitle}</Text>
           </View>
           {eta !== null && !['completed', 'cancelled', 'requested'].includes(ride.status) && (
             <View style={styles.etaBadge}>

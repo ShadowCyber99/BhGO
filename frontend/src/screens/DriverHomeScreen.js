@@ -500,6 +500,7 @@ export default function DriverHomeScreen() {
           nearbyDrivers={[]} 
           demandZones={demandZones}
           rideStatus={activeRide?.status || (incomingRequests.length > 0 ? 'requested' : null)}
+          onDestinationReached={() => setReachedDropoff(true)}
         />
       </View>
 
@@ -592,9 +593,9 @@ export default function DriverHomeScreen() {
               
               {earningsData ? (
                 <View>
-                  <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 12, marginBottom: 20, borderWidth: 1, borderColor: colors.surfaceLight }}>
-                    <Text style={{ color: colors.textMuted, textAlign: 'center', marginBottom: 8, fontSize: 16 }}>Total Net Earnings</Text>
-                    <Text style={{ color: colors.primary, fontSize: 42, fontWeight: '900', textAlign: 'center', marginBottom: 8 }}>₹{earningsData.totalEarnings.toFixed(2)}</Text>
+                  <View style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: 24, borderRadius: 20, marginBottom: 24, borderWidth: 1, borderColor: colors.primary, shadowColor: colors.primary, shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 }}>
+                    <Text style={{ color: colors.textMuted, textAlign: 'center', marginBottom: 8, fontSize: 14, textTransform: 'uppercase', letterSpacing: 1 }}>Total Net Earnings</Text>
+                    <Text style={{ color: colors.primary, fontSize: 48, fontWeight: '900', textAlign: 'center', marginBottom: 8, letterSpacing: 1 }}>₹{earningsData.totalEarnings.toFixed(2)}</Text>
                     {earningsData.totalPenalties > 0 && (
                       <Text style={{ color: colors.danger, textAlign: 'center', fontSize: 13, fontWeight: 'bold' }}>
                         Includes -₹{earningsData.totalPenalties.toFixed(2)} Driver Cancellation Penalties
@@ -604,18 +605,18 @@ export default function DriverHomeScreen() {
 
                   {/* WEEKLY STATS BAR CHART */}
                   {earningsData.weeklyStats && earningsData.weeklyStats.length > 0 && (
-                    <View style={{ marginBottom: 24 }}>
-                      <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>Weekly Statistics</Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 160, backgroundColor: 'rgba(255,255,255,0.02)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.surfaceLight }}>
+                    <View style={{ marginBottom: 32 }}>
+                      <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>Weekly Performance</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 180, backgroundColor: 'rgba(255,255,255,0.02)', padding: 20, borderRadius: 16, borderWidth: 1, borderColor: colors.surfaceLight }}>
                         {earningsData.weeklyStats.map((stat, idx) => {
                           // Simple dynamic height calculation based on max earning
                           const maxEarning = Math.max(...earningsData.weeklyStats.map(s => s.earnings), 1);
                           const barHeight = (stat.earnings / maxEarning) * 100;
                           return (
                             <View key={idx} style={{ alignItems: 'center', flex: 1 }}>
-                              <Text style={{ color: colors.text, fontSize: 10, marginBottom: 4, fontWeight: 'bold' }}>₹{Math.round(stat.earnings)}</Text>
-                              <View style={{ width: '60%', height: `${barHeight}%`, backgroundColor: colors.primary, borderRadius: 4, minHeight: 4 }} />
-                              <Text style={{ color: colors.textMuted, fontSize: 10, marginTop: 8 }}>{stat.label.split(' ')[0]}</Text>
+                              <Text style={{ color: colors.text, fontSize: 11, marginBottom: 6, fontWeight: 'bold' }}>₹{Math.round(stat.earnings)}</Text>
+                              <View style={{ width: '50%', height: `${barHeight}%`, backgroundColor: colors.primary, borderRadius: 6, minHeight: 4 }} />
+                              <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 8, fontWeight: '600' }}>{stat.label.split(' ')[0]}</Text>
                             </View>
                           );
                         })}
@@ -623,16 +624,16 @@ export default function DriverHomeScreen() {
                     </View>
                   )}
 
-                  <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Earnings Breakdown</Text>
+                  <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>Earnings Breakdown</Text>
                   {earningsData.breakdown.map((b) => (
-                    <View key={b.category} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.surfaceLight }}>
+                    <View key={b.category} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16, borderBottomWidth: 1, borderColor: colors.overlayBorder }}>
                       <View>
-                        <Text style={{ color: colors.text, fontSize: 16, textTransform: 'uppercase', fontWeight: 'bold' }}>{b.category}</Text>
-                        <Text style={{ color: colors.textMuted, fontSize: 12 }}>{b.rides} Completed • {b.cutPercentage}% Driver Cut</Text>
+                        <Text style={{ color: colors.text, fontSize: 16, textTransform: 'uppercase', fontWeight: '900' }}>{b.category}</Text>
+                        <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 4 }}>{b.rides} Completed • {b.cutPercentage}% Driver Cut</Text>
                       </View>
                       <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold' }}>₹{b.net.toFixed(2)}</Text>
-                        <Text style={{ color: colors.textMuted, fontSize: 12, textDecorationLine: 'line-through' }}>Gross: ₹{b.gross.toFixed(2)}</Text>
+                        <Text style={{ color: colors.success, fontSize: 18, fontWeight: '900' }}>₹{b.net.toFixed(2)}</Text>
+                        <Text style={{ color: colors.textMuted, fontSize: 12, textDecorationLine: 'line-through', marginTop: 2 }}>Gross: ₹{b.gross.toFixed(2)}</Text>
                       </View>
                     </View>
                   ))}
@@ -868,7 +869,7 @@ export default function DriverHomeScreen() {
             )}
 
             {activeRide.status === 'started' && !reachedDropoff && (
-              <CustomButton title="Vehicle Reached Dropoff" onPress={() => setReachedDropoff(true)} style={[styles.actionBtn, { backgroundColor: '#3b82f6' }]} />
+              <CustomButton title="Navigating to Dropoff..." style={[styles.actionBtn, { backgroundColor: colors.surfaceLight, opacity: 0.7 }]} disabled />
             )}
             {activeRide.status === 'started' && reachedDropoff && (
               <CustomButton title="Complete Trip & Collect Payout" onPress={() => handleUpdateStatus('completed')} style={[styles.actionBtn, { backgroundColor: colors.success }]} />
@@ -989,17 +990,17 @@ const getStyles = (colors) => StyleSheet.create({
   onlineBtnText: { color: colors.text, fontSize: 12, fontWeight: 'bold' },
   logoutBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.2)', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 12 },
   logoutText: { color: colors.danger, fontSize: 12, fontWeight: 'bold' },
-  offerCard: { marginTop: 20, borderColor: colors.primary, backgroundColor: 'rgba(99, 102, 241, 0.1)' },
-  offerTag: { color: colors.primary, fontSize: 14, fontWeight: '900', letterSpacing: 1, marginBottom: 12 },
-  offerAddress: { color: colors.text, fontSize: 14, fontWeight: '600', marginBottom: 6 },
-  offerFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderColor: colors.surfaceLight, paddingTop: 12, marginTop: 12 },
-  offerFareLabel: { color: colors.textDim, fontSize: 11, fontWeight: '600' },
-  offerFareVal: { color: colors.secondary, fontSize: 22, fontWeight: '900' },
-  offerButtons: { flexDirection: 'row', gap: 8 },
-  declineBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.2)', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 16, justifyContent: 'center' },
-  declineText: { color: colors.danger, fontSize: 13, fontWeight: 'bold' },
-  acceptBtn: { backgroundColor: colors.primary, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 18, justifyContent: 'center' },
-  acceptText: { color: colors.text, fontSize: 13, fontWeight: 'bold' },
+  offerCard: { marginTop: 24, padding: 24, borderColor: colors.primary, borderWidth: 2, backgroundColor: 'rgba(99, 102, 241, 0.1)', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 4 },
+  offerTag: { color: colors.primary, fontSize: 16, fontWeight: '900', letterSpacing: 1, marginBottom: 12 },
+  offerAddress: { color: colors.text, fontSize: 15, fontWeight: '700', marginBottom: 8 },
+  offerFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderColor: colors.surfaceLight, paddingTop: 16, marginTop: 16 },
+  offerFareLabel: { color: colors.textDim, fontSize: 13, fontWeight: '700', textTransform: 'uppercase' },
+  offerFareVal: { color: colors.secondary, fontSize: 32, fontWeight: '900' },
+  offerButtons: { flexDirection: 'row', gap: 12 },
+  declineBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', borderRadius: 12, paddingVertical: 14, paddingHorizontal: 20, justifyContent: 'center' },
+  declineText: { color: colors.danger, fontSize: 15, fontWeight: '900' },
+  acceptBtn: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 14, paddingHorizontal: 32, justifyContent: 'center', shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 4 } },
+  acceptText: { color: colors.background, fontSize: 16, fontWeight: '900', textTransform: 'uppercase' },
   ridePanel: { marginTop: 20 },
   panelTitle: { color: colors.text, fontSize: 16, fontWeight: 'bold' },
   legs: { flexDirection: 'column', gap: 8, marginBottom: 16 },

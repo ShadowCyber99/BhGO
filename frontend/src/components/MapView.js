@@ -1,94 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { GoogleMap, useJsApiLoader, Marker, Polyline, Circle } from '@react-google-maps/api';
 
-// Import Leaflet dependencies
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle } from 'react-leaflet';
-import L from 'leaflet';
-
-// Import Leaflet CSS (required for proper map rendering)
-import 'leaflet/dist/leaflet.css';
-
-// Default Map Center (Delhi, India)
-const DEFAULT_CENTER = [28.6139, 77.2090];
-
-function ChangeView({ center }) {
-  const map = useMap();
-  useEffect(() => {
-    if (center && center.length === 2 && center[0] && center[1]) {
-      map.setView(center, map.getZoom(), { animate: true });
-    }
-  }, [center, map]);
-  return null;
-}
-
-const createModernMarker = (color, svgContent) => {
-  return new L.divIcon({
-    html: `
-      <div style="
-        position: relative;
-        width: 38px;
-        height: 38px;
-        background: linear-gradient(135deg, ${color} 0%, #00000033 100%);
-        background-color: ${color};
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-      ">
-        <div style="
-          position: absolute;
-          bottom: -10px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 0;
-          border-left: 8px solid transparent;
-          border-right: 8px solid transparent;
-          border-top: 10px solid white;
-        "></div>
-        <div style="
-          position: absolute;
-          bottom: -7px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 0;
-          border-left: 5px solid transparent;
-          border-right: 5px solid transparent;
-          border-top: 7px solid ${color};
-        "></div>
-        ${svgContent}
-      </div>
-    `,
-    className: 'custom-modern-marker',
-    iconSize: [38, 48],
-    iconAnchor: [19, 48],
-  });
-};
+const DEFAULT_CENTER = { lat: 28.6139, lng: 77.2090 };
 
 const svgIcons = {
-  car: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="11" rx="2" ry="2"></rect><path d="M4 8L6 4h12l2 4"></path><circle cx="7" cy="19" r="2"></circle><circle cx="17" cy="19" r="2"></circle></svg>`,
-  ambulance: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M12 9v6M9 12h6"></path><circle cx="7" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg>`,
-  bike: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="4"></circle><circle cx="18" cy="16" r="4"></circle><path d="M6 16l4-8h4"></path><path d="M14 8l4 8"></path><path d="M10 8h-3"></path></svg>`,
-  parcel: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M12 5v5"></path></svg>`,
-  food: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9v1h14V9c0-3.87-3.13-7-7-7z"></path><path d="M3 14h18v3c0 1.66-1.34 3-3 3H6c-1.66 0-3-1.34-3-3v-3z"></path><path d="M4 11h16v1H4z"></path></svg>`,
-  pickup: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"></circle></svg>`,
-  dropoff: `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="4" y="4" width="16" height="16"></rect></svg>`
+  car: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="20" height="11" rx="2" ry="2"></rect><path d="M4 8L6 4h12l2 4"></path><circle cx="7" cy="19" r="2"></circle><circle cx="17" cy="19" r="2"></circle></svg>`,
+  ambulance: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M12 9v6M9 12h6"></path><circle cx="7" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg>`,
+  bike: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="16" r="4"></circle><circle cx="18" cy="16" r="4"></circle><path d="M6 16l4-8h4"></path><path d="M14 8l4 8"></path><path d="M10 8h-3"></path></svg>`,
+  parcel: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M12 5v5"></path></svg>`,
+  food: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9v1h14V9c0-3.87-3.13-7-7-7z"></path><path d="M3 14h18v3c0 1.66-1.34 3-3 3H6c-1.66 0-3-1.34-3-3v-3z"></path><path d="M4 11h16v1H4z"></path></svg>`,
+  pickup: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"></circle></svg>`,
+  dropoff: `<svg width="16" height="16" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16"></rect></svg>`
 };
 
-// Custom map markers for different service categories
+const createMarkerIcon = (color, svgContent) => {
+  const svg = `
+    <svg width="38" height="48" viewBox="0 0 38 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 48L11 38C4.5 30 0 24 0 19C0 8.5 8.5 0 19 0C29.5 0 38 8.5 38 19C38 24 33.5 30 27 38L19 48Z" fill="${color}"/>
+      <circle cx="19" cy="19" r="14" fill="black" fill-opacity="0.2"/>
+      <g transform="translate(9, 9)">
+        ${svgContent}
+      </g>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+};
+
 const icons = {
-  ride: createModernMarker('#6366F1', svgIcons.car),
-  ambulance: createModernMarker('#EF4444', svgIcons.ambulance),
-  parcel: createModernMarker('#8B5CF6', svgIcons.parcel),
-  food: createModernMarker('#F97316', svgIcons.food),
-  bike: createModernMarker('#F59E0B', svgIcons.bike),
-  pickup: createModernMarker('#10B981', svgIcons.pickup),
-  dropoff: createModernMarker('#EF4444', svgIcons.dropoff)
+  ride: createMarkerIcon('#6366F1', svgIcons.car),
+  ambulance: createMarkerIcon('#EF4444', svgIcons.ambulance),
+  parcel: createMarkerIcon('#8B5CF6', svgIcons.parcel),
+  food: createMarkerIcon('#F97316', svgIcons.food),
+  bike: createMarkerIcon('#F59E0B', svgIcons.bike),
+  pickup: createMarkerIcon('#10B981', svgIcons.pickup),
+  dropoff: createMarkerIcon('#EF4444', svgIcons.dropoff)
 };
 
 const getDriverIcon = (driverObj) => {
@@ -96,70 +43,80 @@ const getDriverIcon = (driverObj) => {
   if (driverObj.serviceCategory === 'ambulance' || driverObj.vehicleType === 'ambulance') return icons.ambulance;
   if (driverObj.vehicleType === 'bike' || driverObj.vehiclePreference === 'bike') return icons.bike;
   if (driverObj.serviceCategory === 'food') return icons.food;
-  return icons.ride; // Cab/Car fallback
+  return icons.ride;
 };
 
 export default function MapView({ 
-  pickup,     // { lat, lng, address }
-  dropoff,    // { lat, lng, address }
-  waypoints = [], // [ { lat, lng } ]
-  demandZones = [], // [ { lat, lng, intensity, radius } ]
-  driver,     // { lat, lng, name, vehicleType, serviceCategory }
-  nearbyDrivers = [], // [ { latitude, longitude, vehicleType, serviceCategory } ]
-  cityCenter, // { lat, lng }
-  rideStatus, // 'requested', 'accepted', 'arrived', 'started', 'completed', 'cancelled'
+  pickup,
+  dropoff,
+  waypoints = [],
+  demandZones = [],
+  driver,
+  nearbyDrivers = [],
+  cityCenter,
+  rideStatus,
+  onDestinationReached,
 }) {
   const { colors, isDarkMode } = useTheme();
   const styles = getStyles(colors);
   
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: 'AIzaSyCAYl3gxJAVaFqZjNL2gfl3IDjp4m_CdzI'
+  });
+
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [hasCentered, setHasCentered] = useState(false);
   const [osrmRoute, setOsrmRoute] = useState([]);
   const [routeStats, setRouteStats] = useState({ distance: 0, duration: 0 });
   const [routeColor, setRouteColor] = useState(colors.primary);
   const [animatedDriverPos, setAnimatedDriverPos] = useState(null);
-  const lastFetchedStatusRef = React.useRef(null);
+  const lastFetchedStatusRef = useRef(null);
+  const mapRef = useRef(null);
 
-  // Auto-center map
   useEffect(() => {
+    let newCenter = null;
     if (cityCenter?.lat && cityCenter?.lng) {
-      setMapCenter([cityCenter.lat, cityCenter.lng]);
+      newCenter = { lat: cityCenter.lat, lng: cityCenter.lng };
     } else if (!hasCentered) {
       if (pickup?.lat && pickup?.lng) {
-        setMapCenter([pickup.lat, pickup.lng]);
+        newCenter = { lat: pickup.lat, lng: pickup.lng };
         setHasCentered(true);
       } else if (driver?.lat && driver?.lng) {
-        setMapCenter([driver.lat, driver.lng]);
+        newCenter = { lat: driver.lat, lng: driver.lng };
         setHasCentered(true);
       } else if (nearbyDrivers.length > 0) {
-        setMapCenter([nearbyDrivers[0].latitude, nearbyDrivers[0].longitude]);
+        newCenter = { lat: nearbyDrivers[0].latitude, lng: nearbyDrivers[0].longitude };
         setHasCentered(true);
+      }
+    }
+    
+    if (newCenter) {
+      setMapCenter(newCenter);
+      if (mapRef.current) {
+        mapRef.current.panTo(newCenter);
       }
     }
   }, [pickup, driver, nearbyDrivers, hasCentered, cityCenter]);
 
-  // Fetch OSRM Route based on status
   useEffect(() => {
     let start = null;
     let end = null;
     let rColor = colors.primary;
 
     if (rideStatus === 'accepted' || rideStatus === 'arrived') {
-      // Driver is going to pickup
       if (driver?.lat && pickup?.lat) {
         start = driver;
         end = pickup;
-        rColor = '#F97316'; // Orange
+        rColor = '#F97316'; 
       }
     } else if (rideStatus === 'started') {
-      // Driver is going to dropoff. They should be at the pickup location.
       if (pickup?.lat && dropoff?.lat) {
         start = pickup;
         end = dropoff;
-        rColor = '#10B981'; // Green
+        rColor = '#10B981'; 
       }
     } else {
-      // Default: show pickup to dropoff
       if (pickup?.lat && dropoff?.lat) {
         start = pickup;
         end = dropoff;
@@ -170,13 +127,10 @@ export default function MapView({
     setRouteColor(rColor);
 
     if (start && end) {
-      if (lastFetchedStatusRef.current === rideStatus && osrmRoute.length > 0) {
-        return; // Prevent recalculating route continuously as driver moves
-      }
+      if (lastFetchedStatusRef.current === rideStatus && osrmRoute.length > 0) return;
       
       const fetchRoute = async () => {
         try {
-          // Only include waypoints if we are showing the full route (pickup to dropoff) or if the trip has started.
           const includeWaypoints = waypoints && waypoints.length > 0 && ((start === pickup && end === dropoff) || rideStatus === 'started');
           const wpString = includeWaypoints ? waypoints.map(w => `${w.lng},${w.lat}`).join(';') : '';
           const coordsString = wpString ? `${start.lng},${start.lat};${wpString};${end.lng},${end.lat}` : `${start.lng},${start.lat};${end.lng},${end.lat}`;
@@ -186,18 +140,16 @@ export default function MapView({
           const data = await res.json();
           if (data.routes && data.routes.length > 0) {
             const route = data.routes[0];
-            // OSRM returns [lng, lat], Leaflet needs [lat, lng]
-            const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+            const coords = route.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] }));
             setOsrmRoute(coords);
             setRouteStats({
-              distance: (route.distance / 1000).toFixed(1), // km
-              duration: Math.ceil(route.duration / 60) // mins
+              distance: (route.distance / 1000).toFixed(1),
+              duration: Math.ceil(route.duration / 60)
             });
           }
         } catch (err) {
           console.error("OSRM Fetch Error:", err);
-          // Fallback to straight line
-          setOsrmRoute([[start.lat, start.lng], [end.lat, end.lng]]);
+          setOsrmRoute([{ lat: start.lat, lng: start.lng }, { lat: end.lat, lng: end.lng }]);
         }
         lastFetchedStatusRef.current = rideStatus;
       };
@@ -209,17 +161,15 @@ export default function MapView({
     }
   }, [rideStatus, pickup?.lat, pickup?.lng, dropoff?.lat, dropoff?.lng, driver?.lat, driver?.lng]);
 
-  // Animate Driver Marker along the route
   useEffect(() => {
     if (rideStatus === 'completed' && dropoff?.lat) {
-      setAnimatedDriverPos([dropoff.lat, dropoff.lng]);
+      setAnimatedDriverPos({ lat: dropoff.lat, lng: dropoff.lng });
     } else if (rideStatus === 'arrived' && pickup?.lat) {
-      setAnimatedDriverPos([pickup.lat, pickup.lng]);
+      setAnimatedDriverPos({ lat: pickup.lat, lng: pickup.lng });
     } else if (osrmRoute.length > 0 && (rideStatus === 'accepted' || rideStatus === 'started')) {
       let step = 0;
       setAnimatedDriverPos(osrmRoute[0]);
       
-      // Calculate delay to make the animation take about 30 seconds total for a smoother experience
       const delay = Math.max(20, Math.floor(30000 / osrmRoute.length));
 
       const interval = setInterval(() => {
@@ -228,95 +178,84 @@ export default function MapView({
           setAnimatedDriverPos(osrmRoute[step]);
         } else {
           clearInterval(interval);
+          if (onDestinationReached) {
+            onDestinationReached();
+          }
         }
       }, delay);
       
       return () => clearInterval(interval);
     } else if (driver?.lat && driver?.lng) {
-      setAnimatedDriverPos([driver.lat, driver.lng]);
+      setAnimatedDriverPos({ lat: driver.lat, lng: driver.lng });
     } else {
       setAnimatedDriverPos(null);
     }
   }, [osrmRoute, rideStatus, dropoff?.lat, dropoff?.lng, pickup?.lat, pickup?.lng, driver?.lat, driver?.lng]);
 
+  const mapOptions = useMemo(() => ({
+    disableDefaultUI: true,
+    styles: isDarkMode ? darkMapStyle : [],
+  }), [isDarkMode]);
+
+  if (!isLoaded) return <View style={styles.container}><Text style={{color: 'white', padding: 20}}>Loading Map...</Text></View>;
+
   return (
     <View style={styles.container}>
-      <MapContainer 
-        center={mapCenter} 
-        key={mapCenter.join(',')} 
-        zoom={14} 
-        style={{ height: '400px', width: '100%', borderRadius: 16 }}
-        zoomControl={false}
+      <GoogleMap
+        mapContainerStyle={{ width: '100%', height: '400px', borderRadius: '16px' }}
+        center={mapCenter}
+        zoom={14}
+        options={mapOptions}
+        onLoad={map => mapRef.current = map}
       >
-        <ChangeView center={mapCenter} />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-          url={isDarkMode 
-            ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" 
-            : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"}
-        />
-
         {nearbyDrivers.map((dr, idx) => (
           dr.latitude && dr.longitude && (
             <Marker 
               key={idx} 
-              position={[dr.latitude, dr.longitude]} 
-              icon={getDriverIcon(dr)}
-            >
-              <Popup>{dr.name} - {dr.vehicleName}</Popup>
-            </Marker>
+              position={{ lat: dr.latitude, lng: dr.longitude }} 
+              icon={window.google ? { url: getDriverIcon(dr), scaledSize: new window.google.maps.Size(38, 48) } : null}
+            />
           )
         ))}
 
         {pickup?.lat && pickup?.lng && (
-          <Marker position={[pickup.lat, pickup.lng]} icon={icons.pickup}>
-            <Popup>Pickup: {pickup.address}</Popup>
-          </Marker>
+          <Marker position={{ lat: pickup.lat, lng: pickup.lng }} icon={window.google ? { url: icons.pickup, scaledSize: new window.google.maps.Size(38, 48) } : null} />
         )}
 
         {waypoints.map((wp, idx) => (
           wp?.lat && wp?.lng && (
-            <Marker key={`wp-${idx}`} position={[wp.lat, wp.lng]} icon={icons.pickup}>
-              <Popup>Stop {idx + 1}</Popup>
-            </Marker>
+            <Marker key={`wp-${idx}`} position={{ lat: wp.lat, lng: wp.lng }} icon={window.google ? { url: icons.pickup, scaledSize: new window.google.maps.Size(38, 48) } : null} />
           )
         ))}
 
         {dropoff?.lat && dropoff?.lng && (
-          <Marker position={[dropoff.lat, dropoff.lng]} icon={icons.dropoff}>
-            <Popup>Dropoff: {dropoff.address}</Popup>
-          </Marker>
+          <Marker position={{ lat: dropoff.lat, lng: dropoff.lng }} icon={window.google ? { url: icons.dropoff, scaledSize: new window.google.maps.Size(38, 48) } : null} />
         )}
 
         {demandZones.map((zone, idx) => (
           <Circle 
             key={`zone-${idx}`}
-            center={[zone.lat, zone.lng]}
+            center={{ lat: zone.lat, lng: zone.lng }}
             radius={zone.radius || 1500}
-            pathOptions={{ color: 'transparent', fillColor: '#ef4444', fillOpacity: zone.intensity || 0.4 }}
+            options={{ strokeColor: 'transparent', fillColor: '#ef4444', fillOpacity: zone.intensity || 0.4 }}
           />
         ))}
 
         {(animatedDriverPos || (driver?.lat && driver?.lng)) && (
           <Marker 
-            position={animatedDriverPos || [driver.lat, driver.lng]} 
-            icon={getDriverIcon(driver)}
-          >
-            <Popup>Active Driver: {driver?.name || 'Driver'}</Popup>
-          </Marker>
+            position={animatedDriverPos || { lat: driver.lat, lng: driver.lng }} 
+            icon={window.google ? { url: getDriverIcon(driver), scaledSize: new window.google.maps.Size(38, 48) } : null}
+          />
         )}
 
         {osrmRoute.length > 1 && (
           <Polyline 
-            positions={osrmRoute} 
-            color={routeColor} 
-            weight={5}
-            opacity={0.8}
+            path={osrmRoute} 
+            options={{ strokeColor: routeColor, strokeWeight: 5, strokeOpacity: 0.8 }}
           />
         )}
-      </MapContainer>
+      </GoogleMap>
       
-      {/* HUD Overlay */}
       <View style={styles.hud}>
         <Text style={styles.hudText}>🌍 Live Super App Map</Text>
         {routeStats.distance > 0 && (
@@ -329,6 +268,27 @@ export default function MapView({
     </View>
   );
 }
+
+const darkMapStyle = [
+  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+  { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
+  { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+  { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
+];
 
 const getStyles = (colors) => StyleSheet.create({
   container: {

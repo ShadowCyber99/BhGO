@@ -1314,16 +1314,16 @@ const getStyles = (colors) => StyleSheet.create({
   cityBtn: { backgroundColor: colors.surfaceLight, borderWidth: 1, borderColor: colors.primary, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },
   cityBtnText: { color: colors.text, fontSize: 12, fontWeight: 'bold' },
   
-  serviceSelectorRibbon: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, marginTop: 20, marginBottom: 20 },
-  serviceTab: { flex: 1, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.surfaceLight, borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
-  serviceIcon: { fontSize: 28, marginBottom: 8 },
-  serviceText: { color: colors.textMuted, fontWeight: '700', fontSize: 12 },
+  serviceSelectorRibbon: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 16, marginBottom: 24, paddingHorizontal: 4 },
+  serviceTab: { flex: 1, backgroundColor: colors.overlay, borderWidth: 1, borderColor: colors.surfaceLight, borderRadius: 20, paddingVertical: 18, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
+  serviceIcon: { fontSize: 32, marginBottom: 10 },
+  serviceText: { color: colors.textMuted, fontWeight: '800', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.5 },
   
-  dashboard: { flexDirection: 'row', gap: 20, flexWrap: 'wrap' },
+  dashboard: { flexDirection: 'row', gap: 24, flexWrap: 'wrap' },
   leftCol: { flex: 1.2, minWidth: 320, zIndex: 5 },
   rightCol: { flex: 1, minWidth: 320, zIndex: 1 },
-  glassCard: { height: '100%', justifyContent: 'flex-start' },
-  cardTitle: { color: colors.text, fontSize: 18, fontWeight: '800', marginBottom: 16 },
+  glassCard: { height: '100%', justifyContent: 'flex-start', padding: 24, borderRadius: 24 },
+  cardTitle: { color: colors.text, fontSize: 20, fontWeight: '900', marginBottom: 20, letterSpacing: 0.5 },
   
   helperHeader: { color: colors.textMuted, fontSize: 13, fontWeight: 'bold', marginBottom: 10 },
   customRouteBox: { backgroundColor: colors.surfaceLight, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.surfaceLight, gap: 10, zIndex: 50 },

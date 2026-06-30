@@ -28,29 +28,29 @@ export const themes = {
     surface: '#12141A',
     surfaceLight: '#1F222B',
     text: '#F3F4F6',
-    textMuted: '#9CA3AF',
-    textDim: '#6B7280',
-    shadow: 'rgba(0, 0, 0, 0.6)',
-    glassBg: 'rgba(18, 20, 26, 0.8)',
-    glassBorder: 'rgba(212, 175, 55, 0.15)', // Subtle gold border
-    overlay: 'rgba(255, 255, 255, 0.05)',
-    overlayBorder: 'rgba(255, 255, 255, 0.1)'
+    textMuted: '#D1D5DB', // Lightened from 9CA3AF for better contrast against dark backgrounds
+    textDim: '#9CA3AF',   // Lightened from 6B7280
+    shadow: 'rgba(0, 0, 0, 0.8)',
+    glassBg: 'rgba(18, 20, 26, 0.90)', // Increased opacity for readability
+    glassBorder: 'rgba(212, 175, 55, 0.2)',
+    overlay: 'rgba(255, 255, 255, 0.08)',
+    overlayBorder: 'rgba(255, 255, 255, 0.15)'
   },
   light: {
     name: 'Minimal Light',
     ...baseColors,
     primary: '#0F172A',
-    background: '#F9FAFB',
+    background: '#F3F4F6', // Slightly darker than F9FAFB for contrast with pure white surface
     surface: '#FFFFFF',
-    surfaceLight: '#F3F4F6',
+    surfaceLight: '#E5E7EB', // Darkened from F3F4F6
     text: '#111827',
-    textMuted: '#4B5563',
-    textDim: '#9CA3AF',
-    shadow: 'rgba(0, 0, 0, 0.08)',
-    glassBg: 'rgba(255, 255, 255, 0.85)',
-    glassBorder: 'rgba(0, 0, 0, 0.05)',
-    overlay: 'rgba(0, 0, 0, 0.05)',
-    overlayBorder: 'rgba(0, 0, 0, 0.1)'
+    textMuted: '#374151', // Darkened from 4B5563 for strong readability
+    textDim: '#4B5563',   // Darkened from 9CA3AF (which was too light)
+    shadow: 'rgba(0, 0, 0, 0.12)',
+    glassBg: 'rgba(255, 255, 255, 0.95)', // Increased opacity
+    glassBorder: 'rgba(0, 0, 0, 0.15)',
+    overlay: 'rgba(0, 0, 0, 0.08)',
+    overlayBorder: 'rgba(0, 0, 0, 0.15)'
   },
   ocean: {
     name: 'Royal Sapphire',
@@ -60,13 +60,13 @@ export const themes = {
     surface: '#0B213A',
     surfaceLight: '#123052',
     text: '#F0F9FF',
-    textMuted: '#BAE6FD',
-    textDim: '#7DD3FC',
-    shadow: 'rgba(0, 0, 0, 0.5)',
-    glassBg: 'rgba(11, 33, 58, 0.75)',
-    glassBorder: 'rgba(56, 189, 248, 0.2)',
-    overlay: 'rgba(255, 255, 255, 0.05)',
-    overlayBorder: 'rgba(255, 255, 255, 0.1)'
+    textMuted: '#E0F2FE', // Lightened from BAE6FD
+    textDim: '#BAE6FD',   // Lightened from 7DD3FC
+    shadow: 'rgba(0, 0, 0, 0.7)',
+    glassBg: 'rgba(11, 33, 58, 0.90)', // Increased opacity
+    glassBorder: 'rgba(56, 189, 248, 0.3)',
+    overlay: 'rgba(255, 255, 255, 0.08)',
+    overlayBorder: 'rgba(255, 255, 255, 0.15)'
   },
   sunset: {
     name: 'Twilight Gold',
@@ -76,13 +76,13 @@ export const themes = {
     surface: '#2D190B',
     surfaceLight: '#432511',
     text: '#FFF7ED',
-    textMuted: '#FDE68A',
-    textDim: '#FBBF24',
-    shadow: 'rgba(0, 0, 0, 0.5)',
-    glassBg: 'rgba(45, 25, 11, 0.75)',
-    glassBorder: 'rgba(245, 158, 11, 0.2)',
-    overlay: 'rgba(255, 255, 255, 0.05)',
-    overlayBorder: 'rgba(255, 255, 255, 0.1)'
+    textMuted: '#FEF3C7', // Lightened from FDE68A
+    textDim: '#FDE68A',   // Lightened from FBBF24
+    shadow: 'rgba(0, 0, 0, 0.7)',
+    glassBg: 'rgba(45, 25, 11, 0.90)', // Increased opacity
+    glassBorder: 'rgba(245, 158, 11, 0.3)',
+    overlay: 'rgba(255, 255, 255, 0.08)',
+    overlayBorder: 'rgba(255, 255, 255, 0.15)'
   },
   forest: {
     name: 'Emerald Executive',
@@ -92,13 +92,13 @@ export const themes = {
     surface: '#0B2F1F',
     surfaceLight: '#12452F',
     text: '#F0FDF4',
-    textMuted: '#A7F3D0',
-    textDim: '#6EE7B7',
-    shadow: 'rgba(0, 0, 0, 0.5)',
-    glassBg: 'rgba(11, 47, 31, 0.75)',
-    glassBorder: 'rgba(16, 185, 129, 0.2)',
-    overlay: 'rgba(255, 255, 255, 0.05)',
-    overlayBorder: 'rgba(255, 255, 255, 0.1)'
+    textMuted: '#D1FAE5', // Lightened from A7F3D0
+    textDim: '#A7F3D0',   // Lightened from 6EE7B7
+    shadow: 'rgba(0, 0, 0, 0.7)',
+    glassBg: 'rgba(11, 47, 31, 0.90)', // Increased opacity
+    glassBorder: 'rgba(16, 185, 129, 0.3)',
+    overlay: 'rgba(255, 255, 255, 0.08)',
+    overlayBorder: 'rgba(255, 255, 255, 0.15)'
   }
 };
 
