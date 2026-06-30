@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { GoogleMap, useJsApiLoader, Marker, Polyline, Circle } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const DEFAULT_CENTER = { lat: 28.6139, lng: 77.2090 };
 
@@ -25,7 +27,12 @@ const createMarkerIcon = (color, svgContent) => {
       </g>
     </svg>
   `;
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  return L.divIcon({
+    html: svg,
+    className: 'custom-leaflet-icon',
+    iconSize: [38, 48],
+    iconAnchor: [19, 48]
+  });
 };
 
 const icons = {
@@ -46,6 +53,58 @@ const getDriverIcon = (driverObj) => {
   return icons.ride;
 };
 
+// Component to handle dynamic map panning
+function MapUpdater({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center && center.lat && center.lng) {
+      map.flyTo([center.lat, center.lng], map.getZoom(), { animate: true, duration: 1.0 });
+    }
+  }, [center, map]);
+  return null;
+}
+
+// Leaflet requires a custom implementation to update marker positions smoothly without React re-renders
+function AnimatedDriverMarker({ initialPos, icon, osrmRoute, rideStatus, dropoff, pickup, driver, onDestinationReached }) {
+  const markerRef = useRef(null);
+
+  useEffect(() => {
+    if (!markerRef.current) return;
+    
+    if (rideStatus === 'completed' && dropoff?.lat) {
+      markerRef.current.setLatLng([dropoff.lat, dropoff.lng]);
+    } else if (rideStatus === 'arrived' && pickup?.lat) {
+      markerRef.current.setLatLng([pickup.lat, pickup.lng]);
+    } else if (osrmRoute.length > 0 && (rideStatus === 'accepted' || rideStatus === 'started')) {
+      let step = 0;
+      markerRef.current.setLatLng([osrmRoute[0].lat, osrmRoute[0].lng]);
+      
+      const delay = Math.max(20, Math.floor(30000 / osrmRoute.length));
+
+      const interval = setInterval(() => {
+        step += 1;
+        if (step < osrmRoute.length) {
+          if (markerRef.current) {
+            markerRef.current.setLatLng([osrmRoute[step].lat, osrmRoute[step].lng]);
+          }
+        } else {
+          clearInterval(interval);
+          if (onDestinationReached) {
+            onDestinationReached();
+          }
+        }
+      }, delay);
+      
+      return () => clearInterval(interval);
+    } else if (driver?.lat && driver?.lng) {
+      markerRef.current.setLatLng([driver.lat, driver.lng]);
+    }
+  }, [osrmRoute, rideStatus, dropoff?.lat, dropoff?.lng, pickup?.lat, pickup?.lng, driver?.lat, driver?.lng]);
+
+  return <Marker ref={markerRef} position={initialPos} icon={icon} />;
+}
+
+
 export default function MapView({ 
   pickup,
   dropoff,
@@ -59,20 +118,13 @@ export default function MapView({
 }) {
   const { colors, isDarkMode } = useTheme();
   const styles = getStyles(colors);
-  
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: 'AIzaSyCAYl3gxJAVaFqZjNL2gfl3IDjp4m_CdzI'
-  });
 
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [hasCentered, setHasCentered] = useState(false);
   const [osrmRoute, setOsrmRoute] = useState([]);
   const [routeStats, setRouteStats] = useState({ distance: 0, duration: 0 });
   const [routeColor, setRouteColor] = useState(colors.primary);
-  const [animatedDriverPos, setAnimatedDriverPos] = useState(null);
   const lastFetchedStatusRef = useRef(null);
-  const mapRef = useRef(null);
 
   useEffect(() => {
     let newCenter = null;
@@ -93,9 +145,6 @@ export default function MapView({
     
     if (newCenter) {
       setMapCenter(newCenter);
-      if (mapRef.current) {
-        mapRef.current.panTo(newCenter);
-      }
     }
   }, [pickup, driver, nearbyDrivers, hasCentered, cityCenter]);
 
@@ -161,100 +210,87 @@ export default function MapView({
     }
   }, [rideStatus, pickup?.lat, pickup?.lng, dropoff?.lat, dropoff?.lng, driver?.lat, driver?.lng]);
 
-  useEffect(() => {
-    if (rideStatus === 'completed' && dropoff?.lat) {
-      setAnimatedDriverPos({ lat: dropoff.lat, lng: dropoff.lng });
-    } else if (rideStatus === 'arrived' && pickup?.lat) {
-      setAnimatedDriverPos({ lat: pickup.lat, lng: pickup.lng });
-    } else if (osrmRoute.length > 0 && (rideStatus === 'accepted' || rideStatus === 'started')) {
-      let step = 0;
-      setAnimatedDriverPos(osrmRoute[0]);
-      
-      const delay = Math.max(20, Math.floor(30000 / osrmRoute.length));
+  const tileUrl = isDarkMode 
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
-      const interval = setInterval(() => {
-        step += 1;
-        if (step < osrmRoute.length) {
-          setAnimatedDriverPos(osrmRoute[step]);
-        } else {
-          clearInterval(interval);
-          if (onDestinationReached) {
-            onDestinationReached();
-          }
-        }
-      }, delay);
-      
-      return () => clearInterval(interval);
-    } else if (driver?.lat && driver?.lng) {
-      setAnimatedDriverPos({ lat: driver.lat, lng: driver.lng });
-    } else {
-      setAnimatedDriverPos(null);
-    }
-  }, [osrmRoute, rideStatus, dropoff?.lat, dropoff?.lng, pickup?.lat, pickup?.lng, driver?.lat, driver?.lng]);
-
-  const mapOptions = useMemo(() => ({
-    disableDefaultUI: true,
-    styles: isDarkMode ? darkMapStyle : [],
-  }), [isDarkMode]);
-
-  if (!isLoaded) return <View style={styles.container}><Text style={{color: 'white', padding: 20}}>Loading Map...</Text></View>;
+  const routePositions = osrmRoute.map(r => [r.lat, r.lng]);
 
   return (
     <View style={styles.container}>
-      <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '400px', borderRadius: '16px' }}
-        center={mapCenter}
-        zoom={14}
-        options={mapOptions}
-        onLoad={map => mapRef.current = map}
+      <style>{`
+        .leaflet-container {
+          width: 100%;
+          height: 400px;
+          border-radius: 16px;
+        }
+        .custom-leaflet-icon {
+          background: transparent;
+          border: none;
+        }
+      `}</style>
+      
+      <MapContainer 
+        center={[mapCenter.lat, mapCenter.lng]} 
+        zoom={14} 
+        zoomControl={false}
       >
+        <TileLayer url={tileUrl} />
+        <MapUpdater center={mapCenter} />
+
         {nearbyDrivers.map((dr, idx) => (
           dr.latitude && dr.longitude && (
             <Marker 
               key={idx} 
-              position={{ lat: dr.latitude, lng: dr.longitude }} 
-              icon={window.google ? { url: getDriverIcon(dr), scaledSize: new window.google.maps.Size(38, 48) } : null}
+              position={[dr.latitude, dr.longitude]} 
+              icon={getDriverIcon(dr)}
             />
           )
         ))}
 
         {pickup?.lat && pickup?.lng && (
-          <Marker position={{ lat: pickup.lat, lng: pickup.lng }} icon={window.google ? { url: icons.pickup, scaledSize: new window.google.maps.Size(38, 48) } : null} />
+          <Marker position={[pickup.lat, pickup.lng]} icon={icons.pickup} />
         )}
 
         {waypoints.map((wp, idx) => (
           wp?.lat && wp?.lng && (
-            <Marker key={`wp-${idx}`} position={{ lat: wp.lat, lng: wp.lng }} icon={window.google ? { url: icons.pickup, scaledSize: new window.google.maps.Size(38, 48) } : null} />
+            <Marker key={`wp-${idx}`} position={[wp.lat, wp.lng]} icon={icons.pickup} />
           )
         ))}
 
         {dropoff?.lat && dropoff?.lng && (
-          <Marker position={{ lat: dropoff.lat, lng: dropoff.lng }} icon={window.google ? { url: icons.dropoff, scaledSize: new window.google.maps.Size(38, 48) } : null} />
+          <Marker position={[dropoff.lat, dropoff.lng]} icon={icons.dropoff} />
         )}
 
         {demandZones.map((zone, idx) => (
           <Circle 
             key={`zone-${idx}`}
-            center={{ lat: zone.lat, lng: zone.lng }}
+            center={[zone.lat, zone.lng]}
             radius={zone.radius || 1500}
-            options={{ strokeColor: 'transparent', fillColor: '#ef4444', fillOpacity: zone.intensity || 0.4 }}
+            pathOptions={{ color: 'transparent', fillColor: '#ef4444', fillOpacity: zone.intensity || 0.4 }}
           />
         ))}
 
-        {(animatedDriverPos || (driver?.lat && driver?.lng)) && (
-          <Marker 
-            position={animatedDriverPos || { lat: driver.lat, lng: driver.lng }} 
-            icon={window.google ? { url: getDriverIcon(driver), scaledSize: new window.google.maps.Size(38, 48) } : null}
+        {(driver?.lat && driver?.lng || osrmRoute.length > 0) && (
+          <AnimatedDriverMarker 
+            initialPos={[driver?.lat || mapCenter.lat, driver?.lng || mapCenter.lng]}
+            icon={getDriverIcon(driver)}
+            osrmRoute={osrmRoute}
+            rideStatus={rideStatus}
+            dropoff={dropoff}
+            pickup={pickup}
+            driver={driver}
+            onDestinationReached={onDestinationReached}
           />
         )}
 
-        {osrmRoute.length > 1 && (
+        {routePositions.length > 1 && (
           <Polyline 
-            path={osrmRoute} 
-            options={{ strokeColor: routeColor, strokeWeight: 5, strokeOpacity: 0.8 }}
+            positions={routePositions} 
+            pathOptions={{ color: routeColor, weight: 5, opacity: 0.8 }}
           />
         )}
-      </GoogleMap>
+      </MapContainer>
       
       <View style={styles.hud}>
         <Text style={styles.hudText}>🌍 Live Super App Map</Text>
@@ -268,27 +304,6 @@ export default function MapView({
     </View>
   );
 }
-
-const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
-  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
-  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
-  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
-  { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
-  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
-  { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
-  { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
-];
 
 const getStyles = (colors) => StyleSheet.create({
   container: {
