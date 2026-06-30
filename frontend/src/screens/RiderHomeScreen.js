@@ -262,6 +262,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   }, [serviceCategory]);
 
   const [emergencyConsent, setEmergencyConsent] = useState(false);
+  const [patientSecurityConsent, setPatientSecurityConsent] = useState(false);
 
   useEffect(() => {
     // When serviceCategory changes to ambulance, reset vehiclePreference to the default
@@ -926,6 +927,20 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                   </TouchableOpacity>
                 )}
 
+                {serviceCategory === 'ambulance' && (
+                  <TouchableOpacity 
+                    style={{ marginTop: 8, marginBottom: 8, padding: 12, backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: patientSecurityConsent ? colors.primary : colors.surfaceLight, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
+                    onPress={() => setPatientSecurityConsent(!patientSecurityConsent)}
+                  >
+                    <View style={{ width: 20, height: 20, borderWidth: 2, borderColor: colors.primary, borderRadius: 4, marginRight: 10, alignItems: 'center', justifyContent: 'center' }}>
+                      {patientSecurityConsent && <Text style={{ color: colors.primary, fontSize: 14, fontWeight: 'bold', marginTop: -2 }}>✓</Text>}
+                    </View>
+                    <Text style={{ flex: 1, color: colors.text, fontSize: 12 }}>
+                      I agree to the Patient Security and Privacy terms. I consent to securely share necessary medical transport details with the assigned driver.
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
                 <View style={styles.bookingFooter}>
                   {pickupCoords && (
                     <View style={styles.fareBreakdown}>
@@ -943,7 +958,10 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                     onPress={initiatePayment} 
                     variant="primary" 
                     style={styles.requestButton} 
-                    disabled={serviceCategory === 'ambulance' && vehiclePreference === 'medical_emergency' && !emergencyConsent}
+                    disabled={
+                      (serviceCategory === 'ambulance' && !patientSecurityConsent) || 
+                      (serviceCategory === 'ambulance' && vehiclePreference === 'medical_emergency' && !emergencyConsent)
+                    }
                   />
                 </View>
               </GlassCard>

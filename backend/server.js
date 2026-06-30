@@ -148,7 +148,8 @@ io.on('connection', (socket) => {
       const driver = driverRes.rows[0];
 
       // Security: Strict matching rules
-      if (ride.service_category === 'ambulance' && driver.service_category !== 'ambulance') {
+      const isAmbulanceDriver = driver.service_category === 'ambulance' || driver.vehicle_type === 'ambulance';
+      if (ride.service_category === 'ambulance' && !isAmbulanceDriver) {
         return socket.emit('ride_error', { message: 'Unauthorized: Only Ambulance drivers can accept this request.' });
       }
       if (ride.service_category === 'food') {
@@ -165,7 +166,7 @@ io.on('connection', (socket) => {
       if (ride.service_category === 'ride') {
         if (driver.service_category !== 'ride') return socket.emit('ride_error', { message: 'Unauthorized: Incorrect service category.' });
         if (ride.vehicle_preference === 'bike' && driver.vehicle_type !== 'bike') return socket.emit('ride_error', { message: 'Unauthorized: Rider requested a bike.' });
-        if (ride.vehicle_preference !== 'any' && ride.vehicle_preference !== 'bike' && driver.vehicle_type !== ride.vehicle_preference) {
+        if (ride.vehicle_preference !== 'any' && ride.vehicle_preference !== 'bike' && driver.vehicle_type !== ride.vehicle_preference && driver.vehicle_type !== 'cab') {
            return socket.emit('ride_error', { message: `Unauthorized: Rider requested ${ride.vehicle_preference} cab.` });
         }
       }

@@ -33,10 +33,14 @@ export default function DriverHomeScreen() {
   const [chatText, setChatText] = useState('');
 
   // Driver Preference
-  const [serviceFilter, setServiceFilter] = useState([user?.driverDetails?.serviceCategory === 'ambulance' ? 'medical_emergency' : (user?.driverDetails?.serviceCategory || 'ride')]);
+  const myServiceCat = user?.driverDetails?.serviceCategory;
+  const myVehicleType = user?.driverDetails?.vehicleType;
+  const isAmbulanceDriver = myServiceCat === 'ambulance' || myVehicleType === 'ambulance';
+  const [serviceFilter, setServiceFilter] = useState([isAmbulanceDriver ? 'medical_emergency' : (myServiceCat || 'ride')]);
   const [routeMode, setRouteMode] = useState('any'); // 'any' or 'specific'
   const [specificRouteStart, setSpecificRouteStart] = useState('');
   const [specificRouteEnd, setSpecificRouteEnd] = useState('');
+  const [driverSecurityConsent, setDriverSecurityConsent] = useState({});
 
   const INDIAN_CITIES = [
     { name: 'Delhi', lat: 28.6139, lng: 77.2090 },
@@ -150,17 +154,15 @@ export default function DriverHomeScreen() {
     if (socket && isOnline) {
       socket.on('new_ride_requested', (data) => {
         // Strict Authorization Rules
-        const myServiceCat = user?.driverDetails?.serviceCategory;
-        const myVehicleType = user?.driverDetails?.vehicleType;
 
         // 1. Ambulance strict match
         if (data.serviceCategory === 'ambulance') {
-          if (myServiceCat !== 'ambulance') return;
+          if (!isAmbulanceDriver) return;
           // Filter based on toggle:
           const pref = data.vehiclePreference || 'non_emergency';
           if (!serviceFilter.includes(pref)) return;
         } else {
-          if (myServiceCat === 'ambulance') return; // Ambulance driver can't take other rides
+          if (isAmbulanceDriver) return; // Ambulance driver can't take other rides
         }
 
         // 2. Food/Grocery/Parcel strict match -> ONLY bikes (except parcels > 25kg)
@@ -412,9 +414,7 @@ export default function DriverHomeScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
           {['ride', 'parcel', 'medical_emergency', 'non_emergency', 'food'].filter(f => {
             // Strict role-based rendering of tabs
-            const myServiceCat = user?.driverDetails?.serviceCategory;
-            const myVehicleType = user?.driverDetails?.vehicleType;
-            if (myServiceCat === 'ambulance') return f === 'medical_emergency' || f === 'non_emergency';
+            if (isAmbulanceDriver) return f === 'medical_emergency' || f === 'non_emergency';
             if (myVehicleType === 'bike') return f === 'ride' || f === 'food' || f === 'parcel';
             return f === 'ride' || f === 'parcel'; // Cab drivers
           }).map(f => (
@@ -443,7 +443,7 @@ export default function DriverHomeScreen() {
       </View>
 
       {/* NEW: Route Preference UI (Hidden for Ambulance) */}
-      {user?.driverDetails?.serviceCategory !== 'ambulance' && (
+      {!isAmbulanceDriver && (
         <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
           <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, fontWeight: 'bold' }}>🛣️ Route Preference:</Text>
           <View style={{ flexDirection: 'row', marginBottom: routeMode === 'specific' ? 8 : 0 }}>
@@ -531,9 +531,29 @@ export default function DriverHomeScreen() {
                   </View>
                   <View style={styles.offerButtons}>
                     <TouchableOpacity onPress={() => handleDeclineOffer(req.id)} style={styles.declineBtn}><Text style={styles.declineText}>Decline</Text></TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleAcceptOffer(req)} style={styles.acceptBtn}><Text style={styles.acceptText}>Accept</Text></TouchableOpacity>
+                    <TouchableOpacity 
+                      onPress={() => handleAcceptOffer(req)} 
+                      style={[styles.acceptBtn, req.serviceCategory === 'ambulance' && !driverSecurityConsent[req.id] && { opacity: 0.5 }]}
+                      disabled={req.serviceCategory === 'ambulance' && !driverSecurityConsent[req.id]}
+                    >
+                      <Text style={styles.acceptText}>Accept</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
+                
+                {req.serviceCategory === 'ambulance' && (
+                  <TouchableOpacity 
+                    style={{ marginTop: 12, padding: 8, backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: driverSecurityConsent[req.id] ? colors.primary : colors.surfaceLight, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
+                    onPress={() => setDriverSecurityConsent(prev => ({ ...prev, [req.id]: !prev[req.id] }))}
+                  >
+                    <View style={{ width: 16, height: 16, borderWidth: 2, borderColor: colors.primary, borderRadius: 4, marginRight: 8, alignItems: 'center', justifyContent: 'center' }}>
+                      {driverSecurityConsent[req.id] && <Text style={{ color: colors.primary, fontSize: 12, fontWeight: 'bold', marginTop: -2 }}>✓</Text>}
+                    </View>
+                    <Text style={{ flex: 1, color: colors.text, fontSize: 11 }}>
+                      I agree to maintain strict Patient Security and Privacy during this transport.
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </GlassCard>
             );
           })}
