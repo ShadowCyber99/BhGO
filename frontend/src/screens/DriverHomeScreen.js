@@ -112,7 +112,7 @@ export default function DriverHomeScreen() {
 
   const fetchEarnings = async () => {
     try {
-      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
+      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
       if (res.ok) {
         setEarningsData(await res.json());
       }
@@ -140,7 +140,7 @@ export default function DriverHomeScreen() {
   const fetchChatHistory = async (rideId) => {
     try {
       const res = await fetch(`/api/rides/${rideId}/chat`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` }
       });
       if (res.ok) setChatMessages(await res.json());
     } catch (e) {}
@@ -378,7 +378,7 @@ export default function DriverHomeScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 140, height: 45, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
+              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 60, height: 60, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
               <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold', marginLeft: 4}}>Driver</Text>
             </View>
             <View style={{ marginTop: 6 }}>

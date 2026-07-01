@@ -22,7 +22,7 @@ const inMemoryDb = {
     {
       id: 1,
       name: 'John Rider',
-      email: 'rider@BharatGo.com',
+      email: 'rider@BharatOne.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'rider',
       rating: 4.9,
@@ -32,7 +32,7 @@ const inMemoryDb = {
     {
       id: 2,
       name: 'Sarah Economy Driver',
-      email: 'driver_eco@BharatGo.com',
+      email: 'driver_eco@BharatOne.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.8,
@@ -42,7 +42,7 @@ const inMemoryDb = {
     {
       id: 3,
       name: 'Michael Premium Driver',
-      email: 'driver_premium@BharatGo.com',
+      email: 'driver_premium@BharatOne.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.95,
@@ -52,10 +52,20 @@ const inMemoryDb = {
     {
       id: 4,
       name: 'Elena SUV Driver',
-      email: 'driver_suv@BharatGo.com',
+      email: 'driver_suv@BharatOne.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.75,
+      wallet_balance: 0.00,
+      created_at: new Date()
+    },
+    {
+      id: 5,
+      name: 'Admin System',
+      email: 'admin@BharatOne.com',
+      password_hash: bcrypt.hashSync('password123', 10),
+      role: 'admin',
+      rating: 5.0,
       wallet_balance: 0.00,
       created_at: new Date()
     }
@@ -122,6 +132,24 @@ const inMemoryDb = {
     { id: 6, restaurant_id: 3, name: 'Dragon Roll', description: 'Eel, cucumber, and avocado.', price: 14.00, is_veg: false, image_url: '🍣' },
     { id: 7, restaurant_id: 3, name: 'Spicy Tuna Roll', description: 'Fresh tuna with spicy sauce.', price: 12.00, is_veg: false, image_url: '🍣' }
   ],
+  supermarkets: [
+    { id: 1, name: 'Fresh Mart', category: 'Daily Essentials', rating: 4.6, image_url: '🛒' },
+    { id: 2, name: 'Green Valley Grocers', category: 'Organic & Fresh', rating: 4.8, image_url: '🥦' }
+  ],
+  grocery_items: [
+    { id: 1, supermarket_id: 1, name: 'Fresh Milk 1L', description: 'Full cream milk', price: 2.50, category: 'Dairy', image_url: '🥛' },
+    { id: 2, supermarket_id: 1, name: 'Whole Wheat Bread', description: 'Freshly baked loaf', price: 3.00, category: 'Bakery', image_url: '🍞' },
+    { id: 3, supermarket_id: 1, name: 'A4 Paper Ream', description: '500 sheets of A4 paper', price: 6.99, category: 'Stationery', image_url: '📄' },
+    { id: 4, supermarket_id: 2, name: 'Organic Tomatoes 1kg', description: 'Farm fresh tomatoes', price: 4.50, category: 'Vegetables', image_url: '🍅' },
+    { id: 5, supermarket_id: 2, name: 'Bananas 1 Dozen', description: 'Ripe sweet bananas', price: 3.20, category: 'Fruits', image_url: '🍌' }
+  ],
+  pharmacies: [
+    { id: 1, name: 'Apollo Pharmacy', category: '24/7 Meds', rating: 4.9, image_url: '💊' }
+  ],
+  medicine_items: [
+    { id: 1, pharmacy_id: 1, name: 'Paracetamol 500mg', description: 'Pain relief', price: 1.50, category: 'OTC', image_url: '💊' },
+    { id: 2, pharmacy_id: 1, name: 'Vitamin C Tablets', description: 'Immunity booster', price: 5.00, category: 'Supplements', image_url: '🍋' }
+  ],
   orders: [],
   chat_messages: []
 };
@@ -146,7 +174,7 @@ const initDb = async () => {
     console.warn('❌ DATABASE CONNECTION FAILED:', err.message);
     console.warn('⚡ AUTOMATIC SWITCH TO IN-MEMORY DEMO MODE');
     console.warn('💡 App will work perfectly for demo and testing without setup!');
-    console.warn('💡 To use real PostgreSQL, create the "BharatGo" DB and update .env');
+    console.warn('💡 To use real PostgreSQL, create the "BharatOne" DB and update .env');
     console.warn('================================================================\n');
     useFallback = true;
   }

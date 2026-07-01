@@ -24,7 +24,7 @@ export default function HistoryScreen({ onNavigateBack }) {
   const fetchHistory = async () => {
     try {
       const res = await fetch('/api/rides/history', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` }
       });
       if (!res.ok) throw new Error('Failed to fetch history');
       const data = await res.json();

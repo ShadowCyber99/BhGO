@@ -118,6 +118,8 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const { user, logout, socket, refreshProfile } = useAuth();
   const { colors, themeName, changeTheme, availableThemes, isDarkMode } = useTheme();
   const styles = getStyles(colors);
+  const [activeFlow, setActiveFlow] = useState('dashboard');
+
   
   const [pickupAddress, setPickupAddress] = useState('');
   const [pickupCoords, setPickupCoords] = useState(null);
@@ -150,6 +152,14 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState([]);
+  
+  const [supermarkets, setSupermarkets] = useState([]);
+  const [selectedSupermarket, setSelectedSupermarket] = useState(null);
+  const [groceryItems, setGroceryItems] = useState([]);
+
+  const [pharmacies, setPharmacies] = useState([]);
+  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+  const [medicineItems, setMedicineItems] = useState([]);
 
   // Payment State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -198,7 +208,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     setRefundData(null);
     if (!refundRefId.trim()) return setRefundError('Please enter a Booking Ref ID');
     try {
-      const res = await fetch(`/api/rides/ref/${refundRefId.trim()}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
+      const res = await fetch(`/api/rides/ref/${refundRefId.trim()}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch details');
       setRefundData(data);
@@ -212,7 +222,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       setRefundError('');
       const res = await fetch(`/api/rides/${refundData.id}/refund`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -227,7 +237,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const res = await fetch(`/api/rides/drivers?service=${serviceCategory}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
+        const res = await fetch(`/api/rides/drivers?service=${serviceCategory}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
         if (res.ok) setNearbyDrivers(await res.json());
       } catch (err) {}
     };
@@ -260,12 +270,26 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
   useEffect(() => {
     if (serviceCategory === 'food') {
-      fetch('/api/rides/restaurants', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } })
+      fetch('/api/rides/restaurants', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } })
       .then(res => { if (!res.ok) throw new Error(); return res.json(); })
       .then(data => { if (Array.isArray(data)) setRestaurants(data); })
       .catch(() => {});
     }
   }, [serviceCategory]);
+
+  useEffect(() => {
+    if (activeFlow === 'grocery') {
+      fetch('/api/rides/supermarkets', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } })
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+      .then(data => { if (Array.isArray(data)) setSupermarkets(data); })
+      .catch(() => {});
+    } else if (activeFlow === 'medicine') {
+      fetch('/api/rides/pharmacies', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } })
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+      .then(data => { if (Array.isArray(data)) setPharmacies(data); })
+      .catch(() => {});
+    }
+  }, [activeFlow]);
 
   const [emergencyConsent, setEmergencyConsent] = useState(false);
   const [patientSecurityConsent, setPatientSecurityConsent] = useState(false);
@@ -405,7 +429,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       // 1. Try with city
       let query = `${cleanAddress}, ${city.name}, India`;
       let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
-      let res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
+      let res = await fetch(url, { headers: { 'User-Agent': 'BharatOne-App/1.0' } });
       let data = await res.json();
       
       if (data && data.length > 0) {
@@ -418,7 +442,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       // 2. Try without city (useful for suburbs like Mohali when Chandigarh is selected)
       query = `${cleanAddress}, India`;
       url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
-      res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
+      res = await fetch(url, { headers: { 'User-Agent': 'BharatOne-App/1.0' } });
       data = await res.json();
       
       if (data && data.length > 0) {
@@ -433,7 +457,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
   const reverseGeocode = async (lat, lng) => {
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'BharatOne-App/1.0' } });
       const data = await res.json();
       if (data && data.display_name) {
         return data.display_name.split(',').slice(0, 3).join(',');
@@ -585,7 +609,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     setSelectedRestaurant(rest);
     setCart([]);
     try {
-      const res = await fetch(`/api/rides/restaurants/${rest.id}/menu`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
+      const res = await fetch(`/api/rides/restaurants/${rest.id}/menu`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) setMenuItems(data);
@@ -607,7 +631,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     const ride = await api.requestRide(ridePayload);
     await fetch('/api/rides/order', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` },
       body: JSON.stringify({ rideId: ride.id, restaurantId: selectedRestaurant.id, totalAmount: cartTotal + deliveryFee, itemsJson: cart })
     });
     if (socket) socket.emit('request_ride', ride);
@@ -618,7 +642,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.nav}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 140, height: 45, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 60, height: 60, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
           <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>🇮🇳 India</Text>
         </View>
         <View style={styles.userBox}>
@@ -631,24 +655,75 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
         </View>
       </View>
 
-      <View style={styles.serviceSelectorRibbon}>
-        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ride' && { borderColor: colors.rideColor, backgroundColor: 'rgba(99,102,241,0.1)' }]} onPress={() => setServiceCategory('ride')}>
-          <Image source={{ uri: svgIcons.ride }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'ride' && { color: colors.rideColor, fontWeight: 'bold' }]}>Ride</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ambulance' && { borderColor: colors.ambulanceColor, backgroundColor: 'rgba(239,68,68,0.1)' }]} onPress={() => setServiceCategory('ambulance')}>
-          <Image source={{ uri: svgIcons.ambulance }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'ambulance' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>Ambulance</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'parcel' && { borderColor: colors.parcelColor, backgroundColor: 'rgba(139,92,246,0.1)' }]} onPress={() => setServiceCategory('parcel')}>
-          <Image source={{ uri: svgIcons.parcel }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'parcel' && { color: colors.parcelColor, fontWeight: 'bold' }]}>Parcel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'food' && { borderColor: colors.foodColor, backgroundColor: 'rgba(249,115,22,0.1)' }]} onPress={() => setServiceCategory('food')}>
-          <Image source={{ uri: svgIcons.food }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'food' && { color: colors.foodColor, fontWeight: 'bold' }]}>Food</Text>
-        </TouchableOpacity>
-      </View>
+      {activeFlow === 'dashboard' ? (
+        <View style={{ marginTop: 24, paddingHorizontal: 16 }}>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: colors.text }}>Hello {user?.name?.split(' ')[0] || 'User'} 👋</Text>
+          <Text style={{ fontSize: 16, color: colors.textMuted, marginTop: 4, marginBottom: 24 }}>Where are we going today?</Text>
+
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between' }}>
+            <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('ride'); setActiveFlow('services'); }}>
+              <Text style={{ fontSize: 40 }}>🚖</Text>
+              <Text style={styles.superAppCardText}>Ride</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('ambulance'); setActiveFlow('services'); }}>
+              <Text style={{ fontSize: 40 }}>🚑</Text>
+              <Text style={styles.superAppCardText}>Ambulance</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('food'); setFoodCategoryTab('food'); setActiveFlow('services'); }}>
+              <Text style={{ fontSize: 40 }}>🍔</Text>
+              <Text style={styles.superAppCardText}>Food</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('parcel'); setActiveFlow('services'); }}>
+              <Text style={{ fontSize: 40 }}>📦</Text>
+              <Text style={styles.superAppCardText}>Parcel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.superAppCard} onPress={() => { setActiveFlow('grocery'); }}>
+              <Text style={{ fontSize: 40 }}>🛒</Text>
+              <Text style={styles.superAppCardText}>Grocery</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.superAppCard} onPress={() => { setActiveFlow('medicine'); }}>
+              <Text style={{ fontSize: 40 }}>💊</Text>
+              <Text style={styles.superAppCardText}>Medicine</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ marginTop: 32 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 16 }}>Recent Activity</Text>
+            <GlassCard style={{ padding: 16 }}>
+              <Text style={{ color: colors.textMuted }}>No recent trips found.</Text>
+            </GlassCard>
+          </View>
+        </View>
+      ) : activeFlow === 'services' ? (
+        <View style={{ flex: 1, width: '100%' }}>
+          <View style={{ flexDirection: 'row', paddingHorizontal: 16, marginBottom: 12 }}>
+            <TouchableOpacity onPress={() => setActiveFlow('dashboard')}>
+              <Text style={{ color: colors.primary, fontWeight: 'bold' }}>← Back to Dashboard</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.serviceSelectorRibbon}>
+            <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ride' && { borderColor: colors.rideColor, backgroundColor: 'rgba(99,102,241,0.1)' }]} onPress={() => setServiceCategory('ride')}>
+              <Image source={{ uri: svgIcons.ride }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+              <Text style={[styles.serviceText, serviceCategory === 'ride' && { color: colors.rideColor, fontWeight: 'bold' }]}>Ride</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ambulance' && { borderColor: colors.ambulanceColor, backgroundColor: 'rgba(239,68,68,0.1)' }]} onPress={() => setServiceCategory('ambulance')}>
+              <Image source={{ uri: svgIcons.ambulance }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+              <Text style={[styles.serviceText, serviceCategory === 'ambulance' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>Ambulance</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'parcel' && { borderColor: colors.parcelColor, backgroundColor: 'rgba(139,92,246,0.1)' }]} onPress={() => setServiceCategory('parcel')}>
+              <Image source={{ uri: svgIcons.parcel }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+              <Text style={[styles.serviceText, serviceCategory === 'parcel' && { color: colors.parcelColor, fontWeight: 'bold' }]}>Parcel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'food' && { borderColor: colors.foodColor, backgroundColor: 'rgba(249,115,22,0.1)' }]} onPress={() => setServiceCategory('food')}>
+              <Image source={{ uri: svgIcons.food }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+              <Text style={[styles.serviceText, serviceCategory === 'food' && { color: colors.foodColor, fontWeight: 'bold' }]}>Food</Text>
+            </TouchableOpacity>
+          </View>
 
       {/* GLOBAL MAP VIEW */}
       <MapView 
@@ -695,11 +770,8 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                 <Text style={{ color: colors.text, fontSize: 24, fontWeight: '800' }}>Craving Something?</Text>
                 
                 <View style={styles.foodTabs}>
-                  <TouchableOpacity style={[styles.foodTab, foodCategoryTab === 'food' && styles.foodTabActive]} onPress={() => setFoodCategoryTab('food')}>
-                    <Text style={[styles.foodTabText, foodCategoryTab === 'food' && {color: colors.text}]}>🍽️ Restaurants</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.foodTab, foodCategoryTab === 'grocery' && styles.foodTabActive]} onPress={() => setFoodCategoryTab('grocery')}>
-                    <Text style={[styles.foodTabText, foodCategoryTab === 'grocery' && {color: colors.text}]}>🛒 Groceries</Text>
+                  <TouchableOpacity style={[styles.foodTab, styles.foodTabActive]}>
+                    <Text style={[styles.foodTabText, {color: colors.text}]}>🍽️ Restaurants</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -711,11 +783,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                     <Text style={{ color: colors.text }}>Please re-seed your database with Indian locations.</Text>
                   </View>
                 ) : (
-                  restaurants.filter(r => {
-                    const isMatchCategory = r.category === foodCategoryTab || (!r.category && foodCategoryTab === 'food');
-                    const isCityMatch = (r.city && r.city === selectedCity.name) || r.category === 'grocery'; // Make groceries global for now, or use real city mapping if updated
-                    return isMatchCategory && isCityMatch;
-                  }).map(r => (
+                  restaurants.filter(r => (r.city && r.city === selectedCity.name)).map(r => (
                     <TouchableOpacity key={r.id} style={styles.restaurantCard} onPress={() => openRestaurant(r)}>
                       <Text style={{ fontSize: 40 }}>{r.image_url}</Text>
                       <Text style={styles.restaurantName}>{r.name}</Text>
@@ -1040,7 +1108,57 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
           </View>
         </>
       )}
-
+      </View>
+      ) : activeFlow === 'grocery' || activeFlow === 'medicine' ? (
+        <View style={{ flex: 1, width: '100%', paddingHorizontal: 16 }}>
+           <View style={{ flexDirection: 'row', marginBottom: 20, marginTop: 16 }}>
+            <TouchableOpacity onPress={() => setActiveFlow('dashboard')}>
+              <Text style={{ color: colors.primary, fontWeight: 'bold' }}>← Back to Dashboard</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={{ fontSize: 24, color: colors.text, fontWeight: 'bold', marginBottom: 20 }}>
+            {activeFlow === 'grocery' ? '🛒 Grocery Delivery' : '💊 Medicine Delivery'}
+          </Text>
+          
+          <GlassCard style={{ padding: 20, flex: 1 }}>
+            {activeFlow === 'grocery' ? (
+              <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+                {supermarkets.length === 0 ? (
+                   <View style={{ padding: 20, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: colors.danger, width: '100%' }}>
+                     <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>⚠️ No Supermarkets Found</Text>
+                     <Text style={{ color: colors.text }}>Please re-seed your database with Indian locations.</Text>
+                   </View>
+                ) : (
+                  supermarkets.map(s => (
+                    <TouchableOpacity key={s.id} style={styles.restaurantCard} onPress={() => { setSelectedSupermarket(s); fetch(`/api/rides/supermarkets/${s.id}/items`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } }).then(res=>res.json()).then(setGroceryItems).catch(console.error); }}>
+                      <Text style={{ fontSize: 40 }}>{s.image_url}</Text>
+                      <Text style={styles.restaurantName}>{s.name}</Text>
+                      <Text style={styles.restaurantCuisine}>{s.city} • ⭐ {s.rating}</Text>
+                    </TouchableOpacity>
+                  ))
+                )}
+              </View>
+            ) : (
+              <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+                {pharmacies.length === 0 ? (
+                   <View style={{ padding: 20, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: colors.danger, width: '100%' }}>
+                     <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>⚠️ No Pharmacies Found</Text>
+                     <Text style={{ color: colors.text }}>Please re-seed your database with Indian locations.</Text>
+                   </View>
+                ) : (
+                  pharmacies.map(p => (
+                    <TouchableOpacity key={p.id} style={styles.restaurantCard} onPress={() => { setSelectedPharmacy(p); fetch(`/api/rides/pharmacies/${p.id}/items`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } }).then(res=>res.json()).then(setMedicineItems).catch(console.error); }}>
+                      <Text style={{ fontSize: 40 }}>{p.image_url}</Text>
+                      <Text style={styles.restaurantName}>{p.name}</Text>
+                      <Text style={styles.restaurantCuisine}>{p.city} • ⭐ {p.rating}</Text>
+                    </TouchableOpacity>
+                  ))
+                )}
+              </View>
+            )}
+          </GlassCard>
+        </View>
+      ) : null}
       {/* SECURE PAYMENT MODAL */}
       <Modal visible={showPaymentModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
@@ -1371,6 +1489,27 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 const getStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 24, paddingBottom: 60 },
+  superAppCard: {
+    backgroundColor: colors.surfaceLight,
+    padding: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    width: '47%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5
+  },
+  superAppCardText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
   nav: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 

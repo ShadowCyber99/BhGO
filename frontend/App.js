@@ -11,6 +11,7 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import RiderHomeScreen from './src/screens/RiderHomeScreen';
 import RideActiveScreen from './src/screens/RideActiveScreen';
 import DriverHomeScreen from './src/screens/DriverHomeScreen';
+import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
 
 import HistoryScreen from './src/screens/HistoryScreen';
 
@@ -28,7 +29,7 @@ function MainApp() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#040508' }}>
         <ActivityIndicator size="large" color="#A3E635" />
-        <Text style={{ color: '#94A3B8', marginTop: 16, fontSize: 16, fontWeight: '600' }}>Initializing BharatGo Space...</Text>
+        <Text style={{ color: '#94A3B8', marginTop: 16, fontSize: 16, fontWeight: '600' }}>Initializing BharatOne Space...</Text>
       </View>
     );
   }
@@ -42,12 +43,17 @@ function MainApp() {
     );
   }
 
-  // --- 2. AUTHENTICATED DRIVER ROUTING ---
+  // --- 2. AUTHENTICATED ADMIN ROUTING ---
+  if (user.role === 'admin') {
+    return <AdminDashboardScreen />;
+  }
+
+  // --- 3. AUTHENTICATED DRIVER ROUTING ---
   if (user.role === 'driver') {
     return <DriverHomeScreen />;
   }
 
-  // --- 3. AUTHENTICATED RIDER ROUTING ---
+  // --- 4. AUTHENTICATED RIDER ROUTING ---
   if (riderScreen === 'history') {
     return <HistoryScreen onNavigateBack={() => setRiderScreen('home')} />;
   }

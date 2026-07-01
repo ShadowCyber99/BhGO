@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'BharatGo-backend',
+      name: 'BharatOne-backend',
       script: 'server.js',
       instances: 'max', // Use all available CPU cores
       exec_mode: 'cluster',

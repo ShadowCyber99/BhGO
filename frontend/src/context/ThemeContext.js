@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const baseColors = {
-  // Brand Colors based on BharatGo logo
+  // Brand Colors based on BharatOne logo
   primary: '#F97316', // Vibrant Orange from the logo
   primaryHover: '#FB923C',
   secondary: '#0F172A', // Navy Blue from 'bharat' text
@@ -22,7 +22,7 @@ const baseColors = {
 
 export const themes = {
   dark: {
-    name: 'BharatGo Dark',
+    name: 'BharatOne Dark',
     ...baseColors,
     background: '#0B0C10',
     surface: '#12141A',
@@ -38,7 +38,7 @@ export const themes = {
     overlayBorder: 'rgba(255, 255, 255, 0.15)'
   },
   light: {
-    name: 'BharatGo Light',
+    name: 'BharatOne Light',
     ...baseColors,
     primary: '#0F172A', // Use Navy for primary in light mode for better contrast
     primaryHover: '#1E293B',
@@ -66,7 +66,7 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem('BharatGo_theme');
+      const savedTheme = localStorage.getItem('BharatOne_theme');
       if (savedTheme && themes[savedTheme]) {
         setThemeName(savedTheme);
       } else if (savedTheme === 'light') {
@@ -78,7 +78,7 @@ export const ThemeProvider = ({ children }) => {
   const changeTheme = (name) => {
     setThemeName(name);
     try {
-      localStorage.setItem('BharatGo_theme', name);
+      localStorage.setItem('BharatOne_theme', name);
     } catch(e) {}
   };
 

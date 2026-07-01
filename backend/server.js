@@ -413,7 +413,7 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 5000;
 db.initDb().then(() => {
   server.listen(PORT, () => {
-    console.log(`🚀 BharatGo API + Socket Server running on port ${PORT}`);
+    console.log(`🚀 BharatOne API + Socket Server running on port ${PORT}`);
     console.log(`💡 Mode: ${db.getUseFallback() ? 'In-Memory Simulation' : 'PostgreSQL Database Connection'}`);
   });
 });
