@@ -2,6 +2,10 @@
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS chat_messages CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS medicine_items CASCADE;
+DROP TABLE IF EXISTS pharmacies CASCADE;
+DROP TABLE IF EXISTS grocery_items CASCADE;
+DROP TABLE IF EXISTS supermarkets CASCADE;
 DROP TABLE IF EXISTS menu_items CASCADE;
 DROP TABLE IF EXISTS restaurants CASCADE;
 DROP TABLE IF EXISTS rides CASCADE;
@@ -106,6 +110,44 @@ CREATE TABLE reviews (
     tags JSONB,
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE supermarkets (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    rating DECIMAL(3,2) DEFAULT 4.5,
+    image_url TEXT,
+    city VARCHAR(50) DEFAULT 'Delhi'
+);
+
+CREATE TABLE grocery_items (
+    id SERIAL PRIMARY KEY,
+    supermarket_id INTEGER REFERENCES supermarkets(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    image_url TEXT
+);
+
+CREATE TABLE pharmacies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    rating DECIMAL(3,2) DEFAULT 4.5,
+    image_url TEXT,
+    city VARCHAR(50) DEFAULT 'Delhi'
+);
+
+CREATE TABLE medicine_items (
+    id SERIAL PRIMARY KEY,
+    pharmacy_id INTEGER REFERENCES pharmacies(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    image_url TEXT
 );
 
 -- Seed Restaurants (15 Food, 6 Groceries)

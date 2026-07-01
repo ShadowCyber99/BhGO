@@ -137,7 +137,7 @@ const inMemoryDb = {
     { id: 2, name: 'BlinkIt Fresh', category: 'Daily Essentials', rating: 4.8, image_url: '🛍️' },
     { id: 3, name: 'Reliance Smart', category: 'Supermarket', rating: 4.5, image_url: '🏬' },
     { id: 4, name: 'D-Mart Specials', category: 'Discount Groceries', rating: 4.6, image_url: '🏪' },
-    { id: 5, name: "Nature''s Basket", category: 'Premium Grocery', rating: 4.8, image_url: '🥑' },
+    { id: 5, name: "Nature's Basket", category: 'Premium Grocery', rating: 4.8, image_url: '🥑' },
     { id: 6, name: 'Local Kirana', category: 'Neighborhood Store', rating: 4.4, image_url: '🏪' },
     { id: 7, name: 'Croma Express', category: 'Electronics', rating: 4.5, image_url: '🔌' },
     { id: 8, name: 'Licious', category: 'Fresh Meat & Seafood', rating: 4.7, image_url: '🥩' }
