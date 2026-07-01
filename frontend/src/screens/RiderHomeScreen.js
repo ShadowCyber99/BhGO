@@ -662,22 +662,30 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between' }}>
             <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('ride'); setActiveFlow('services'); }}>
-              <Text style={{ fontSize: 40 }}>🚖</Text>
+              <View style={[styles.iconCircle, { backgroundColor: 'rgba(99,102,241,0.1)' }]}>
+                <Image source={{ uri: svgIcons.ride }} style={{ width: 36, height: 36 }} />
+              </View>
               <Text style={styles.superAppCardText}>Ride</Text>
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('ambulance'); setActiveFlow('services'); }}>
-              <Text style={{ fontSize: 40 }}>🚑</Text>
+              <View style={[styles.iconCircle, { backgroundColor: 'rgba(239,68,68,0.1)' }]}>
+                <Image source={{ uri: svgIcons.ambulance }} style={{ width: 36, height: 36 }} />
+              </View>
               <Text style={styles.superAppCardText}>Ambulance</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('food'); setFoodCategoryTab('food'); setActiveFlow('services'); }}>
-              <Text style={{ fontSize: 40 }}>🍔</Text>
+              <View style={[styles.iconCircle, { backgroundColor: 'rgba(249,115,22,0.1)' }]}>
+                <Image source={{ uri: svgIcons.food }} style={{ width: 36, height: 36 }} />
+              </View>
               <Text style={styles.superAppCardText}>Food</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.superAppCard} onPress={() => { setServiceCategory('parcel'); setActiveFlow('services'); }}>
-              <Text style={{ fontSize: 40 }}>📦</Text>
+              <View style={[styles.iconCircle, { backgroundColor: 'rgba(139,92,246,0.1)' }]}>
+                <Image source={{ uri: svgIcons.parcel }} style={{ width: 36, height: 36 }} />
+              </View>
               <Text style={styles.superAppCardText}>Parcel</Text>
             </TouchableOpacity>
 
@@ -1188,22 +1196,32 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                     <Text style={{ fontSize: 24 }}>📱</Text>
                     <View>
                       <Text style={{ color: colors.text, fontWeight: 'bold' }}>UPI / Scan QR</Text>
-                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>GPay, PhonePe, Paytm, BHIM</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>Paytm, PhonePe, GPay, BHIM</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
 
                 {paymentMode === 'upi' && (
-                  <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 12, borderRadius: 8, marginBottom: 12, alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', gap: 16, marginBottom: 12 }}>
-                      <Text style={{ fontSize: 30 }}>🇬</Text>
-                      <Text style={{ fontSize: 30 }}>🅿️</Text>
-                      <Text style={{ fontSize: 30 }}>🅱️</Text>
+                  <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 12, marginBottom: 12, alignItems: 'center', borderWidth: 1, borderColor: colors.glassBorder }}>
+                    <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 12 }}>Pay using any UPI App</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16, justifyContent: 'center' }}>
+                      <View style={{ backgroundColor: '#002970', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+                        <Text style={{ color: '#00BAF2', fontWeight: 'bold', fontSize: 13 }}>Paytm</Text>
+                      </View>
+                      <View style={{ backgroundColor: '#5E35B1', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>PhonePe</Text>
+                      </View>
+                      <View style={{ backgroundColor: '#FFF', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, borderWidth: 1, borderColor: '#DADCE0' }}>
+                        <Text style={{ color: '#3C4043', fontWeight: 'bold', fontSize: 13 }}>GPay</Text>
+                      </View>
+                      <View style={{ backgroundColor: '#E65100', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>BHIM</Text>
+                      </View>
                     </View>
-                    <View style={{ width: 120, height: 120, backgroundColor: '#FFF', padding: 8, borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ fontSize: 60, color: '#000' }}>🔲</Text>
+                    <View style={{ width: 140, height: 140, backgroundColor: '#FFF', padding: 10, borderRadius: 12, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5 }}>
+                      <Text style={{ fontSize: 70, color: '#000' }}>🔲</Text>
                     </View>
-                    <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Scan to Pay ₹{paymentAmount.toFixed(2)}</Text>
+                    <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 12, fontWeight: '600' }}>Scan to Pay ₹{paymentAmount.toFixed(2)}</Text>
                   </View>
                 )}
 
@@ -1214,8 +1232,8 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                     <Text style={{ fontSize: 24 }}>💳</Text>
                     <View>
-                      <Text style={{ color: colors.text, fontWeight: 'bold' }}>Digital Wallet</Text>
-                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>Balance: ₹999.00</Text>
+                      <Text style={{ color: colors.text, fontWeight: 'bold' }}>BharatOne Wallet</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>Available Balance: ₹999.00</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -1610,6 +1628,7 @@ const getStyles = (colors) => StyleSheet.create({
   profileMenuText: { color: colors.text, fontSize: 16, fontWeight: '600' },
 
   fareBreakdown: { marginBottom: 16 },
+  iconCircle: { width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   fareText: { color: colors.rideColor, fontSize: 24, fontWeight: '900', marginBottom: 4 },
   paymentInfoText: { color: colors.textMuted, fontSize: 13 },
   surgeBadge: { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderWidth: 1, borderColor: '#EAB308', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, alignSelf: 'flex-start', marginBottom: 8 },

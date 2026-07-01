@@ -125,24 +125,33 @@ INSERT INTO restaurants (id, name, cuisine, rating, image_url, category) VALUES
 (13, 'Bikanervala', 'Sweets & Snacks', 4.6, '🥨', 'food'),
 (14, 'Rajdhani Thali', 'Rajasthani', 4.8, '🍱', 'food'),
 (15, 'Tunday Kababi', 'Awadhi', 4.9, '🥩', 'food'),
-
--- Grocery Stores
-(16, 'BigBasket Local', 'Groceries', 4.7, '🛒', 'grocery'),
-(17, 'BlinkIt Fresh', 'Daily Essentials', 4.8, '🛍️', 'grocery'),
-(18, 'Reliance Smart', 'Supermarket', 4.5, '🏬', 'grocery'),
-(19, 'D-Mart Specials', 'Discount Groceries', 4.6, '🏪', 'grocery'),
-(20, 'Nature''s Basket', 'Premium Grocery', 4.8, '🥑', 'grocery'),
-(21, 'Local Kirana', 'Neighborhood Store', 4.4, '🏪', 'grocery'),
-
--- New Additions
-(22, 'Apollo Pharmacy', 'Medicines & Health', 4.8, '💊', 'grocery'),
-(23, 'Croma Express', 'Electronics', 4.5, '🔌', 'grocery'),
-(24, 'Licious', 'Fresh Meat & Seafood', 4.7, '🥩', 'grocery'),
-(25, 'Sweet Tooth Desserts', 'Desserts & Cakes', 4.9, '🎂', 'food'),
-(26, 'Subway Sandwiches', 'Healthy Fast Food', 4.3, '🥪', 'food');
+(16, 'Sweet Tooth Desserts', 'Desserts & Cakes', 4.9, '🎂', 'food'),
+(17, 'Subway Sandwiches', 'Healthy Fast Food', 4.3, '🥪', 'food');
 
 -- Reset Sequence for restaurants
-SELECT setval('restaurants_id_seq', 26);
+SELECT setval('restaurants_id_seq', 17);
+
+-- Seed Supermarkets
+INSERT INTO supermarkets (id, name, category, rating, image_url) VALUES 
+(1, 'BigBasket Local', 'Groceries', 4.7, '🛒'),
+(2, 'BlinkIt Fresh', 'Daily Essentials', 4.8, '🛍️'),
+(3, 'Reliance Smart', 'Supermarket', 4.5, '🏬'),
+(4, 'D-Mart Specials', 'Discount Groceries', 4.6, '🏪'),
+(5, 'Nature''s Basket', 'Premium Grocery', 4.8, '🥑'),
+(6, 'Local Kirana', 'Neighborhood Store', 4.4, '🏪'),
+(7, 'Croma Express', 'Electronics', 4.5, '🔌'),
+(8, 'Licious', 'Fresh Meat & Seafood', 4.7, '🥩');
+
+SELECT setval('supermarkets_id_seq', 8);
+
+-- Seed Pharmacies
+INSERT INTO pharmacies (id, name, category, rating, image_url) VALUES 
+(1, 'Apollo Pharmacy', 'Medicines & Health', 4.8, '💊'),
+(2, 'NetMeds Local', '24/7 Meds', 4.7, '⚕️'),
+(3, '1mg Store', 'Healthcare', 4.6, '🩹'),
+(4, 'Wellness Forever', 'Pharmacy', 4.9, '🩺');
+
+SELECT setval('pharmacies_id_seq', 4);
 
 -- Seed Menu Items (30+ Food)
 INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_url) VALUES 
@@ -209,54 +218,56 @@ INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_u
 
 -- Seed Grocery Items (20+ Items)
 INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_url) VALUES 
--- BigBasket Local
-(16, 'Aashirvaad Atta (5kg)', 'Whole wheat flour.', 245.00, TRUE, '🌾'),
-(16, 'Daawat Basmati Rice (1kg)', 'Premium long grain rice.', 180.00, TRUE, '🍚'),
-(16, 'Tata Salt (1kg)', 'Iodized salt.', 28.00, TRUE, '🧂'),
-(16, 'Madhur Sugar (1kg)', 'Refined sugar.', 55.00, TRUE, '🍬'),
--- BlinkIt Fresh
-(17, 'Amul Taaza Milk (1L)', 'Toned fresh milk.', 68.00, TRUE, '🥛'),
-(17, 'Amul Butter (100g)', 'Pasteurized butter.', 56.00, TRUE, '🧈'),
-(17, 'Amul Paneer (200g)', 'Fresh cottage cheese.', 90.00, TRUE, '🧀'),
-(17, 'Britannia Bread', 'Sliced white bread.', 45.00, TRUE, '🍞'),
--- Reliance Smart
-(18, 'Fresh Onions (1kg)', 'Locally sourced onions.', 35.00, TRUE, '🧅'),
-(18, 'Fresh Potatoes (1kg)', 'Farm fresh potatoes.', 30.00, TRUE, '🥔'),
-(18, 'Fresh Tomatoes (1kg)', 'Red ripe tomatoes.', 40.00, TRUE, '🍅'),
-(18, 'Green Chillies (250g)', 'Spicy fresh chillies.', 25.00, TRUE, '🌶️'),
--- D-Mart Specials
-(19, 'Maggi Noodles (4 Pack)', '2-minute instant noodles.', 56.00, TRUE, '🍜'),
-(19, 'Fortune Sunflower Oil (1L)', 'Refined edible oil.', 145.00, TRUE, '🛢️'),
-(19, 'Surf Excel Detergent (1kg)', 'Washing powder.', 130.00, TRUE, '🧼'),
-(19, 'Colgate Toothpaste (150g)', 'Strong teeth formula.', 95.00, TRUE, '🪥'),
--- Nature''s Basket
-(20, 'Everest Turmeric Powder', 'Haldi powder 100g.', 35.00, TRUE, '🌿'),
-(20, 'Everest Red Chilli Powder', 'Spicy lal mirch 100g.', 40.00, TRUE, '🌶️'),
-(20, 'Tata Tea Gold (250g)', 'Premium tea leaves.', 145.00, TRUE, '🫖'),
-(20, 'Bru Instant Coffee (50g)', 'Instant coffee blend.', 95.00, TRUE, '☕'),
--- Local Kirana
-(21, 'Fresh Bananas (6pcs)', 'Robusta bananas.', 40.00, TRUE, '🍌'),
-(21, 'Apples (1kg)', 'Kashmiri apples.', 200.00, TRUE, '🍎'),
-(21, 'Eggs (1 Dozen)', 'Farm fresh eggs.', 80.00, FALSE, '🥚'),
-(21, 'Toor Dal (1kg)', 'Yellow split pigeon peas.', 160.00, TRUE, '🥣'),
-
--- Apollo Pharmacy
-(22, 'Paracetamol (10 Tablets)', 'Fever reducer.', 35.00, TRUE, '💊'),
-(22, 'First Aid Kit', 'Bandages and antiseptics.', 250.00, TRUE, '🩹'),
-(22, 'Vitamin C (30 Tablets)', 'Immunity booster.', 120.00, TRUE, '🍋'),
-
--- Croma Express
-(23, 'USB-C Charging Cable', 'Fast charging cable 1m.', 350.00, TRUE, '🔌'),
-(23, 'AA Batteries (Pack of 4)', 'Alkaline batteries.', 90.00, TRUE, '🔋'),
-
--- Licious
-(24, 'Chicken Breast (500g)', 'Boneless, skinless chicken.', 280.00, FALSE, '🍗'),
-(24, 'Fresh Prawns (250g)', 'Cleaned and deveined.', 450.00, FALSE, '🦐'),
-
 -- Sweet Tooth Desserts
-(25, 'Chocolate Truffle Pastry', 'Rich chocolate cake slice.', 120.00, TRUE, '🍰'),
-(25, 'Red Velvet Cupcake', 'With cream cheese frosting.', 90.00, TRUE, '🧁'),
+(16, 'Chocolate Truffle Pastry', 'Rich chocolate cake slice.', 120.00, TRUE, '🍰'),
+(16, 'Red Velvet Cupcake', 'With cream cheese frosting.', 90.00, TRUE, '🧁'),
 
 -- Subway Sandwiches
-(26, 'Paneer Tikka Sub (15cm)', 'Toasted sub with fresh veggies.', 180.00, TRUE, '🥪'),
-(26, 'Chicken Teriyaki Sub (15cm)', 'Classic chicken sub.', 220.00, FALSE, '🌯');
+(17, 'Paneer Tikka Sub (15cm)', 'Toasted sub with fresh veggies.', 180.00, TRUE, '🥪'),
+(17, 'Chicken Teriyaki Sub (15cm)', 'Classic chicken sub.', 220.00, FALSE, '🌯');
+
+-- Seed Grocery Items
+INSERT INTO grocery_items (supermarket_id, name, description, price, category, image_url) VALUES 
+-- BigBasket Local
+(1, 'Aashirvaad Atta (5kg)', 'Whole wheat flour.', 245.00, 'Staples', '🌾'),
+(1, 'Daawat Basmati Rice (1kg)', 'Premium long grain rice.', 180.00, 'Staples', '🍚'),
+(1, 'Tata Salt (1kg)', 'Iodized salt.', 28.00, 'Staples', '🧂'),
+(1, 'Madhur Sugar (1kg)', 'Refined sugar.', 55.00, 'Staples', '🍬'),
+-- BlinkIt Fresh
+(2, 'Amul Taaza Milk (1L)', 'Toned fresh milk.', 68.00, 'Dairy', '🥛'),
+(2, 'Amul Butter (100g)', 'Pasteurized butter.', 56.00, 'Dairy', '🧈'),
+(2, 'Amul Paneer (200g)', 'Fresh cottage cheese.', 90.00, 'Dairy', '🧀'),
+(2, 'Britannia Bread', 'Sliced white bread.', 45.00, 'Bakery', '🍞'),
+-- Reliance Smart
+(3, 'Fresh Onions (1kg)', 'Locally sourced onions.', 35.00, 'Vegetables', '🧅'),
+(3, 'Fresh Potatoes (1kg)', 'Farm fresh potatoes.', 30.00, 'Vegetables', '🥔'),
+(3, 'Fresh Tomatoes (1kg)', 'Red ripe tomatoes.', 40.00, 'Vegetables', '🍅'),
+(3, 'Green Chillies (250g)', 'Spicy fresh chillies.', 25.00, 'Vegetables', '🌶️'),
+-- D-Mart Specials
+(4, 'Maggi Noodles (4 Pack)', '2-minute instant noodles.', 56.00, 'Snacks', '🍜'),
+(4, 'Fortune Sunflower Oil (1L)', 'Refined edible oil.', 145.00, 'Staples', '🛢️'),
+(4, 'Surf Excel Detergent (1kg)', 'Washing powder.', 130.00, 'Cleaning', '🧼'),
+(4, 'Colgate Toothpaste (150g)', 'Strong teeth formula.', 95.00, 'Personal Care', '🪥'),
+-- Nature''s Basket
+(5, 'Everest Turmeric Powder', 'Haldi powder 100g.', 35.00, 'Spices', '🌿'),
+(5, 'Everest Red Chilli Powder', 'Spicy lal mirch 100g.', 40.00, 'Spices', '🌶️'),
+(5, 'Tata Tea Gold (250g)', 'Premium tea leaves.', 145.00, 'Beverages', '🫖'),
+(5, 'Bru Instant Coffee (50g)', 'Instant coffee blend.', 95.00, 'Beverages', '☕'),
+-- Local Kirana
+(6, 'Fresh Bananas (6pcs)', 'Robusta bananas.', 40.00, 'Fruits', '🍌'),
+(6, 'Apples (1kg)', 'Kashmiri apples.', 200.00, 'Fruits', '🍎'),
+(6, 'Eggs (1 Dozen)', 'Farm fresh eggs.', 80.00, 'Dairy & Eggs', '🥚'),
+(6, 'Toor Dal (1kg)', 'Yellow split pigeon peas.', 160.00, 'Staples', '🥣'),
+-- Croma Express
+(7, 'USB-C Charging Cable', 'Fast charging cable 1m.', 350.00, 'Electronics', '🔌'),
+(7, 'AA Batteries (Pack of 4)', 'Alkaline batteries.', 90.00, 'Electronics', '🔋'),
+-- Licious
+(8, 'Chicken Breast (500g)', 'Boneless, skinless chicken.', 280.00, 'Meat', '🍗'),
+(8, 'Fresh Prawns (250g)', 'Cleaned and deveined.', 450.00, 'Seafood', '🦐');
+
+-- Seed Medicine Items
+INSERT INTO medicine_items (pharmacy_id, name, description, price, category, image_url) VALUES 
+-- Apollo Pharmacy
+(1, 'Paracetamol (10 Tablets)', 'Fever reducer.', 35.00, 'OTC', '💊'),
+(1, 'First Aid Kit', 'Bandages and antiseptics.', 250.00, 'First Aid', '🩹'),
+(1, 'Vitamin C (30 Tablets)', 'Immunity booster.', 120.00, 'Supplements', '🍋');

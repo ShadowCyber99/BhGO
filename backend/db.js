@@ -133,18 +133,27 @@ const inMemoryDb = {
     { id: 7, restaurant_id: 3, name: 'Spicy Tuna Roll', description: 'Fresh tuna with spicy sauce.', price: 12.00, is_veg: false, image_url: '🍣' }
   ],
   supermarkets: [
-    { id: 1, name: 'Fresh Mart', category: 'Daily Essentials', rating: 4.6, image_url: '🛒' },
-    { id: 2, name: 'Green Valley Grocers', category: 'Organic & Fresh', rating: 4.8, image_url: '🥦' }
+    { id: 1, name: 'BigBasket Local', category: 'Groceries', rating: 4.7, image_url: '🛒' },
+    { id: 2, name: 'BlinkIt Fresh', category: 'Daily Essentials', rating: 4.8, image_url: '🛍️' },
+    { id: 3, name: 'Reliance Smart', category: 'Supermarket', rating: 4.5, image_url: '🏬' },
+    { id: 4, name: 'D-Mart Specials', category: 'Discount Groceries', rating: 4.6, image_url: '🏪' },
+    { id: 5, name: 'Nature''s Basket', category: 'Premium Grocery', rating: 4.8, image_url: '🥑' },
+    { id: 6, name: 'Local Kirana', category: 'Neighborhood Store', rating: 4.4, image_url: '🏪' },
+    { id: 7, name: 'Croma Express', category: 'Electronics', rating: 4.5, image_url: '🔌' },
+    { id: 8, name: 'Licious', category: 'Fresh Meat & Seafood', rating: 4.7, image_url: '🥩' }
   ],
   grocery_items: [
-    { id: 1, supermarket_id: 1, name: 'Fresh Milk 1L', description: 'Full cream milk', price: 2.50, category: 'Dairy', image_url: '🥛' },
-    { id: 2, supermarket_id: 1, name: 'Whole Wheat Bread', description: 'Freshly baked loaf', price: 3.00, category: 'Bakery', image_url: '🍞' },
-    { id: 3, supermarket_id: 1, name: 'A4 Paper Ream', description: '500 sheets of A4 paper', price: 6.99, category: 'Stationery', image_url: '📄' },
-    { id: 4, supermarket_id: 2, name: 'Organic Tomatoes 1kg', description: 'Farm fresh tomatoes', price: 4.50, category: 'Vegetables', image_url: '🍅' },
-    { id: 5, supermarket_id: 2, name: 'Bananas 1 Dozen', description: 'Ripe sweet bananas', price: 3.20, category: 'Fruits', image_url: '🍌' }
+    { id: 1, supermarket_id: 1, name: 'Aashirvaad Atta (5kg)', description: 'Whole wheat flour.', price: 245.00, category: 'Staples', image_url: '🌾' },
+    { id: 2, supermarket_id: 1, name: 'Daawat Basmati Rice (1kg)', description: 'Premium long grain rice.', price: 180.00, category: 'Staples', image_url: '🍚' },
+    { id: 3, supermarket_id: 1, name: 'Tata Salt (1kg)', description: 'Iodized salt.', price: 28.00, category: 'Staples', image_url: '🧂' },
+    { id: 4, supermarket_id: 2, name: 'Amul Taaza Milk (1L)', description: 'Toned fresh milk.', price: 68.00, category: 'Dairy', image_url: '🥛' },
+    { id: 5, supermarket_id: 2, name: 'Amul Butter (100g)', description: 'Pasteurized butter.', price: 56.00, category: 'Dairy', image_url: '🧈' }
   ],
   pharmacies: [
-    { id: 1, name: 'Apollo Pharmacy', category: '24/7 Meds', rating: 4.9, image_url: '💊' }
+    { id: 1, name: 'Apollo Pharmacy', category: 'Medicines & Health', rating: 4.8, image_url: '💊' },
+    { id: 2, name: 'NetMeds Local', category: '24/7 Meds', rating: 4.7, image_url: '⚕️' },
+    { id: 3, name: '1mg Store', category: 'Healthcare', rating: 4.6, image_url: '🩹' },
+    { id: 4, name: 'Wellness Forever', category: 'Pharmacy', rating: 4.9, image_url: '🩺' }
   ],
   medicine_items: [
     { id: 1, pharmacy_id: 1, name: 'Paracetamol 500mg', description: 'Pain relief', price: 1.50, category: 'OTC', image_url: '💊' },
