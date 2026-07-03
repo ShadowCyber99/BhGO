@@ -62,15 +62,13 @@ export const themes = {
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [themeName, setThemeName] = useState('dark');
+  const [themeName, setThemeName] = useState('light');
 
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem('BharatOne_theme');
       if (savedTheme && themes[savedTheme]) {
         setThemeName(savedTheme);
-      } else if (savedTheme === 'light') {
-        setThemeName('light');
       }
     } catch (e) {}
   }, []);
@@ -87,7 +85,7 @@ export const ThemeProvider = ({ children }) => {
     changeTheme(newMode);
   };
 
-  const theme = themes[themeName] || themes.dark;
+  const theme = themes[themeName] || themes.light;
   const isDarkMode = themeName !== 'light';
 
   const availableThemes = Object.keys(themes).map(k => ({id: k, name: themes[k].name}));

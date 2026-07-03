@@ -1,4 +1,4 @@
 Role	Email / Username	Password
-Admin	admin@BharatGo.com	Admin@123
+Admin	admin@BharatOne.com	Admin@123
 Rider	rider@example.com	Rider@123
 Driver	driver@example.com	Driver@123

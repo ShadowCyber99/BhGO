@@ -7,10 +7,10 @@ require('dotenv').config();
 const pgConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
-  user: process.env.DB_USER || 'devops',
-  password: process.env.DB_PASSWORD || 'Shadow99@@',
-  database: process.env.DB_NAME || 'cab_ride',
-  connectionTimeoutMillis: 3000, // Timeout fast if Postgres is offline
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'postgres',
+  connectionTimeoutMillis: 3000, 
 };
 
 let pool = null;
@@ -179,13 +179,19 @@ const initDb = async () => {
     client.release();
     useFallback = false;
   } catch (err) {
-    console.warn('\n================================================================');
-    console.warn('❌ DATABASE CONNECTION FAILED:', err.message);
-    console.warn('⚡ AUTOMATIC SWITCH TO IN-MEMORY DEMO MODE');
-    console.warn('💡 App will work perfectly for demo and testing without setup!');
-    console.warn('💡 To use real PostgreSQL, create the "BharatOne" DB and update .env');
-    console.warn('================================================================\n');
-    useFallback = true;
+    if (process.env.USE_DEMO_DB === 'true') {
+      console.warn('\n================================================================');
+      console.warn('⚠️ DATABASE CONNECTION FAILED:', err.message);
+      console.warn('⚠️ AUTOMATIC SWITCH TO IN-MEMORY DEMO MODE');
+      console.warn('💡 App will work perfectly for demo and testing without setup!');
+      console.warn('💡 To use real PostgreSQL, create the "BharatOne" DB and update .env');
+      console.warn('================================================================\n');
+      useFallback = true;
+    } else {
+      console.error('❌ DATABASE CONNECTION FAILED:', err.message);
+      console.error('❌ USE_DEMO_DB is not set to true. Exiting.');
+      process.exit(1);
+    }
   }
 };
 

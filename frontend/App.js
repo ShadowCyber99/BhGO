@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { NavigationProvider, useNavigation } from './src/context/NavigationContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 // Screens
@@ -12,18 +13,11 @@ import RiderHomeScreen from './src/screens/RiderHomeScreen';
 import RideActiveScreen from './src/screens/RideActiveScreen';
 import DriverHomeScreen from './src/screens/DriverHomeScreen';
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
-
 import HistoryScreen from './src/screens/HistoryScreen';
 
 function MainApp() {
   const { user, loading, isAuthenticated } = useAuth();
-  
-  // Custom light navigation state triggers
-  const [authScreen, setAuthScreen] = useState('login'); // 'login' | 'register'
-  const [riderScreen, setRiderScreen] = useState('home'); // 'home' | 'active_ride' | 'history'
-
-  // Global hack for RiderHomeScreen to access setRiderScreen without prop drilling
-  window.setRiderScreen = setRiderScreen;
+  const { authScreen, setAuthScreen, riderScreen, setRiderScreen } = useNavigation();
 
   if (loading) {
     return (
@@ -70,10 +64,12 @@ export default function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <AuthProvider>
-          <View style={{ flex: 1 }}>
-            <StatusBar style="auto" />
-            <MainApp />
-          </View>
+          <NavigationProvider>
+            <View style={{ flex: 1 }}>
+              <StatusBar style="auto" />
+              <MainApp />
+            </View>
+          </NavigationProvider>
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>

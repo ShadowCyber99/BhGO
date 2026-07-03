@@ -19,7 +19,9 @@ export function AuthProvider({ children }) {
       const socketUrl = process.env.EXPO_PUBLIC_API_URL 
         ? process.env.EXPO_PUBLIC_API_URL.replace('/api', '') 
         : '/';
-      const newSocket = io(socketUrl);
+      const newSocket = io(socketUrl, {
+        auth: { token }
+      });
       
       newSocket.on('connect', () => {
         console.log('✅ WebSocket Client Connected to Backend');

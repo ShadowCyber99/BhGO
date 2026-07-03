@@ -7,7 +7,10 @@ const db = require('../db');
 const auth = require('../middleware/auth');
 
 require('dotenv').config();
-const JWT_SECRET = process.env.JWT_SECRET || 'BharatOne-super-secret-key-change-in-prod';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.warn("WARNING: JWT_SECRET is not set in environment variables.");
+}
 
 // @route   POST /api/auth/register
 // @desc    Register a rider or driver

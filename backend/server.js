@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
@@ -9,6 +10,7 @@ const db = require('./db');
 
 const authRoutes = require('./routes/auth');
 const rideRoutes = require('./routes/rides');
+const adminRoutes = require('./routes/admin');
 
 require('dotenv').config();
 
@@ -41,6 +43,7 @@ app.use(express.json());
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rides', rideRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -76,12 +79,29 @@ const clearSimulation = (rideId) => {
   }
 };
 
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) {
+    return next(new Error('Authentication error: No token provided'));
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return next(new Error('Authentication error: Invalid token'));
+    }
+    socket.user = decoded.user;
+    next();
+  });
+});
+
 io.on('connection', (socket) => {
-  console.log('⚡ New client socket connected:', socket.id);
+  console.log('⚡ New client socket connected:', socket.id, 'User:', socket.user.id);
 
   // User registers their presence with their User ID
   socket.on('join', (data) => {
-    const { userId, role, serviceFilter } = data;
+    const userId = socket.user.id;
+    const role = socket.user.role;
+    const { serviceFilter } = data;
+    
     if (userId) {
       socket.join(`user_${userId}`);
       activeConnections.set(userId.toString(), socket.id);
@@ -103,7 +123,8 @@ io.on('connection', (socket) => {
 
   // Client requests a ride
   socket.on('request_ride', async (rideData) => {
-    const { rideId, riderId } = rideData;
+    const { rideId } = rideData;
+    const riderId = socket.user.id;
     console.log(`🔔 Ride ${rideId} requested by Rider ${riderId}`);
 
     // Standard Socket Broadcast to actual online drivers (if any exist)
@@ -133,7 +154,8 @@ io.on('connection', (socket) => {
 
   // Driver explicitly accepts a ride
   socket.on('accept_ride', async (data) => {
-    const { rideId, driverId } = data;
+    const { rideId } = data;
+    const driverId = socket.user.id;
     try {
       console.log(`✅ Driver ${driverId} accepting Ride ${rideId}`);
       
@@ -343,7 +365,8 @@ io.on('connection', (socket) => {
 
   // Client updates location (primarily driver)
   socket.on('update_location', async (data) => {
-    const { userId, latitude, longitude } = data;
+    const { latitude, longitude } = data;
+    const userId = socket.user.id;
     try {
       await db.query('UPDATE drivers SET latitude = $1, longitude = $2 WHERE user_id = $3', [
         latitude,

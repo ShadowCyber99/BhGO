@@ -165,9 +165,9 @@ export default function DriverHomeScreen() {
           if (isAmbulanceDriver) return; // Ambulance driver can't take other rides
         }
 
-        // 2. Food/Grocery/Parcel strict match -> ONLY bikes (except parcels > 25kg)
-        if (data.serviceCategory === 'food') {
-          if (myVehicleType !== 'bike') return; // Only bike riders can deliver food
+        // 2. Food/Grocery/Parcel/Medicine strict match -> ONLY bikes (except parcels > 25kg)
+        if (['food', 'grocery', 'medicine'].includes(data.serviceCategory)) {
+          if (myVehicleType !== 'bike') return; // Only bike riders can deliver food/grocery/medicine
         }
         if (data.serviceCategory === 'parcel') {
           const weight = data.parcelWeight || 0;
@@ -415,10 +415,10 @@ export default function DriverHomeScreen() {
       <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
         <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, fontWeight: 'bold' }}>📍 Service Filter Preference:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
-          {['ride', 'parcel', 'medical_emergency', 'non_emergency', 'food'].filter(f => {
+          {['ride', 'parcel', 'medical_emergency', 'non_emergency', 'food', 'grocery', 'medicine'].filter(f => {
             // Strict role-based rendering of tabs
             if (isAmbulanceDriver) return f === 'medical_emergency' || f === 'non_emergency';
-            if (myVehicleType === 'bike') return f === 'ride' || f === 'food' || f === 'parcel';
+            if (myVehicleType === 'bike') return f === 'ride' || f === 'food' || f === 'parcel' || f === 'grocery' || f === 'medicine';
             return f === 'ride' || f === 'parcel'; // Cab drivers
           }).map(f => (
             <TouchableOpacity 
@@ -839,41 +839,51 @@ export default function DriverHomeScreen() {
             )}
           </View>
 
-          <View style={styles.actionBlock}>
-            <View>
-              <Text style={styles.fareLabel}>Payout</Text>
-              <Text style={styles.fareAmount}>₹{activeRide.fare}</Text>
+          <View style={[styles.actionBlock, { flexDirection: 'column', gap: 16, marginTop: 16 }]}>
+            <View style={{ backgroundColor: 'rgba(163,230,53,0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.primary, alignItems: 'center' }}>
+              <Text style={{ color: colors.textMuted, fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase' }}>Payout Estimate</Text>
+              <Text style={{ color: colors.primary, fontSize: 32, fontWeight: '900' }}>₹{activeRide.fare}</Text>
             </View>
 
-            {activeRide.status === 'accepted' && <CustomButton title="I Have Arrived at Pickup" onPress={() => handleUpdateStatus('arrived')} style={styles.actionBtn} />}
+            {activeRide.status === 'accepted' && (
+              <TouchableOpacity onPress={() => handleUpdateStatus('arrived')} style={{ backgroundColor: colors.primary, paddingVertical: 24, borderRadius: 16, alignItems: 'center', shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 15, elevation: 10 }}>
+                <Text style={{ color: '#000', fontSize: 22, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>📍 Arrived at Pickup</Text>
+              </TouchableOpacity>
+            )}
             
             {activeRide.status === 'arrived' && (
-              <View style={{ flex: 1, marginLeft: 16 }}>
+              <View>
                 <TouchableOpacity 
                   onPress={() => setSafetyChecked(!safetyChecked)}
-                  style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: safetyChecked ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: safetyChecked ? colors.success : colors.danger, marginBottom: 8 }}
+                  style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: safetyChecked ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: 16, borderRadius: 12, borderWidth: 2, borderColor: safetyChecked ? colors.success : colors.danger, marginBottom: 16 }}
                 >
-                  <Text style={{ marginRight: 8, fontSize: 18 }}>{safetyChecked ? '✅' : '⬜'}</Text>
-                  <Text style={{ color: colors.text, fontSize: 12, flex: 1 }}>
-                    {activeRide.serviceCategory === 'ambulance' ? 'Seatbelts buckled, Stretcher & Medical kit ready' :
-                     (activeRide.vehicleType === 'bike' || activeRide.vehiclePreference === 'bike' || activeRide.serviceCategory === 'bike') ? 'helmet wear both riders for bike ride' :
+                  <Text style={{ marginRight: 12, fontSize: 24 }}>{safetyChecked ? '✅' : '⬜'}</Text>
+                  <Text style={{ color: colors.text, fontSize: 14, flex: 1, fontWeight: 'bold' }}>
+                    {activeRide.serviceCategory === 'ambulance' ? 'Seatbelts buckled, Stretcher & Kit ready' :
+                     (activeRide.vehicleType === 'bike' || activeRide.vehiclePreference === 'bike' || activeRide.serviceCategory === 'bike') ? 'Helmet worn by both riders' :
                      'Seatbelts buckled securely'}
                   </Text>
                 </TouchableOpacity>
-                <CustomButton 
-                  title="Start Trip / Board Passenger" 
+                <TouchableOpacity 
                   onPress={() => setShowOtpModal(true)} 
-                  style={[styles.actionBtn, !safetyChecked && { opacity: 0.5 }]} 
                   disabled={!safetyChecked}
-                />
+                  style={{ backgroundColor: safetyChecked ? colors.success : colors.surfaceLight, paddingVertical: 24, borderRadius: 16, alignItems: 'center', opacity: safetyChecked ? 1 : 0.5, shadowColor: colors.success, shadowOpacity: safetyChecked ? 0.3 : 0, shadowRadius: 15, elevation: safetyChecked ? 10 : 0 }}
+                >
+                  <Text style={{ color: safetyChecked ? '#fff' : colors.textMuted, fontSize: 22, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>🚀 Start Trip</Text>
+                </TouchableOpacity>
               </View>
             )}
 
             {activeRide.status === 'started' && !reachedDropoff && (
-              <CustomButton title="Navigating to Dropoff..." style={[styles.actionBtn, { backgroundColor: colors.surfaceLight, opacity: 0.7 }]} disabled />
+              <TouchableOpacity disabled style={{ backgroundColor: colors.surfaceLight, paddingVertical: 24, borderRadius: 16, alignItems: 'center', opacity: 0.8, borderWidth: 1, borderColor: colors.border }}>
+                <Text style={{ color: colors.textMuted, fontSize: 20, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>🧭 Navigating to Dropoff...</Text>
+              </TouchableOpacity>
             )}
+            
             {activeRide.status === 'started' && reachedDropoff && (
-              <CustomButton title="Complete Trip & Collect Payout" onPress={() => handleUpdateStatus('completed')} style={[styles.actionBtn, { backgroundColor: colors.success }]} />
+              <TouchableOpacity onPress={() => handleUpdateStatus('completed')} style={{ backgroundColor: colors.success, paddingVertical: 24, borderRadius: 16, alignItems: 'center', shadowColor: colors.success, shadowOpacity: 0.3, shadowRadius: 15, elevation: 10 }}>
+                <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>🏁 Complete Trip & Collect Payout</Text>
+              </TouchableOpacity>
             )}
           </View>
         </GlassCard>
