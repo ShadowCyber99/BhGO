@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ActivityIndicator, Image, TouchableOpacity, ScrollView, TextInput, KeyboardAvoidingView } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { useNavigation } from '../context/NavigationContext';
 import { api } from '../utils/api';
+import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomButton from '../components/CustomButton';
 import MapView from '../components/MapView';
 
 export default function RideActiveScreen({ onNavigateToHome }) {
   const { user, socket } = useAuth();
-  const { setRiderScreen } = useNavigation();
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const [ride, setRide] = useState(null);
@@ -56,7 +54,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
   const fetchChatHistory = async (rideId) => {
     try {
       const res = await fetch(`/api/rides/${rideId}/chat`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
       });
       if (res.ok) {
         setChatMessages(await res.json());
@@ -165,7 +163,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}`
         },
         body: JSON.stringify({ rating, tags: reviewTags, comment: reviewComment, driverId: ride.driverId })
       });
@@ -211,39 +209,50 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         rideStatus={ride.status}
       />
 
-      <View style={[styles.consoleCard, { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, marginTop: -24, zIndex: 10, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: -5 } }]}>
-        <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 16 }}>
-          <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2 }} />
+      <GlassCard style={styles.consoleCard}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 16, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+          <Text style={{ color: colors.textMuted, fontSize: 13, fontWeight: '800', letterSpacing: 0.5 }}>BOOKING REF:</Text>
+          <Text style={{ color: colors.text, fontSize: 15, fontWeight: '900', letterSpacing: 1 }}>{ride.refId}</Text>
         </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: 'bold' }}>BOOKING REF: {ride.refId}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+          <View style={[styles.statusHeader, { flex: 1 }]}>
+            <Text style={{ color: statusMeta.color, fontSize: 24, fontWeight: '900', marginBottom: 6 }}>{statusMeta.title}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14, fontWeight: '500' }}>{statusMeta.subtitle}</Text>
+          </View>
           {eta !== null && !['completed', 'cancelled', 'requested'].includes(ride.status) && (
-            <View style={{ backgroundColor: 'rgba(163,230,53,0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 16 }}>
-              <Text style={{ color: colors.primary, fontWeight: '900', fontSize: 14 }}>{eta} min ETA</Text>
+            <View style={styles.etaBadge}>
+              <Text style={{ color: colors.text, fontWeight: 'bold' }}>ETA</Text>
+              <Text style={{ color: colors.primary, fontSize: 18, fontWeight: '900' }}>{eta} min</Text>
             </View>
           )}
         </View>
 
-        <View style={{ marginBottom: 20 }}>
-          <Text style={{ color: statusMeta.color, fontSize: 28, fontWeight: '900', marginBottom: 4 }}>{statusMeta.title}</Text>
-          <Text style={{ color: colors.textMuted, fontSize: 16 }}>{statusMeta.subtitle}</Text>
-        </View>
+        <View style={{ marginBottom: 16, paddingBottom: 16, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+          <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Pickup</Text>
+          <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.pickupAddress}</Text>
+          
+          <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8 }}>Dropoff</Text>
+          <Text style={{ color: colors.text, fontWeight: '500' }}>{ride.dropoffAddress}</Text>
 
-        <View style={{ backgroundColor: colors.surfaceLight, padding: 16, borderRadius: 16, marginBottom: 16 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.textMuted, marginRight: 12 }} />
-            <Text style={{ color: colors.text, fontWeight: '500', flex: 1 }} numberOfLines={1}>{ride.pickupAddress}</Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginRight: 12 }} />
-            <Text style={{ color: colors.text, fontWeight: '500', flex: 1 }} numberOfLines={1}>{ride.dropoffAddress}</Text>
-          </View>
-        </View>
+          {ride.driverName && (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+              <View>
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>Driver</Text>
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.driverName}</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>Vehicle</Text>
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{ride.vehicleName} ({ride.vehicleNumber})</Text>
+              </View>
+            </View>
+          )}
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>
-          <Text style={{ color: colors.textMuted, fontSize: 14 }}>{ride.status === 'completed' ? 'Paid' : 'Estimated Fare'}</Text>
-          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '900' }}>₹{ride.fare?.toFixed(2)}</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+            <View>
+              <Text style={{ color: colors.textMuted, fontSize: 12 }}>Amount {ride.status === 'completed' ? 'Paid' : 'Estimate'}</Text>
+              <Text style={{ color: colors.primary, fontSize: 18, fontWeight: 'bold' }}>₹{ride.fare?.toFixed(2)}</Text>
+            </View>
+          </View>
         </View>
 
         {ride.status === 'requested' && (
@@ -379,7 +388,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
                 <CustomButton title="Submit Feedback" onPress={submitRating} variant="primary" style={styles.doneBtn} />
                 <CustomButton 
                   title="📄 View Full Invoice" 
-                  onPress={() => setRiderScreen('history')} 
+                  onPress={() => window.setRiderScreen?.('history')} 
                   variant="outline" 
                   style={{ width: '100%', marginTop: 12 }} 
                 />
@@ -415,7 +424,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         {['requested', 'accepted', 'arrived'].includes(ride.status) && (
           <CustomButton title="Cancel Request" onPress={handleCancelRide} variant="danger" style={styles.cancelBtn} />
         )}
-      </View>
+      </GlassCard>
 
       {/* SOS MODAL */}
       {sosOpen && (
@@ -426,7 +435,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
             
             <CustomButton title="📞 Call Police (100)" onPress={() => { alert('Dialing Police...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF003C'}} />
             <CustomButton title="🚑 Call Ambulance (108)" onPress={() => { alert('Dialing Ambulance...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF1111'}} />
-            <CustomButton title="🎧 BharatOne 24/7 Support" onPress={() => { alert('Connecting to Live Support...'); setSosOpen(false); }} variant="primary" style={{marginBottom: 20}} />
+            <CustomButton title="🎧 BharatGo 24/7 Support" onPress={() => { alert('Connecting to Live Support...'); setSosOpen(false); }} variant="primary" style={{marginBottom: 20}} />
             
             <CustomButton title="Cancel SOS" onPress={() => setSosOpen(false)} variant="outline" />
           </GlassCard>

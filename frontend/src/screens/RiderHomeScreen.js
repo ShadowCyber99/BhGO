@@ -3,12 +3,10 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIn
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import { useTheme } from '../context/ThemeContext';
-import { useNavigation } from '../context/NavigationContext';
 import GlassCard from '../components/GlassCard';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 import MapView from '../components/MapView';
-
 const CITIES = [
   { id: 'DEL', name: 'Delhi', lat: 28.6139, lng: 77.2090 },
   { id: 'MUM', name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
@@ -110,27 +108,16 @@ const DEMO_ROUTES = [
 ];
 
 const svgIcons = {
-  ride: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="20" height="11" rx="2" ry="2"></rect><path d="M4 8L6 4h12l2 4"></path><circle cx="7" cy="19" r="2"></circle><circle cx="17" cy="19" r="2"></circle></svg>'),
-  ambulance: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M12 9v6M9 12h6"></path><circle cx="7" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg>'),
-  parcel: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M12 5v5"></path></svg>'),
-  food: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9v1h14V9c0-3.87-3.13-7-7-7z"></path><path d="M3 14h18v3c0 1.66-1.34 3-3 3H6c-1.66 0-3-1.34-3-3v-3z"></path><path d="M4 11h16v1H4z"></path></svg>')
-};
-
-const vehicleIcons = {
-  cab: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>'),
-  bike: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 19a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M18.5 19a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M12 17.5V14l-3-3 4-3 2 3h2" /></svg>'),
-  economy: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>'),
-  premium: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/><path d="M10 11l4-2"/></svg>'),
-  suv: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="9" rx="2" ry="2"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><path d="M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>')
+  ride: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%236366F1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="20" height="11" rx="2" ry="2"></rect><path d="M4 8L6 4h12l2 4"></path><circle cx="7" cy="19" r="2"></circle><circle cx="17" cy="19" r="2"></circle></svg>',
+  ambulance: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M12 9v6M9 12h6"></path><circle cx="7" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg>',
+  parcel: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238B5CF6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M12 5v5"></path></svg>',
+  food: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23F97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9v1h14V9c0-3.87-3.13-7-7-7z"></path><path d="M3 14h18v3c0 1.66-1.34 3-3 3H6c-1.66 0-3-1.34-3-3v-3z"></path><path d="M4 11h16v1H4z"></path></svg>'
 };
 
 export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const { user, logout, socket, refreshProfile } = useAuth();
-  const { setRiderScreen } = useNavigation();
   const { colors, themeName, changeTheme, availableThemes, isDarkMode } = useTheme();
   const styles = getStyles(colors);
-  const [activeFlow, setActiveFlow] = useState('dashboard');
-
   
   const [pickupAddress, setPickupAddress] = useState('');
   const [pickupCoords, setPickupCoords] = useState(null);
@@ -163,14 +150,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState([]);
-  
-  const [supermarkets, setSupermarkets] = useState([]);
-  const [selectedSupermarket, setSelectedSupermarket] = useState(null);
-  const [groceryItems, setGroceryItems] = useState([]);
-
-  const [pharmacies, setPharmacies] = useState([]);
-  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
-  const [medicineItems, setMedicineItems] = useState([]);
 
   // Payment State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -219,7 +198,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     setRefundData(null);
     if (!refundRefId.trim()) return setRefundError('Please enter a Booking Ref ID');
     try {
-      const res = await fetch(`/api/rides/ref/${refundRefId.trim()}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
+      const res = await fetch(`/api/rides/ref/${refundRefId.trim()}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch details');
       setRefundData(data);
@@ -233,7 +212,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       setRefundError('');
       const res = await fetch(`/api/rides/${refundData.id}/refund`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -248,7 +227,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const res = await fetch(`/api/rides/drivers?service=${serviceCategory}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
+        const res = await fetch(`/api/rides/drivers?service=${serviceCategory}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
         if (res.ok) setNearbyDrivers(await res.json());
       } catch (err) {}
     };
@@ -281,26 +260,12 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
   useEffect(() => {
     if (serviceCategory === 'food') {
-      fetch('/api/rides/restaurants', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } })
+      fetch('/api/rides/restaurants', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } })
       .then(res => { if (!res.ok) throw new Error(); return res.json(); })
       .then(data => { if (Array.isArray(data)) setRestaurants(data); })
       .catch(() => {});
     }
   }, [serviceCategory]);
-
-  useEffect(() => {
-    if (activeFlow === 'grocery') {
-      fetch('/api/rides/supermarkets', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } })
-      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
-      .then(data => { if (Array.isArray(data)) setSupermarkets(data); })
-      .catch(() => {});
-    } else if (activeFlow === 'medicine') {
-      fetch('/api/rides/pharmacies', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } })
-      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
-      .then(data => { if (Array.isArray(data)) setPharmacies(data); })
-      .catch(() => {});
-    }
-  }, [activeFlow]);
 
   const [emergencyConsent, setEmergencyConsent] = useState(false);
   const [patientSecurityConsent, setPatientSecurityConsent] = useState(false);
@@ -440,7 +405,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       // 1. Try with city
       let query = `${cleanAddress}, ${city.name}, India`;
       let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
-      let res = await fetch(url, { headers: { 'User-Agent': 'BharatOne-App/1.0' } });
+      let res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
       let data = await res.json();
       
       if (data && data.length > 0) {
@@ -453,7 +418,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       // 2. Try without city (useful for suburbs like Mohali when Chandigarh is selected)
       query = `${cleanAddress}, India`;
       url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
-      res = await fetch(url, { headers: { 'User-Agent': 'BharatOne-App/1.0' } });
+      res = await fetch(url, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
       data = await res.json();
       
       if (data && data.length > 0) {
@@ -468,7 +433,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
   const reverseGeocode = async (lat, lng) => {
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'BharatOne-App/1.0' } });
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'BharatGo-App/1.0' } });
       const data = await res.json();
       if (data && data.display_name) {
         return data.display_name.split(',').slice(0, 3).join(',');
@@ -620,7 +585,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     setSelectedRestaurant(rest);
     setCart([]);
     try {
-      const res = await fetch(`/api/rides/restaurants/${rest.id}/menu`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
+      const res = await fetch(`/api/rides/restaurants/${rest.id}/menu`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) setMenuItems(data);
@@ -634,8 +599,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
   const doPlaceFoodOrder = async () => {
     const deliveryFee = 5.00;
     const ridePayload = {
-      serviceCategory: activeFlow === 'grocery' ? 'grocery' : activeFlow === 'medicine' ? 'medicine' : 'food', 
-      vehiclePreference: (activeFlow === 'grocery' || activeFlow === 'medicine') ? 'bike' : 'any',
+      serviceCategory: 'food', vehiclePreference: 'any',
       pickupAddress: selectedRestaurant.name, dropoffAddress: 'Home (Demo)',
       pickupLat: selectedCity.lat + 0.005, pickupLng: selectedCity.lng + 0.005, dropoffLat: selectedCity.lat, dropoffLng: selectedCity.lng,
       fare: deliveryFee, paymentMode
@@ -643,7 +607,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
     const ride = await api.requestRide(ridePayload);
     await fetch('/api/rides/order', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` },
       body: JSON.stringify({ rideId: ride.id, restaurantId: selectedRestaurant.id, totalAmount: cartTotal + deliveryFee, itemsJson: cart })
     });
     if (socket) socket.emit('request_ride', ride);
@@ -652,161 +616,79 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Main Map Background */}
-      {activeFlow === 'dashboard' || activeFlow === 'services' ? (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: activeFlow === 'dashboard' ? '45%' : 0 }}>
-          <MapView 
-            cityCenter={selectedCity} 
-            pickup={pickupCoords} 
-            dropoff={dropoffCoords} 
-            waypoints={waypointCoords} 
-            nearbyDrivers={nearbyDrivers} 
-            onMapClick={handleMapClick}
-          />
-        </View>
-      ) : null}
-
-      <View style={[styles.nav, { backgroundColor: 'transparent', borderBottomWidth: 0, zIndex: 10 }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.surface, paddingHorizontal: 12, borderRadius: 24, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } }}>
-          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 30, height: 30, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
-          <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>BharatOne</Text>
+      <View style={styles.nav}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 140, height: 45, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
+          <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold'}}>🇮🇳 India</Text>
         </View>
         <View style={styles.userBox}>
-          <TouchableOpacity onPress={() => setShowCityPicker(true)} style={[styles.cityBtn, { backgroundColor: colors.surface, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } }]}>
+          <TouchableOpacity onPress={() => setShowCityPicker(true)} style={styles.cityBtn}>
             <Text style={styles.cityBtnText}>📍 {selectedCity.name}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setShowProfileModal(true)} style={[styles.profileBtn, { backgroundColor: colors.surface, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } }]}>
+          <TouchableOpacity onPress={() => setShowProfileModal(true)} style={styles.profileBtn}>
             <Text style={styles.userName}>👤 Profile</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Main Content Overlay */}
-      <View style={{ flex: 1, justifyContent: 'flex-end', marginTop: 100 }}>
-        {activeFlow === 'dashboard' && (
-          <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: -5 } }}>
-            <Text style={{ fontSize: 24, fontWeight: '900', color: colors.text }}>Hello {user?.name?.split(' ')[0] || 'User'} 👋</Text>
-            <Text style={{ fontSize: 16, color: colors.textMuted, marginTop: 4, marginBottom: 20 }}>Where to?</Text>
-            
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'flex-start' }}>
-              {[
-                { id: 'ride', label: 'Ride', icon: svgIcons.ride, color: colors.rideColor, action: () => { setServiceCategory('ride'); setActiveFlow('services'); } },
-                { id: 'bike', label: 'Bike', icon: vehicleIcons.bike, color: colors.rideColor, action: () => { setServiceCategory('ride'); setActiveFlow('services'); } },
-                { id: 'auto', label: 'Auto', icon: vehicleIcons.cab, color: colors.rideColor, action: () => { setServiceCategory('ride'); setActiveFlow('services'); } },
-                { id: 'parcel', label: 'Parcel', icon: svgIcons.parcel, color: colors.parcelColor, action: () => { setServiceCategory('parcel'); setActiveFlow('services'); } },
-                { id: 'food', label: 'Food', icon: svgIcons.food, color: colors.foodColor, action: () => { setServiceCategory('food'); setFoodCategoryTab('food'); setActiveFlow('services'); } },
-                { id: 'grocery', label: 'Grocery', emoji: '🛒', color: colors.foodColor, action: () => setActiveFlow('grocery') },
-                { id: 'medicine', label: 'Pharmacy', emoji: '💊', color: colors.foodColor, action: () => setActiveFlow('medicine') },
-                { id: 'ambulance', label: 'Ambulance', icon: svgIcons.ambulance, color: colors.ambulanceColor, action: () => { setServiceCategory('ambulance'); setActiveFlow('services'); }, isRed: true }
-              ].map((s, idx) => (
-                <TouchableOpacity key={idx} style={{ width: '22%', alignItems: 'center', marginBottom: 12 }} onPress={s.action}>
-                  <View style={[styles.iconCircle, { backgroundColor: s.isRed ? '#FEE2E2' : colors.surfaceLight, borderColor: s.isRed ? colors.danger : 'transparent', borderWidth: s.isRed ? 2 : 0, width: 60, height: 60, borderRadius: 16, justifyContent: 'center', alignItems: 'center' }]}>
-                    {s.emoji ? <Text style={{ fontSize: 28 }}>{s.emoji}</Text> : (
-                       s.icon.includes('svg') ? <Image source={{ uri: s.icon }} style={{ width: 32, height: 32, tintColor: s.isRed ? colors.danger : colors.primary }} /> : <Image source={{ uri: s.icon }} style={{ width: 32, height: 32 }} />
-                    )}
-                  </View>
-                  <Text style={{ fontSize: 12, color: colors.text, marginTop: 8, fontWeight: s.isRed ? 'bold' : '500' }}>{s.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
+      <View style={styles.serviceSelectorRibbon}>
+        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ride' && { borderColor: colors.rideColor, backgroundColor: 'rgba(99,102,241,0.1)' }]} onPress={() => setServiceCategory('ride')}>
+          <Image source={{ uri: svgIcons.ride }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'ride' && { color: colors.rideColor, fontWeight: 'bold' }]}>Ride</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ambulance' && { borderColor: colors.ambulanceColor, backgroundColor: 'rgba(239,68,68,0.1)' }]} onPress={() => setServiceCategory('ambulance')}>
+          <Image source={{ uri: svgIcons.ambulance }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'ambulance' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>Ambulance</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'parcel' && { borderColor: colors.parcelColor, backgroundColor: 'rgba(139,92,246,0.1)' }]} onPress={() => setServiceCategory('parcel')}>
+          <Image source={{ uri: svgIcons.parcel }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'parcel' && { color: colors.parcelColor, fontWeight: 'bold' }]}>Parcel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'food' && { borderColor: colors.foodColor, backgroundColor: 'rgba(249,115,22,0.1)' }]} onPress={() => setServiceCategory('food')}>
+          <Image source={{ uri: svgIcons.food }} style={{ width: 24, height: 24, marginBottom: 4 }} />
+          <Text style={[styles.serviceText, serviceCategory === 'food' && { color: colors.foodColor, fontWeight: 'bold' }]}>Food</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'medical' && { borderColor: colors.ambulanceColor, backgroundColor: 'rgba(239,68,68,0.1)' }]} onPress={() => setServiceCategory('medical')}>
+          <Text style={{ fontSize: 20, marginBottom: 2 }}>💊</Text>
+          <Text style={[styles.serviceText, serviceCategory === 'medical' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>Medical</Text>
+        </TouchableOpacity>
+      </View>
 
-      {activeFlow === 'services' ? (
-        <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end', marginTop: 100 }}>
-          <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: -5 }, maxHeight: '90%' }}>
-            <TouchableOpacity onPress={() => setActiveFlow('dashboard')} style={{ marginBottom: 16 }}>
-              <Text style={{ color: colors.primary, fontWeight: 'bold' }}>← Back</Text>
-            </TouchableOpacity>
-            
-            {/* SEARCH BARS (Pickup/Dropoff) */}
-            <View style={{ backgroundColor: colors.surfaceLight, borderRadius: 12, padding: 12, marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.textMuted, marginRight: 12 }} />
-                <TextInput 
-                  style={{ flex: 1, fontSize: 16, color: colors.text, padding: 8 }} 
-                  placeholder="Pickup Location" 
-                  placeholderTextColor={colors.textMuted}
-                  value={pickupAddress}
-                  onChangeText={searchPickup}
-                />
-              </View>
-              {pickupSuggestions.length > 0 && (
-                <View style={{ backgroundColor: colors.surface, borderRadius: 8, marginBottom: 12, padding: 8 }}>
-                  {pickupSuggestions.map((s, i) => (
-                    <TouchableOpacity key={i} style={{ paddingVertical: 8, borderBottomWidth: i !== pickupSuggestions.length -1 ? 1 : 0, borderColor: colors.surfaceLight }} onPress={() => selectPickupSuggestion(s)}>
-                      <Text style={{ color: colors.text }}>{s.address}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-              
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginRight: 12 }} />
-                <TextInput 
-                  style={{ flex: 1, fontSize: 16, color: colors.text, padding: 8 }} 
-                  placeholder="Where to?" 
-                  placeholderTextColor={colors.textMuted}
-                  value={dropoffAddress}
-                  onChangeText={searchDropoff}
-                />
-              </View>
-              {dropoffSuggestions.length > 0 && (
-                <View style={{ backgroundColor: colors.surface, borderRadius: 8, marginTop: 12, padding: 8 }}>
-                  {dropoffSuggestions.map((s, i) => (
-                    <TouchableOpacity key={i} style={{ paddingVertical: 8, borderBottomWidth: i !== dropoffSuggestions.length -1 ? 1 : 0, borderColor: colors.surfaceLight }} onPress={() => selectDropoffSuggestion(s)}>
-                      <Text style={{ color: colors.text }}>{s.address}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            {/* If locations selected, show Fare/Booking UI */}
-            {baseDistance > 0 && (
-              <ScrollView style={{ marginTop: 8 }}>
-                <Text style={{ fontSize: 16, color: colors.text, marginBottom: 16, fontWeight: 'bold' }}>Distance: {baseDistance.toFixed(1)} km</Text>
-                
-                {serviceCategory === 'ride' && (
-                  <View style={{ flexDirection: 'column', gap: 12 }}>
-                    {[
-                      { id: 'bike', label: 'Moto', price: 8, icon: vehicleIcons.bike, time: '2 min' },
-                      { id: 'cab', label: 'Ride Go', price: 15, icon: vehicleIcons.cab, time: '4 min' },
-                      { id: 'premium', label: 'Ride Premier', price: 22, icon: vehicleIcons.premium, time: '6 min' },
-                      { id: 'suv', label: 'Ride XL', price: 30, icon: vehicleIcons.suv, time: '8 min' }
-                    ].map(v => (
-                      <TouchableOpacity key={v.id} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, borderWidth: 2, borderColor: vehiclePreference === v.id ? colors.primary : 'transparent', backgroundColor: vehiclePreference === v.id ? 'rgba(249,115,22,0.1)' : colors.surfaceLight }} onPress={() => setVehiclePreference(v.id)}>
-                        <View style={{ width: 40, height: 40, backgroundColor: colors.surface, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
-                          {v.icon.includes('svg') ? <Image source={{ uri: v.icon }} style={{ width: 24, height: 24, tintColor: colors.primary }} /> : <Image source={{ uri: v.icon }} style={{ width: 24, height: 24 }} />}
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 16 }}>{v.label} <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: 'normal' }}>• {v.time}</Text></Text>
-                        </View>
-                        <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold' }}>₹{(baseDistance * v.price).toFixed(0)}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-
-                {serviceCategory === 'ambulance' && (
-                  <View style={{ backgroundColor: '#FEE2E2', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: colors.danger }}>
-                    <Text style={{ color: colors.danger, fontWeight: '900', fontSize: 18 }}>🚨 Emergency Ambulance</Text>
-                    <Text style={{ color: colors.danger, marginTop: 4, fontWeight: 'bold' }}>Priority Dispatch & Routing.</Text>
-                    <Text style={{ color: colors.text, marginTop: 8, fontSize: 24, fontWeight: 'bold' }}>Est: ₹{(baseDistance * 25).toFixed(0)}</Text>
-                  </View>
-                )}
-                
-                <TouchableOpacity 
-                  onPress={requestRide}
-                  style={{ backgroundColor: serviceCategory === 'ambulance' ? colors.danger : colors.primary, padding: 16, borderRadius: 12, marginTop: 24, alignItems: 'center' }}
-                >
-                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: 'bold' }}>{serviceCategory === 'ambulance' ? 'Request Ambulance NOW' : 'Book Ride'}</Text>
-                </TouchableOpacity>
-              </ScrollView>
-            )}
-          </View>
+      {/* GLOBAL MAP VIEW */}
+      <MapView 
+        cityCenter={selectedCity} 
+        pickup={pickupCoords} 
+        dropoff={dropoffCoords} 
+        waypoints={waypointCoords} 
+        nearbyDrivers={nearbyDrivers} 
+        onMapClick={handleMapClick}
+      />
+      
+      {/* POPULAR TOURIST PLACES CAROUSEL */}
+      {serviceCategory !== 'food' && serviceCategory !== 'medical' && (
+        <View style={{ marginVertical: 16 }}>
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>🌟 Popular Tourist Places in {selectedCity.name}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+            {FAMOUS_PLACES.filter(p => p.city === selectedCity.name).map((place, idx) => (
+              <TouchableOpacity 
+                key={idx} 
+                style={{ backgroundColor: colors.surfaceLight, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}
+                onPress={() => {
+                  setDropoffAddress(`${place.name}, ${place.city}`);
+                  setCustomDropoff(`${place.name}, ${place.city}`);
+                  setDropoffCoords({ lat: place.lat, lng: place.lng });
+                  if (pickupCoords) {
+                    setBaseDistance(Math.sqrt(Math.pow((place.lat - pickupCoords.lat)*111, 2) + Math.pow((place.lng - pickupCoords.lng)*111, 2)));
+                  }
+                }}
+              >
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{place.name}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>{place.city}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
-      ): null}
+      )}
 
       {/* FOOD MARKETPLACE VIEW */}
       {serviceCategory === 'food' ? (
@@ -817,8 +699,11 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                 <Text style={{ color: colors.text, fontSize: 24, fontWeight: '800' }}>Craving Something?</Text>
                 
                 <View style={styles.foodTabs}>
-                  <TouchableOpacity style={[styles.foodTab, styles.foodTabActive]}>
-                    <Text style={[styles.foodTabText, {color: colors.text}]}>🍽️ Restaurants</Text>
+                  <TouchableOpacity style={[styles.foodTab, foodCategoryTab === 'food' && styles.foodTabActive]} onPress={() => setFoodCategoryTab('food')}>
+                    <Text style={[styles.foodTabText, foodCategoryTab === 'food' && {color: colors.text}]}>🍽️ Restaurants</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.foodTab, foodCategoryTab === 'grocery' && styles.foodTabActive]} onPress={() => setFoodCategoryTab('grocery')}>
+                    <Text style={[styles.foodTabText, foodCategoryTab === 'grocery' && {color: colors.text}]}>🛒 Groceries</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -830,7 +715,13 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                     <Text style={{ color: colors.text }}>Please re-seed your database with Indian locations.</Text>
                   </View>
                 ) : (
-                  restaurants.filter(r => (r.city && r.city === selectedCity.name)).map(r => (
+                  restaurants.filter(r => {
+                    const isPharmacy = r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health') || r.category === 'pharmacy';
+                    if (isPharmacy) return false;
+                    const isMatchCategory = r.category === foodCategoryTab || (!r.category && foodCategoryTab === 'food');
+                    const isCityMatch = (r.city && r.city === selectedCity.name) || r.category === 'grocery'; // Make groceries global for now, or use real city mapping if updated
+                    return isMatchCategory && isCityMatch;
+                  }).map(r => (
                     <TouchableOpacity key={r.id} style={styles.restaurantCard} onPress={() => openRestaurant(r)}>
                       <Text style={{ fontSize: 40 }}>{r.image_url}</Text>
                       <Text style={styles.restaurantName}>{r.name}</Text>
@@ -877,6 +768,84 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                         <Text style={{ color: colors.textMuted, fontSize: 14 }}>Delivery Partner Fee: ₹{foodCategoryTab === 'grocery' ? '15.00' : '30.00'}</Text>
                         <Text style={{ color: colors.textMuted, fontSize: 14 }}>Platform Fee: ₹{foodCategoryTab === 'grocery' ? '5.00' : '10.00'}</Text>
                         <Text style={{ color: colors.foodColor, fontSize: 24, fontWeight: '900', marginVertical: 12 }}>Total: ₹{(cartTotal + (foodCategoryTab === 'grocery' ? 20 : 40)).toFixed(2)}</Text>
+                        <CustomButton title="Checkout & Pay" onPress={initiatePayment} variant="primary" />
+                      </View>
+                    </View>
+                  )}
+                </GlassCard>
+              </View>
+            </View>
+          )}
+        </View>
+        </View>
+      ) : serviceCategory === 'medical' ? (
+        <View style={{ marginTop: 30 }}>
+          {!selectedRestaurant ? (
+            <GlassCard style={{ padding: 20 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <Text style={{ color: colors.text, fontSize: 24, fontWeight: '800' }}>Healthcare Essentials</Text>
+                <View style={styles.foodTabs}>
+                  <TouchableOpacity style={[styles.foodTab, styles.foodTabActive]}>
+                    <Text style={[styles.foodTabText, {color: colors.text}]}>💊 Pharmacies</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+                {restaurants.filter(r => r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health')).length === 0 ? (
+                  <View style={{ padding: 20, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: colors.danger, width: '100%' }}>
+                    <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>⚠️ No Pharmacies Found</Text>
+                  </View>
+                ) : (
+                  restaurants.filter(r => r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health') || r.category === 'pharmacy').map(r => (
+                    <TouchableOpacity key={r.id} style={styles.restaurantCard} onPress={() => openRestaurant(r)}>
+                      <Text style={{ fontSize: 40 }}>{r.image_url || '💊'}</Text>
+                      <Text style={styles.restaurantName}>{r.name}</Text>
+                      <Text style={styles.restaurantCuisine}>⭐ {r.rating}</Text>
+                    </TouchableOpacity>
+                  ))
+                )}
+              </View>
+            </GlassCard>
+          ) : (
+            <View style={styles.dashboard}>
+              <View style={styles.leftCol}>
+                <GlassCard style={styles.glassCard}>
+                  <TouchableOpacity onPress={() => setSelectedRestaurant(null)}>
+                    <Text style={{ color: colors.primary, marginBottom: 16 }}>← Back to Pharmacies</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.cardTitle}>{selectedRestaurant.name} Catalog</Text>
+                  
+                  {menuItems.map(item => (
+                    <View key={item.id} style={styles.menuItem}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: colors.text, fontSize: 16, fontWeight: 'bold' }}>{item.image_url || '💊'} {item.name}</Text>
+                        <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 4 }}>{item.description}</Text>
+                        <Text style={{ color: colors.ambulanceColor, fontWeight: 'bold', marginTop: 8 }}>₹{item.price}</Text>
+                      </View>
+                      <TouchableOpacity style={styles.addBtn} onPress={() => addToCart(item)}><Text style={{ color: colors.text, fontWeight: 'bold' }}>Add</Text></TouchableOpacity>
+                    </View>
+                  ))}
+                </GlassCard>
+              </View>
+              <View style={styles.rightCol}>
+                <GlassCard style={styles.glassCard}>
+                  <Text style={styles.cardTitle}>Cart</Text>
+                  {cart.length === 0 ? (
+                    <Text style={{ color: colors.textMuted, textAlign: 'center', marginTop: 20 }}>No medicines added.</Text>
+                  ) : (
+                    <View style={{ flex: 1 }}>
+                      <ScrollView style={{ maxHeight: 250 }}>
+                        {cart.map((c, i) => (
+                          <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                            <Text style={{ color: colors.text, flex: 1 }} numberOfLines={1}>{c.name}</Text>
+                            <Text style={{ color: colors.text }}>₹{c.price}</Text>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      <View style={{ marginTop: 'auto', borderTopWidth: 1, borderColor: colors.surfaceLight, paddingTop: 16 }}>
+                        <Text style={{ color: colors.textMuted, fontSize: 16 }}>Items Total: ₹{cartTotal.toFixed(2)}</Text>
+                        <Text style={{ color: colors.ambulanceColor, fontSize: 24, fontWeight: '900', marginVertical: 12 }}>Total: ₹{(cartTotal + 20).toFixed(2)}</Text>
                         <CustomButton title="Checkout & Pay" onPress={initiatePayment} variant="primary" />
                       </View>
                     </View>
@@ -1004,7 +973,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                         return (
                           <TouchableOpacity 
                             key={v}
-                            style={[styles.vehicleBtn, isActive && styles.vehicleBtnActive, { padding: 16, alignItems: 'center' }]}
+                            style={[styles.vehicleBtn, isActive && styles.vehicleBtnActive]}
                             onPress={() => {
                               if (v === 'bike') {
                                 setVehiclePreference('bike');
@@ -1013,7 +982,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                               }
                             }}
                           >
-                            <Image source={{ uri: vehicleIcons[v] }} style={{ width: 40, height: 40, opacity: isActive ? 1 : 0.4, marginBottom: 8 }} />
                             <Text style={[styles.vehicleBtnText, isActive && { color: colors.text }]}>{v.toUpperCase()}</Text>
                           </TouchableOpacity>
                         );
@@ -1030,11 +998,10 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                                style={[
                                  styles.vehicleBtn, 
                                  vehiclePreference === tier && styles.vehicleBtnActive, 
-                                 { paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center' }
+                                 { paddingVertical: 8, paddingHorizontal: 16 }
                                ]}
                                onPress={() => setVehiclePreference(tier)}
                              >
-                               <Image source={{ uri: vehicleIcons[tier] }} style={{ width: 40, height: 40, opacity: vehiclePreference === tier ? 1 : 0.4, marginBottom: 8 }} />
                                <Text style={[styles.vehicleBtnText, vehiclePreference === tier && { color: colors.text }]}>{tier.toUpperCase()}</Text>
                              </TouchableOpacity>
                           ))}
@@ -1157,179 +1124,102 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
           </View>
         </>
       )}
-      </View>
-      ) : activeFlow === 'grocery' || activeFlow === 'medicine' ? (
-        <View style={{ flex: 1, width: '100%', paddingHorizontal: 16 }}>
-           <View style={{ flexDirection: 'row', marginBottom: 20, marginTop: 16 }}>
-            <TouchableOpacity onPress={() => setActiveFlow('dashboard')}>
-              <Text style={{ color: colors.primary, fontWeight: 'bold' }}>← Back to Dashboard</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={{ fontSize: 24, color: colors.text, fontWeight: 'bold', marginBottom: 20 }}>
-            {activeFlow === 'grocery' ? '🛒 Grocery Delivery' : '💊 Medicine Delivery'}
-          </Text>
-          
-          <GlassCard style={{ padding: 20, flex: 1 }}>
-            {activeFlow === 'grocery' ? (
-              <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
-                {supermarkets.length === 0 ? (
-                   <View style={{ padding: 20, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: colors.danger, width: '100%' }}>
-                     <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>⚠️ No Supermarkets Found</Text>
-                     <Text style={{ color: colors.text }}>Please re-seed your database with Indian locations.</Text>
-                   </View>
-                ) : (
-                  supermarkets.map(s => (
-                    <TouchableOpacity key={s.id} style={styles.restaurantCard} onPress={() => { setSelectedSupermarket(s); fetch(`/api/rides/supermarkets/${s.id}/items`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } }).then(res=>res.json()).then(setGroceryItems).catch(console.error); }}>
-                      <Text style={{ fontSize: 40 }}>{s.image_url}</Text>
-                      <Text style={styles.restaurantName}>{s.name}</Text>
-                      <Text style={styles.restaurantCuisine}>{s.city} • ⭐ {s.rating}</Text>
-                    </TouchableOpacity>
-                  ))
-                )}
+
+      {/* SECURE PAYMENT MODAL */}
+      <Modal visible={showPaymentModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <GlassCard style={styles.modalCard}>
+            <Text style={{ color: colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16 }}>Secure Checkout</Text>
+            
+            <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 12, marginBottom: 20, borderWidth: 1, borderColor: colors.surfaceLight }}>
+              <Text style={{ color: colors.textMuted, fontSize: 14 }}>Total Amount Due</Text>
+              <Text style={{ color: colors.primary, fontSize: 36, fontWeight: '900', marginTop: 4 }}>₹{paymentAmount.toFixed(2)}</Text>
+            </View>
+
+            {paymentProcessing ? (
+              <View style={{ alignItems: 'center', padding: 20 }}>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={{ color: colors.text, marginTop: 16, fontSize: 16, fontWeight: 'bold' }}>{paymentMode === 'cash' ? 'Confirming Order...' : 'Processing Payment...'}</Text>
+                <Text style={{ color: colors.textMuted, marginTop: 8, fontSize: 12 }}>{paymentMode === 'cash' ? 'Validating request.' : 'Authorizing digital wallet.'}</Text>
               </View>
             ) : (
-              <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
-                {pharmacies.length === 0 ? (
-                   <View style={{ padding: 20, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: colors.danger, width: '100%' }}>
-                     <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>⚠️ No Pharmacies Found</Text>
-                     <Text style={{ color: colors.text }}>Please re-seed your database with Indian locations.</Text>
-                   </View>
-                ) : (
-                  pharmacies.map(p => (
-                    <TouchableOpacity key={p.id} style={styles.restaurantCard} onPress={() => { setSelectedPharmacy(p); fetch(`/api/rides/pharmacies/${p.id}/items`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } }).then(res=>res.json()).then(setMedicineItems).catch(console.error); }}>
-                      <Text style={{ fontSize: 40 }}>{p.image_url}</Text>
-                      <Text style={styles.restaurantName}>{p.name}</Text>
-                      <Text style={styles.restaurantCuisine}>{p.city} • ⭐ {p.rating}</Text>
-                    </TouchableOpacity>
-                  ))
+              <>
+                <Text style={{ color: colors.text, marginBottom: 12 }}>Payment Method</Text>
+                
+                <TouchableOpacity 
+                  style={[styles.paymentMethodCard, paymentMode === 'upi' && styles.paymentMethodActive]} 
+                  onPress={() => setPaymentMode('upi')}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <Text style={{ fontSize: 24 }}>📱</Text>
+                    <View>
+                      <Text style={{ color: colors.text, fontWeight: 'bold' }}>UPI / Scan QR</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>GPay, PhonePe, Paytm, BHIM</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                {paymentMode === 'upi' && (
+                  <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 12, marginBottom: 12, alignItems: 'center', borderWidth: 1, borderColor: colors.surfaceLight }}>
+                    <View style={{ flexDirection: 'row', gap: 20, marginBottom: 16, alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row' }}>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: '#4285F4' }}>G</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: '#EA4335' }}>P</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: '#FBBC05' }}>a</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: '#34A853' }}>y</Text>
+                      </View>
+                      <View style={{ backgroundColor: '#5f259f', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
+                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#FFF' }}>पे PhonePe</Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', backgroundColor: '#002970', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#00baf2' }}>Pay</Text>
+                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#FFF' }}>tm</Text>
+                      </View>
+                    </View>
+                    <View style={{ width: 180, height: 180, backgroundColor: '#FFF', padding: 12, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}>
+                      <Image 
+                        source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg' }}
+                        style={{ width: '100%', height: '100%', opacity: 0.9 }} 
+                        resizeMode="contain" 
+                      />
+                    </View>
+                    <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 12, fontWeight: 'bold' }}>Scan to Pay ₹{paymentAmount.toFixed(2)}</Text>
+                  </View>
                 )}
-              </View>
+
+                <TouchableOpacity 
+                  style={[styles.paymentMethodCard, paymentMode === 'digital' && styles.paymentMethodActive]} 
+                  onPress={() => setPaymentMode('digital')}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <Text style={{ fontSize: 24 }}>💳</Text>
+                    <View>
+                      <Text style={{ color: colors.text, fontWeight: 'bold' }}>Digital Wallet</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>Balance: ₹999.00</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.paymentMethodCard, paymentMode === 'cash' && styles.paymentMethodActive]} 
+                  onPress={() => setPaymentMode('cash')}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <Text style={{ fontSize: 24 }}>💵</Text>
+                    <View>
+                      <Text style={{ color: colors.text, fontWeight: 'bold' }}>Cash / Pay on Delivery</Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 12 }}>Have exact change ready.</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <CustomButton title="Cancel" onPress={() => setShowPaymentModal(false)} variant="outline" style={{ flex: 1 }} />
+                  <CustomButton title={paymentMode === 'cash' ? "Confirm Order" : "Confirm Pay"} onPress={processPaymentAndRequest} variant="primary" style={{ flex: 2 }} />
+                </View>
+              </>
             )}
           </GlassCard>
-        </View>
-      ) : null}
-      {/* PAYMENT MODAL */}
-      <Modal visible={showPaymentModal} transparent animationType="slide">
-        <View style={[styles.modalOverlay, { justifyContent: 'flex-end', margin: 0 }]}>
-          <View style={{ backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 20, width: '100%', maxHeight: '90%' }}>
-            
-            {/* Handle Bar */}
-            <View style={{ width: 40, height: 5, backgroundColor: colors.border, borderRadius: 3, alignSelf: 'center', marginBottom: 20 }} />
-
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={{ color: colors.text, fontSize: 24, fontWeight: '900' }}>Complete Payment</Text>
-                <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                  <Text style={{ color: colors.textMuted, fontSize: 24 }}>✕</Text>
-                </TouchableOpacity>
-              </View>
-              
-              <View style={{ backgroundColor: 'rgba(34, 197, 94, 0.05)', padding: 24, borderRadius: 20, marginBottom: 24, borderWidth: 1, borderColor: 'rgba(34, 197, 94, 0.2)', alignItems: 'center' }}>
-                <Text style={{ color: colors.textMuted, fontSize: 16, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>Total to Pay</Text>
-                <Text style={{ color: colors.primary, fontSize: 48, fontWeight: '900', marginTop: 8 }}>₹{paymentAmount.toFixed(2)}</Text>
-                <Text style={{ color: colors.success, fontSize: 12, marginTop: 8, fontWeight: 'bold' }}>✓ Secure checkout verified by BharatOne</Text>
-              </View>
-
-              {paymentProcessing ? (
-                <View style={{ alignItems: 'center', padding: 40 }}>
-                  <ActivityIndicator size="large" color={colors.primary} />
-                  <Text style={{ color: colors.text, marginTop: 24, fontSize: 20, fontWeight: 'bold' }}>{paymentMode === 'cash' ? 'Confirming Order...' : 'Processing Payment...'}</Text>
-                  <Text style={{ color: colors.textMuted, marginTop: 8, fontSize: 14 }}>{paymentMode === 'cash' ? 'Validating request securely.' : 'Connecting to your bank...'}</Text>
-                </View>
-              ) : (
-                <>
-                  <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>Select Payment Method</Text>
-                  
-                  <TouchableOpacity 
-                    style={[styles.paymentMethodCard, paymentMode === 'upi' && { borderColor: colors.primary, backgroundColor: 'rgba(59, 130, 246, 0.05)', borderWidth: 2 }]} 
-                    onPress={() => setPaymentMode('upi')}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(59, 130, 246, 0.1)', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 24 }}>📱</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold' }}>UPI / QR Code</Text>
-                        <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 2 }}>Instant payment via any UPI app</Text>
-                      </View>
-                      <View style={{ width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: paymentMode === 'upi' ? colors.primary : colors.border, alignItems: 'center', justifyContent: 'center' }}>
-                        {paymentMode === 'upi' && <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary }} />}
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-
-                  {paymentMode === 'upi' && (
-                    <View style={{ backgroundColor: colors.surfaceLight, padding: 24, borderRadius: 20, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: colors.glassBorder, marginTop: 8 }}>
-                      
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24, justifyContent: 'center', width: '100%' }}>
-                        <View style={{ backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: '#e0e0e0', shadowColor: '#000', shadowOffset:{width:0, height:2}, shadowOpacity: 0.05, elevation: 2, flex: 1, alignItems: 'center' }}>
-                          <Text style={{ color: '#002970', fontWeight: '900', fontSize: 16 }}>Pay<Text style={{color: '#00BAF2'}}>tm</Text></Text>
-                        </View>
-                        <View style={{ backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: '#e0e0e0', shadowColor: '#000', shadowOffset:{width:0, height:2}, shadowOpacity: 0.05, elevation: 2, flex: 1, alignItems: 'center' }}>
-                          <Text style={{ color: '#5E35B1', fontWeight: '900', fontSize: 16 }}>पे PhonePe</Text>
-                        </View>
-                        <View style={{ backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: '#e0e0e0', shadowColor: '#000', shadowOffset:{width:0, height:2}, shadowOpacity: 0.05, elevation: 2, flex: 1, alignItems: 'center' }}>
-                          <Text style={{ color: '#3C4043', fontWeight: '900', fontSize: 16 }}><Text style={{color:'#4285F4'}}>G</Text><Text style={{color:'#EA4335'}}>P</Text><Text style={{color:'#FBBC05'}}>a</Text><Text style={{color:'#34A853'}}>y</Text></Text>
-                        </View>
-                      </View>
-
-                      <View style={{ width: 220, height: 220, backgroundColor: '#FFF', padding: 16, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 10, marginBottom: 16 }}>
-                        <Image source={{ uri: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect x="0" y="0" width="10" height="10" fill="#FFF"/><rect x="1" y="1" width="3" height="3" fill="#000"/><rect x="1.5" y="1.5" width="2" height="2" fill="#FFF"/><rect x="2" y="2" width="1" height="1" fill="#000"/><rect x="6" y="1" width="3" height="3" fill="#000"/><rect x="6.5" y="1.5" width="2" height="2" fill="#FFF"/><rect x="7" y="2" width="1" height="1" fill="#000"/><rect x="1" y="6" width="3" height="3" fill="#000"/><rect x="1.5" y="6.5" width="2" height="2" fill="#FFF"/><rect x="2" y="7" width="1" height="1" fill="#000"/><rect x="5" y="1" width="1" height="1" fill="#000"/><rect x="5" y="3" width="1" height="2" fill="#000"/><rect x="2" y="5" width="2" height="1" fill="#000"/><rect x="5" y="6" width="1" height="1" fill="#000"/><rect x="6" y="5" width="3" height="1" fill="#000"/><rect x="7" y="7" width="2" height="1" fill="#000"/><rect x="5" y="8" width="1" height="1" fill="#000"/><rect x="8" y="8" width="1" height="1" fill="#000"/><rect x="6" y="9" width="1" height="1" fill="#000"/></svg>') }} style={{ width: '100%', height: '100%' }} />
-                      </View>
-                      <Text style={{ color: colors.text, fontSize: 18, fontWeight: '800' }}>Scan to Pay ₹{paymentAmount.toFixed(2)}</Text>
-                      <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 4 }}>Scan with any UPI app on your phone</Text>
-                    </View>
-                  )}
-
-                  <TouchableOpacity 
-                    style={[styles.paymentMethodCard, paymentMode === 'digital' && { borderColor: colors.primary, backgroundColor: 'rgba(59, 130, 246, 0.05)', borderWidth: 2 }]} 
-                    onPress={() => setPaymentMode('digital')}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(59, 130, 246, 0.1)', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 24 }}>💳</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold' }}>BharatOne Wallet</Text>
-                        <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 2 }}>Available Balance: ₹{(user?.walletBalance || 0).toFixed(2)}</Text>
-                      </View>
-                      <View style={{ width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: paymentMode === 'digital' ? colors.primary : colors.border, alignItems: 'center', justifyContent: 'center' }}>
-                        {paymentMode === 'digital' && <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary }} />}
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity 
-                    style={[styles.paymentMethodCard, paymentMode === 'cash' && { borderColor: colors.primary, backgroundColor: 'rgba(59, 130, 246, 0.05)', borderWidth: 2 }]} 
-                    onPress={() => setPaymentMode('cash')}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(34, 197, 94, 0.1)', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 24 }}>💵</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold' }}>Cash on Delivery</Text>
-                        <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 2 }}>Pay with cash to the partner</Text>
-                      </View>
-                      <View style={{ width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: paymentMode === 'cash' ? colors.primary : colors.border, alignItems: 'center', justifyContent: 'center' }}>
-                        {paymentMode === 'cash' && <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary }} />}
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-
-                  <View style={{ marginTop: 16 }}>
-                    <CustomButton 
-                      title={paymentMode === 'cash' ? "Place Cash Order" : `Pay ₹${paymentAmount.toFixed(2)} & Proceed`} 
-                      onPress={processPaymentAndRequest} 
-                      variant="primary" 
-                      style={{ height: 64, borderRadius: 32 }}
-                      textStyle={{ fontSize: 20 }}
-                    />
-                  </View>
-                </>
-              )}
-            </ScrollView>
-          </View>
         </View>
       </Modal>
 
@@ -1551,7 +1441,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                 ))}
               </ScrollView>
               
-              <TouchableOpacity style={styles.profileMenuBtn} onPress={() => { setShowProfileModal(false); setRiderScreen('history'); }}>
+              <TouchableOpacity style={styles.profileMenuBtn} onPress={() => { setShowProfileModal(false); window.setRiderScreen?.('history'); }}>
                 <Text style={styles.profileMenuIcon}>📜</Text>
                 <Text style={styles.profileMenuText}>View Ride & Order History</Text>
               </TouchableOpacity>
@@ -1579,27 +1469,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 const getStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 24, paddingBottom: 60 },
-  superAppCard: {
-    backgroundColor: colors.surfaceLight,
-    padding: 16,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    width: '47%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5
-  },
-  superAppCardText: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
   nav: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
@@ -1700,7 +1569,6 @@ const getStyles = (colors) => StyleSheet.create({
   profileMenuText: { color: colors.text, fontSize: 16, fontWeight: '600' },
 
   fareBreakdown: { marginBottom: 16 },
-  iconCircle: { width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   fareText: { color: colors.rideColor, fontSize: 24, fontWeight: '900', marginBottom: 4 },
   paymentInfoText: { color: colors.textMuted, fontSize: 13 },
   surgeBadge: { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderWidth: 1, borderColor: '#EAB308', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, alignSelf: 'flex-start', marginBottom: 8 },

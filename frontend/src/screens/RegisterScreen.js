@@ -110,12 +110,12 @@ export default function RegisterScreen({ onNavigateToLogin }) {
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 160, height: 160, marginBottom: 12, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
           <Text style={styles.tagline}>Create your account to start traveling</Text>
         </View>
 
         <GlassCard style={styles.card}>
-          <Text style={styles.title}>Join BharatOne</Text>
+          <Text style={styles.title}>Join BharatGo</Text>
           <Text style={styles.subtitle}>Select your transit role to get configured</Text>
 
           {error ? <Text style={styles.errorText}>⚠️ {error}</Text> : null}

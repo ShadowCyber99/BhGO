@@ -48,7 +48,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
       <View style={styles.content}>
         {/* Brand Logo & Header */}
         <View style={styles.header}>
-          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 160, height: 160, marginBottom: 12, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
+          <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 220, height: 70, marginBottom: 12, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
           <Text style={styles.tagline}>Future-forward urban transit, simulated live.</Text>
         </View>
 
@@ -61,7 +61,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
 
           <CustomInput
             label="Email Address"
-            placeholder="rider@BharatOne.com"
+            placeholder="rider@BharatGo.com"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -104,11 +104,20 @@ export default function LoginScreen({ onNavigateToRegister }) {
               >
                 <Text style={[styles.demoBadgeText, { color: colors.secondary }]}>🚗 Driver Demo</Text>
               </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.demoBadge, { borderColor: colors.danger }]}
+                onPress={() => {
+                  setEmail('admin@BharatGo.com');
+                  setPassword('password123');
+                }}
+              >
+                <Text style={[styles.demoBadgeText, { color: colors.danger }]}>🛠️ Admin Demo</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>New to BharatOne? </Text>
+            <Text style={styles.footerText}>New to BharatGo? </Text>
             <TouchableOpacity onPress={onNavigateToRegister}>
               <Text style={styles.footerLink}>Create Account</Text>
             </TouchableOpacity>

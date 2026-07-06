@@ -12,7 +12,7 @@ const pgConfig = {
   database: process.env.DB_NAME || 'cab_ride',
 };
 
-const JWT_SECRET = process.env.JWT_SECRET || 'BharatOne_super_secret_key_2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'BharatGo_super_secret_key_2024';
 const SERVER_URL = 'http://localhost:5000';
 
 const pool = new Pool(pgConfig);

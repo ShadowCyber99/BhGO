@@ -19,9 +19,7 @@ export function AuthProvider({ children }) {
       const socketUrl = process.env.EXPO_PUBLIC_API_URL 
         ? process.env.EXPO_PUBLIC_API_URL.replace('/api', '') 
         : '/';
-      const newSocket = io(socketUrl, {
-        auth: { token }
-      });
+      const newSocket = io(socketUrl);
       
       newSocket.on('connect', () => {
         console.log('✅ WebSocket Client Connected to Backend');
@@ -52,7 +50,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {
-        const storedToken = localStorage.getItem('BharatOne_token');
+        const storedToken = localStorage.getItem('BharatGo_token');
         if (storedToken) {
           setAuthToken(storedToken);
           setToken(storedToken);
@@ -61,7 +59,7 @@ export function AuthProvider({ children }) {
         }
       } catch (e) {
         console.warn('Failed to load storage/profile:', e.message);
-        localStorage.removeItem('BharatOne_token');
+        localStorage.removeItem('BharatGo_token');
       } finally {
         setLoading(false);
       }
@@ -74,7 +72,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const data = await api.login({ email, password });
-      localStorage.setItem('BharatOne_token', data.token);
+      localStorage.setItem('BharatGo_token', data.token);
       setAuthToken(data.token);
       setToken(data.token);
       setUser(data.user);
@@ -90,7 +88,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const data = await api.register(userData);
-      localStorage.setItem('BharatOne_token', data.token);
+      localStorage.setItem('BharatGo_token', data.token);
       setAuthToken(data.token);
       setToken(data.token);
       setUser(data.user);
@@ -103,7 +101,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('BharatOne_token');
+    localStorage.removeItem('BharatGo_token');
     setAuthToken(null);
     setToken(null);
     setUser(null);

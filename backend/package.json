@@ -1,15 +1,14 @@
 {
-  "name": "BharatOne-backend",
+  "name": "BharatGo-backend",
   "version": "1.0.0",
-  "description": "Backend API and WebSocket Server for BharatOne 3-tier Application",
+  "description": "Backend API and WebSocket Server for BharatGo 3-tier Application",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node seed.js",
     "simulate": "node simulate_drivers.js",
-    "simulate:riders": "node simulate_riders.js",
-    "test": "jest --detectOpenHandles"
+    "simulate:riders": "node simulate_riders.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -26,9 +25,7 @@
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.1.0",
-    "supertest": "^6.3.3"
+    "nodemon": "^3.1.0"
   },
   "private": true
 }

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const baseColors = {
-  // Brand Colors based on BharatOne logo
+  // Brand Colors based on BharatGo logo
   primary: '#F97316', // Vibrant Orange from the logo
   primaryHover: '#FB923C',
   secondary: '#0F172A', // Navy Blue from 'bharat' text
@@ -22,7 +22,7 @@ const baseColors = {
 
 export const themes = {
   dark: {
-    name: 'BharatOne Dark',
+    name: 'BharatGo Dark',
     ...baseColors,
     background: '#0B0C10',
     surface: '#12141A',
@@ -38,7 +38,7 @@ export const themes = {
     overlayBorder: 'rgba(255, 255, 255, 0.15)'
   },
   light: {
-    name: 'BharatOne Light',
+    name: 'BharatGo Light',
     ...baseColors,
     primary: '#0F172A', // Use Navy for primary in light mode for better contrast
     primaryHover: '#1E293B',
@@ -62,13 +62,15 @@ export const themes = {
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [themeName, setThemeName] = useState('light');
+  const [themeName, setThemeName] = useState('dark');
 
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem('BharatOne_theme');
+      const savedTheme = localStorage.getItem('BharatGo_theme');
       if (savedTheme && themes[savedTheme]) {
         setThemeName(savedTheme);
+      } else if (savedTheme === 'light') {
+        setThemeName('light');
       }
     } catch (e) {}
   }, []);
@@ -76,7 +78,7 @@ export const ThemeProvider = ({ children }) => {
   const changeTheme = (name) => {
     setThemeName(name);
     try {
-      localStorage.setItem('BharatOne_theme', name);
+      localStorage.setItem('BharatGo_theme', name);
     } catch(e) {}
   };
 
@@ -85,7 +87,7 @@ export const ThemeProvider = ({ children }) => {
     changeTheme(newMode);
   };
 
-  const theme = themes[themeName] || themes.light;
+  const theme = themes[themeName] || themes.dark;
   const isDarkMode = themeName !== 'light';
 
   const availableThemes = Object.keys(themes).map(k => ({id: k, name: themes[k].name}));

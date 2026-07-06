@@ -112,7 +112,7 @@ export default function DriverHomeScreen() {
 
   const fetchEarnings = async () => {
     try {
-      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` } });
+      const res = await fetch('/api/rides/driver/earnings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` } });
       if (res.ok) {
         setEarningsData(await res.json());
       }
@@ -140,7 +140,7 @@ export default function DriverHomeScreen() {
   const fetchChatHistory = async (rideId) => {
     try {
       const res = await fetch(`/api/rides/${rideId}/chat`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatOne_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('BharatGo_token')}` }
       });
       if (res.ok) setChatMessages(await res.json());
     } catch (e) {}
@@ -165,9 +165,9 @@ export default function DriverHomeScreen() {
           if (isAmbulanceDriver) return; // Ambulance driver can't take other rides
         }
 
-        // 2. Food/Grocery/Parcel/Medicine strict match -> ONLY bikes (except parcels > 25kg)
-        if (['food', 'grocery', 'medicine'].includes(data.serviceCategory)) {
-          if (myVehicleType !== 'bike') return; // Only bike riders can deliver food/grocery/medicine
+        // 2. Food/Grocery/Parcel strict match -> ONLY bikes (except parcels > 25kg)
+        if (data.serviceCategory === 'food') {
+          if (myVehicleType !== 'bike') return; // Only bike riders can deliver food
         }
         if (data.serviceCategory === 'parcel') {
           const weight = data.parcelWeight || 0;
@@ -378,7 +378,7 @@ export default function DriverHomeScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 60, height: 60, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
+              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 180, height: 60, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
               <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold', marginLeft: 4}}>Driver</Text>
             </View>
             <View style={{ marginTop: 6 }}>
@@ -415,12 +415,23 @@ export default function DriverHomeScreen() {
       <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
         <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, fontWeight: 'bold' }}>📍 Service Filter Preference:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
-          {['ride', 'parcel', 'medical_emergency', 'non_emergency', 'food', 'grocery', 'medicine'].filter(f => {
+          {['ride', 'parcel', 'medical_emergency', 'non_emergency', 'food'].filter(f => {
             // Strict role-based rendering of tabs
             if (isAmbulanceDriver) return f === 'medical_emergency' || f === 'non_emergency';
-            if (myVehicleType === 'bike') return f === 'ride' || f === 'food' || f === 'parcel' || f === 'grocery' || f === 'medicine';
+            if (myVehicleType === 'bike') return f === 'ride' || f === 'food' || f === 'parcel';
             return f === 'ride' || f === 'parcel'; // Cab drivers
-          }).map(f => (
+          }).map(f => {
+            let label = f.toUpperCase();
+            let icon = '📌';
+            if (f === 'ride') { label = 'RIDE'; icon = '🚘'; }
+            else if (f === 'parcel') { label = 'PARCEL'; icon = '📦'; }
+            else if (f === 'food') { label = 'FOOD'; icon = '🍔'; }
+            else if (f === 'medical_emergency') { label = 'AMBULANCE'; icon = '🚑'; }
+            else if (f === 'non_emergency') { label = 'NON-EMERGENCY'; icon = '🏥'; }
+
+            const isActive = serviceFilter.includes(f);
+
+            return (
             <TouchableOpacity 
               key={f}
               onPress={() => {
@@ -433,15 +444,19 @@ export default function DriverHomeScreen() {
                 });
               }}
               style={{
-                paddingVertical: 6, paddingHorizontal: 16, borderRadius: 16, marginRight: 8,
-                backgroundColor: serviceFilter.includes(f) ? colors.primary : colors.surfaceLight,
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+                paddingVertical: 14, paddingHorizontal: 20, borderRadius: 12, marginRight: 12,
+                backgroundColor: isActive ? (f === 'medical_emergency' || f === 'non_emergency' ? 'rgba(239, 68, 68, 0.1)' : colors.primary) : colors.surfaceLight,
+                borderWidth: 1, borderColor: isActive ? (f === 'medical_emergency' || f === 'non_emergency' ? colors.danger : colors.primary) : 'transparent',
+                minWidth: 130,
               }}
             >
-              <Text style={{ color: serviceFilter.includes(f) ? (isDarkMode ? '#000' : '#FFF') : colors.text, fontSize: 13, fontWeight: 'bold' }}>
-                {f.toUpperCase()}
+              <Text style={{ fontSize: 20 }}>{icon}</Text>
+              <Text style={{ color: isActive ? (f === 'medical_emergency' || f === 'non_emergency' ? colors.danger : (isDarkMode ? '#000' : '#FFF')) : colors.text, fontSize: 15, fontWeight: '900' }}>
+                {label}
               </Text>
             </TouchableOpacity>
-          ))}
+          )})}
         </ScrollView>
       </View>
 
@@ -839,51 +854,41 @@ export default function DriverHomeScreen() {
             )}
           </View>
 
-          <View style={[styles.actionBlock, { flexDirection: 'column', gap: 16, marginTop: 16 }]}>
-            <View style={{ backgroundColor: 'rgba(163,230,53,0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.primary, alignItems: 'center' }}>
-              <Text style={{ color: colors.textMuted, fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase' }}>Payout Estimate</Text>
-              <Text style={{ color: colors.primary, fontSize: 32, fontWeight: '900' }}>₹{activeRide.fare}</Text>
+          <View style={styles.actionBlock}>
+            <View>
+              <Text style={styles.fareLabel}>Payout</Text>
+              <Text style={styles.fareAmount}>₹{activeRide.fare}</Text>
             </View>
 
-            {activeRide.status === 'accepted' && (
-              <TouchableOpacity onPress={() => handleUpdateStatus('arrived')} style={{ backgroundColor: colors.primary, paddingVertical: 24, borderRadius: 16, alignItems: 'center', shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 15, elevation: 10 }}>
-                <Text style={{ color: '#000', fontSize: 22, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>📍 Arrived at Pickup</Text>
-              </TouchableOpacity>
-            )}
+            {activeRide.status === 'accepted' && <CustomButton title="I Have Arrived at Pickup" onPress={() => handleUpdateStatus('arrived')} style={styles.actionBtn} />}
             
             {activeRide.status === 'arrived' && (
-              <View>
+              <View style={{ flex: 1, marginLeft: 16 }}>
                 <TouchableOpacity 
                   onPress={() => setSafetyChecked(!safetyChecked)}
-                  style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: safetyChecked ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: 16, borderRadius: 12, borderWidth: 2, borderColor: safetyChecked ? colors.success : colors.danger, marginBottom: 16 }}
+                  style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: safetyChecked ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: safetyChecked ? colors.success : colors.danger, marginBottom: 8 }}
                 >
-                  <Text style={{ marginRight: 12, fontSize: 24 }}>{safetyChecked ? '✅' : '⬜'}</Text>
-                  <Text style={{ color: colors.text, fontSize: 14, flex: 1, fontWeight: 'bold' }}>
-                    {activeRide.serviceCategory === 'ambulance' ? 'Seatbelts buckled, Stretcher & Kit ready' :
-                     (activeRide.vehicleType === 'bike' || activeRide.vehiclePreference === 'bike' || activeRide.serviceCategory === 'bike') ? 'Helmet worn by both riders' :
+                  <Text style={{ marginRight: 8, fontSize: 18 }}>{safetyChecked ? '✅' : '⬜'}</Text>
+                  <Text style={{ color: colors.text, fontSize: 12, flex: 1 }}>
+                    {activeRide.serviceCategory === 'ambulance' ? 'Seatbelts buckled, Stretcher & Medical kit ready' :
+                     (activeRide.vehicleType === 'bike' || activeRide.vehiclePreference === 'bike' || activeRide.serviceCategory === 'bike') ? 'helmet wear both riders for bike ride' :
                      'Seatbelts buckled securely'}
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <CustomButton 
+                  title="Start Trip / Board Passenger" 
                   onPress={() => setShowOtpModal(true)} 
+                  style={[styles.actionBtn, !safetyChecked && { opacity: 0.5 }]} 
                   disabled={!safetyChecked}
-                  style={{ backgroundColor: safetyChecked ? colors.success : colors.surfaceLight, paddingVertical: 24, borderRadius: 16, alignItems: 'center', opacity: safetyChecked ? 1 : 0.5, shadowColor: colors.success, shadowOpacity: safetyChecked ? 0.3 : 0, shadowRadius: 15, elevation: safetyChecked ? 10 : 0 }}
-                >
-                  <Text style={{ color: safetyChecked ? '#fff' : colors.textMuted, fontSize: 22, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>🚀 Start Trip</Text>
-                </TouchableOpacity>
+                />
               </View>
             )}
 
             {activeRide.status === 'started' && !reachedDropoff && (
-              <TouchableOpacity disabled style={{ backgroundColor: colors.surfaceLight, paddingVertical: 24, borderRadius: 16, alignItems: 'center', opacity: 0.8, borderWidth: 1, borderColor: colors.border }}>
-                <Text style={{ color: colors.textMuted, fontSize: 20, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>🧭 Navigating to Dropoff...</Text>
-              </TouchableOpacity>
+              <CustomButton title="Navigating to Dropoff..." style={[styles.actionBtn, { backgroundColor: colors.surfaceLight, opacity: 0.7 }]} disabled />
             )}
-            
             {activeRide.status === 'started' && reachedDropoff && (
-              <TouchableOpacity onPress={() => handleUpdateStatus('completed')} style={{ backgroundColor: colors.success, paddingVertical: 24, borderRadius: 16, alignItems: 'center', shadowColor: colors.success, shadowOpacity: 0.3, shadowRadius: 15, elevation: 10 }}>
-                <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>🏁 Complete Trip & Collect Payout</Text>
-              </TouchableOpacity>
+              <CustomButton title="Complete Trip & Collect Payout" onPress={() => handleUpdateStatus('completed')} style={[styles.actionBtn, { backgroundColor: colors.success }]} />
             )}
           </View>
         </GlassCard>

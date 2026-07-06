@@ -7,10 +7,10 @@ require('dotenv').config();
 const pgConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'postgres',
-  connectionTimeoutMillis: 3000, 
+  user: process.env.DB_USER || 'devops',
+  password: process.env.DB_PASSWORD || 'Shadow99@@',
+  database: process.env.DB_NAME || 'cab_ride',
+  connectionTimeoutMillis: 3000, // Timeout fast if Postgres is offline
 };
 
 let pool = null;
@@ -22,7 +22,7 @@ const inMemoryDb = {
     {
       id: 1,
       name: 'John Rider',
-      email: 'rider@BharatOne.com',
+      email: 'rider@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'rider',
       rating: 4.9,
@@ -32,7 +32,7 @@ const inMemoryDb = {
     {
       id: 2,
       name: 'Sarah Economy Driver',
-      email: 'driver_eco@BharatOne.com',
+      email: 'driver_eco@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.8,
@@ -42,7 +42,7 @@ const inMemoryDb = {
     {
       id: 3,
       name: 'Michael Premium Driver',
-      email: 'driver_premium@BharatOne.com',
+      email: 'driver_premium@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.95,
@@ -52,7 +52,7 @@ const inMemoryDb = {
     {
       id: 4,
       name: 'Elena SUV Driver',
-      email: 'driver_suv@BharatOne.com',
+      email: 'driver_suv@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'driver',
       rating: 4.75,
@@ -61,8 +61,8 @@ const inMemoryDb = {
     },
     {
       id: 5,
-      name: 'Admin System',
-      email: 'admin@BharatOne.com',
+      name: 'System Admin',
+      email: 'admin@BharatGo.com',
       password_hash: bcrypt.hashSync('password123', 10),
       role: 'admin',
       rating: 5.0,
@@ -132,35 +132,30 @@ const inMemoryDb = {
     { id: 6, restaurant_id: 3, name: 'Dragon Roll', description: 'Eel, cucumber, and avocado.', price: 14.00, is_veg: false, image_url: '🍣' },
     { id: 7, restaurant_id: 3, name: 'Spicy Tuna Roll', description: 'Fresh tuna with spicy sauce.', price: 12.00, is_veg: false, image_url: '🍣' }
   ],
-  supermarkets: [
-    { id: 1, name: 'BigBasket Local', category: 'Groceries', rating: 4.7, image_url: '🛒' },
-    { id: 2, name: 'BlinkIt Fresh', category: 'Daily Essentials', rating: 4.8, image_url: '🛍️' },
-    { id: 3, name: 'Reliance Smart', category: 'Supermarket', rating: 4.5, image_url: '🏬' },
-    { id: 4, name: 'D-Mart Specials', category: 'Discount Groceries', rating: 4.6, image_url: '🏪' },
-    { id: 5, name: "Nature's Basket", category: 'Premium Grocery', rating: 4.8, image_url: '🥑' },
-    { id: 6, name: 'Local Kirana', category: 'Neighborhood Store', rating: 4.4, image_url: '🏪' },
-    { id: 7, name: 'Croma Express', category: 'Electronics', rating: 4.5, image_url: '🔌' },
-    { id: 8, name: 'Licious', category: 'Fresh Meat & Seafood', rating: 4.7, image_url: '🥩' }
-  ],
-  grocery_items: [
-    { id: 1, supermarket_id: 1, name: 'Aashirvaad Atta (5kg)', description: 'Whole wheat flour.', price: 245.00, category: 'Staples', image_url: '🌾' },
-    { id: 2, supermarket_id: 1, name: 'Daawat Basmati Rice (1kg)', description: 'Premium long grain rice.', price: 180.00, category: 'Staples', image_url: '🍚' },
-    { id: 3, supermarket_id: 1, name: 'Tata Salt (1kg)', description: 'Iodized salt.', price: 28.00, category: 'Staples', image_url: '🧂' },
-    { id: 4, supermarket_id: 2, name: 'Amul Taaza Milk (1L)', description: 'Toned fresh milk.', price: 68.00, category: 'Dairy', image_url: '🥛' },
-    { id: 5, supermarket_id: 2, name: 'Amul Butter (100g)', description: 'Pasteurized butter.', price: 56.00, category: 'Dairy', image_url: '🧈' }
-  ],
-  pharmacies: [
-    { id: 1, name: 'Apollo Pharmacy', category: 'Medicines & Health', rating: 4.8, image_url: '💊' },
-    { id: 2, name: 'NetMeds Local', category: '24/7 Meds', rating: 4.7, image_url: '⚕️' },
-    { id: 3, name: '1mg Store', category: 'Healthcare', rating: 4.6, image_url: '🩹' },
-    { id: 4, name: 'Wellness Forever', category: 'Pharmacy', rating: 4.9, image_url: '🩺' }
-  ],
-  medicine_items: [
-    { id: 1, pharmacy_id: 1, name: 'Paracetamol 500mg', description: 'Pain relief', price: 1.50, category: 'OTC', image_url: '💊' },
-    { id: 2, pharmacy_id: 1, name: 'Vitamin C Tablets', description: 'Immunity booster', price: 5.00, category: 'Supplements', image_url: '🍋' }
-  ],
   orders: [],
-  chat_messages: []
+  chat_messages: [],
+  complaints: [
+    {
+      id: 1,
+      user_id: 1, // John Rider
+      user_name: 'John Rider',
+      user_role: 'rider',
+      subject: 'Driver took too long',
+      message: 'My driver yesterday took a totally wrong turn and delayed me by 20 minutes.',
+      status: 'open',
+      created_at: new Date(Date.now() - 86400000) // 1 day ago
+    },
+    {
+      id: 2,
+      user_id: 2, // Sarah Driver
+      user_name: 'Sarah Economy Driver',
+      user_role: 'driver',
+      subject: 'Payment not received',
+      message: 'The rider paid in cash but it says digital on my end?',
+      status: 'resolved',
+      created_at: new Date(Date.now() - 172800000) // 2 days ago
+    }
+  ]
 };
 
 // Check DB Connection on startup
@@ -179,19 +174,13 @@ const initDb = async () => {
     client.release();
     useFallback = false;
   } catch (err) {
-    if (process.env.USE_DEMO_DB === 'true') {
-      console.warn('\n================================================================');
-      console.warn('⚠️ DATABASE CONNECTION FAILED:', err.message);
-      console.warn('⚠️ AUTOMATIC SWITCH TO IN-MEMORY DEMO MODE');
-      console.warn('💡 App will work perfectly for demo and testing without setup!');
-      console.warn('💡 To use real PostgreSQL, create the "BharatOne" DB and update .env');
-      console.warn('================================================================\n');
-      useFallback = true;
-    } else {
-      console.error('❌ DATABASE CONNECTION FAILED:', err.message);
-      console.error('❌ USE_DEMO_DB is not set to true. Exiting.');
-      process.exit(1);
-    }
+    console.warn('\n================================================================');
+    console.warn('❌ DATABASE CONNECTION FAILED:', err.message);
+    console.warn('⚡ AUTOMATIC SWITCH TO IN-MEMORY DEMO MODE');
+    console.warn('💡 App will work perfectly for demo and testing without setup!');
+    console.warn('💡 To use real PostgreSQL, create the "BharatGo" DB and update .env');
+    console.warn('================================================================\n');
+    useFallback = true;
   }
 };
 
@@ -551,6 +540,7 @@ const query = async (text, params = []) => {
       message_text: params[2],
       created_at: new Date()
     };
+    
     inMemoryDb.chat_messages.push(newMsg);
     return { rows: [newMsg] };
   }

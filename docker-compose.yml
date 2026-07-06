@@ -1,12 +1,12 @@
 services:
   db:
     image: postgres:14-alpine
-    container_name: BharatOne-db
+    container_name: BharatGo-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: devops
+      POSTGRES_PASSWORD: Shadow99@@
+      POSTGRES_DB: cab_ride
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -16,7 +16,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: BharatOne-backend
+    container_name: BharatGo-backend
     restart: unless-stopped
     depends_on:
       - db
@@ -37,7 +37,7 @@ services:
       dockerfile: Dockerfile
       args:
         - EXPO_PUBLIC_API_URL=http://bharatgo.duckdns.org/api
-    container_name: BharatOne-frontend
+    container_name: BharatGo-frontend
     restart: unless-stopped
     depends_on:
       - backend

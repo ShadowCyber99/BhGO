@@ -1,6 +1,6 @@
-# 🚖 BharatOne: Premium 3-Tier Real-Time Cab Booking Application
+# 🚖 BharatGo: Premium 3-Tier Real-Time Cab Booking Application
 
-Welcome to **BharatOne**, a premium, production-grade 3-tier cab booking clone. This project is built using **React Native (Expo Web)** for the mobile-first frontend, **Node.js (Express + Socket.io)** for the real-time backend, and **PostgreSQL** for persistent database storage.
+Welcome to **BharatGo**, a premium, production-grade 3-tier cab booking clone. This project is built using **React Native (Expo Web)** for the mobile-first frontend, **Node.js (Express + Socket.io)** for the real-time backend, and **PostgreSQL** for persistent database storage.
 
 To make development and testing incredibly fast, the backend includes an **intelligent in-memory database fallback and a Driver AI movement simulator**. If PostgreSQL is not yet configured on your machine, the server will alert you and run in in-memory mode instantly out of the box, allowing you to test bookings and watch vehicles drive on the map with zero setup!
 
@@ -9,7 +9,7 @@ To make development and testing incredibly fast, the backend includes an **intel
 ## 🏗️ Project Architecture
 
 ```
-BharatOne-app/
+bharatgo-app/
 ├── backend/                  # Node.js + Express API & Socket.io WebSockets
 │   ├── routes/               # REST API Routers (Auth, Rides)
 │   ├── middleware/           # Route guards (JWT verification)
@@ -42,14 +42,14 @@ Ensure you have **Node.js** (v18+) and **PostgreSQL** installed on your system.
 
 ### Step 1: Database Setup (PostgreSQL)
 
-1. Open your PostgreSQL terminal (`psql` or pgAdmin) and create a database named `BharatOne`:
+1. Open your PostgreSQL terminal (`psql` or pgAdmin) and create a database named `BharatGo`:
    ```sql
-   CREATE DATABASE BharatOne;
+   CREATE DATABASE BharatGo;
    ```
-2. Connect to the database and run the schema query script inside [backend/schema.sql](file:///C:/Users/Softelevation-Devops/.gemini/antigravity/scratch/BharatOne-app/backend/schema.sql) to create tables and pre-populate seed accounts.
+2. Connect to the database and run the schema query script inside [backend/schema.sql](file:///C:/Users/Softelevation-Devops/.gemini/antigravity/scratch/bharatgo-app/backend/schema.sql) to create tables and pre-populate seed accounts.
    - If using terminal:
      ```bash
-     psql -U postgres -d BharatOne -f backend/schema.sql
+     psql -U postgres -d BharatGo -f backend/schema.sql
      ```
      *(The script inserts 1 test Rider and 3 test Drivers representing Economy, Premium, and SUV vehicles).*
 
@@ -66,7 +66,7 @@ Ensure you have **Node.js** (v18+) and **PostgreSQL** installed on your system.
    npm install
    ```
 3. Configure the environment variables:
-   - Open the [.env](file:///C:/Users/Softelevation-Devops/.gemini/antigravity/scratch/BharatOne-app/backend/.env) file.
+   - Open the [.env](file:///C:/Users/Softelevation-Devops/.gemini/antigravity/scratch/bharatgo-app/backend/.env) file.
    - Update `DB_PASSWORD` and `DB_USER` to match your local PostgreSQL credentials.
 4. Launch the server in development mode:
    ```bash
@@ -98,21 +98,21 @@ Ensure you have **Node.js** (v18+) and **PostgreSQL** installed on your system.
 
 ## 🎮 How to Test & Demo the Application
 
-BharatOne is configured with **two highly engaging demo avenues** to let you inspect every edge of the 3-tier WebSocket flow:
+BharatGo is configured with **two highly engaging demo avenues** to let you inspect every edge of the 3-tier WebSocket flow:
 
 ### Avenue A: Interactive Single-Player Demo (Automatic AI Simulator)
 1. Open the frontend browser page (`http://localhost:8081`).
-2. On the login screen, click **`👤 Rider Demo`** to instantly autofill the credentials (`rider@BharatOne.com`). Click **Log In**.
+2. On the login screen, click **`👤 Rider Demo`** to instantly autofill the credentials (`rider@BharatGo.com`). Click **Log In**.
 3. Select one of our **✨ Quick Demo Journey Routes** (e.g., *Wall Street to SoHo*).
-4. Tap **Request BharatOne**.
+4. Tap **Request BharatGo**.
 5. The matching radar turns on. After 2 seconds, the server matches you with **Sarah's Hyundai Ioniq**.
 6. **Watch the live Map**: Sarah's vehicle will appear, change status to *Arrived*, transition to *Active Trip*, and you will watch the vehicle marker move smoothly along the highway lines in real-time, ultimately ending in a detailed electronic fare receipt!
 
 ### Avenue B: Two-Player Dispatch Match (Multi-Tab Multi-Role Testing)
 1. Open **Tab A** in your browser, log in as **`👤 Rider Demo`**, select a route, but do **NOT** click request yet.
-2. Open **Tab B** (Incognito window recommended so sessions don't clash), log in using the **`🚗 Driver Demo`** button (Autofills `driver_eco@BharatOne.com` representing Sarah).
+2. Open **Tab B** (Incognito window recommended so sessions don't clash), log in using the **`🚗 Driver Demo`** button (Autofills `driver_eco@BharatGo.com` representing Sarah).
 3. In Tab B, click the toggle to mark Sarah's status as **`🟢 ONLINE`**.
-4. Return to Tab A (Rider) and click **Request BharatOne**.
+4. Return to Tab A (Rider) and click **Request BharatGo**.
 5. Look at Tab B (Driver): An **Incoming Dispatch Offer** card flashes with a bright glowing outline, displaying the passenger's pickup location, dropoff location, and payout fare!
 6. Click **Accept Offer** in Tab B:
    - Sarah is now matched. Tab A (Rider) instantly receives the update over WebSockets!

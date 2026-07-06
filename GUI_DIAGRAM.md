@@ -1,6 +1,6 @@
-# BharatOne Super App: GUI Flow Diagram
+# BharatGo Super App: GUI Flow Diagram
 
-Below is the visual map of the graphical user interfaces and how they connect to the backend system in the BharatOne Super App.
+Below is the visual map of the graphical user interfaces and how they connect to the backend system in the BharatGo Super App.
 
 ```mermaid
 graph TD
