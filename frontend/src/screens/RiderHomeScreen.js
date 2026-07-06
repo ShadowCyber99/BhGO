@@ -633,24 +633,24 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
 
       <View style={styles.serviceSelectorRibbon}>
         <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ride' && { borderColor: colors.rideColor, backgroundColor: 'rgba(99,102,241,0.1)' }]} onPress={() => setServiceCategory('ride')}>
-          <Image source={{ uri: svgIcons.ride }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'ride' && { color: colors.rideColor, fontWeight: 'bold' }]}>Ride</Text>
+          <Text style={{ fontSize: 20, marginBottom: 2 }}>🚘</Text>
+          <Text style={[styles.serviceText, serviceCategory === 'ride' && { color: colors.rideColor, fontWeight: 'bold' }]}>RIDE</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'ambulance' && { borderColor: colors.ambulanceColor, backgroundColor: 'rgba(239,68,68,0.1)' }]} onPress={() => setServiceCategory('ambulance')}>
-          <Image source={{ uri: svgIcons.ambulance }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'ambulance' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>Ambulance</Text>
+          <Text style={{ fontSize: 20, marginBottom: 2 }}>🚑</Text>
+          <Text style={[styles.serviceText, serviceCategory === 'ambulance' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>AMBULANCE</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'parcel' && { borderColor: colors.parcelColor, backgroundColor: 'rgba(139,92,246,0.1)' }]} onPress={() => setServiceCategory('parcel')}>
-          <Image source={{ uri: svgIcons.parcel }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'parcel' && { color: colors.parcelColor, fontWeight: 'bold' }]}>Parcel</Text>
+          <Text style={{ fontSize: 20, marginBottom: 2 }}>📦</Text>
+          <Text style={[styles.serviceText, serviceCategory === 'parcel' && { color: colors.parcelColor, fontWeight: 'bold' }]}>PARCEL</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'food' && { borderColor: colors.foodColor, backgroundColor: 'rgba(249,115,22,0.1)' }]} onPress={() => setServiceCategory('food')}>
-          <Image source={{ uri: svgIcons.food }} style={{ width: 24, height: 24, marginBottom: 4 }} />
-          <Text style={[styles.serviceText, serviceCategory === 'food' && { color: colors.foodColor, fontWeight: 'bold' }]}>Food</Text>
+          <Text style={{ fontSize: 20, marginBottom: 2 }}>🍔</Text>
+          <Text style={[styles.serviceText, serviceCategory === 'food' && { color: colors.foodColor, fontWeight: 'bold' }]}>FOOD</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.serviceTab, serviceCategory === 'medical' && { borderColor: colors.ambulanceColor, backgroundColor: 'rgba(239,68,68,0.1)' }]} onPress={() => setServiceCategory('medical')}>
           <Text style={{ fontSize: 20, marginBottom: 2 }}>💊</Text>
-          <Text style={[styles.serviceText, serviceCategory === 'medical' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>Medical</Text>
+          <Text style={[styles.serviceText, serviceCategory === 'medical' && { color: colors.ambulanceColor, fontWeight: 'bold' }]}>MEDICAL</Text>
         </TouchableOpacity>
       </View>
 
@@ -776,7 +776,6 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
               </View>
             </View>
           )}
-        </View>
         </View>
       ) : serviceCategory === 'medical' ? (
         <View style={{ marginTop: 30 }}>
@@ -1129,6 +1128,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
       <Modal visible={showPaymentModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <GlassCard style={styles.modalCard}>
+            <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={{ color: colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16 }}>Secure Checkout</Text>
             
             <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 12, marginBottom: 20, borderWidth: 1, borderColor: colors.surfaceLight }}>
@@ -1219,6 +1219,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                 </View>
               </>
             )}
+            </ScrollView>
           </GlassCard>
         </View>
       </Modal>
@@ -1553,7 +1554,7 @@ const getStyles = (colors) => StyleSheet.create({
   paymentMethodActive: { borderColor: colors.primary, backgroundColor: 'rgba(163,230,53,0.05)' },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20, zIndex: 9999 },
-  modalCard: { width: '100%', maxWidth: 450, padding: 24, backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.glassBorder },
+  modalCard: { width: '100%', maxWidth: 450, maxHeight: '90%', padding: 24, backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.glassBorder },
   cityOptionBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: colors.surfaceLight, borderWidth: 1, borderColor: colors.glassBorder },
   cityOptionBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   cityOptionText: { color: colors.text, fontWeight: 'bold' },

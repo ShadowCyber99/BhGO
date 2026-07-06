@@ -119,9 +119,29 @@ const inMemoryDb = {
   ],
   rides: [],
   restaurants: [
-    { id: 1, name: 'Burger Heaven', cuisine: 'American Fast Food', rating: 4.8, image_url: '🍔' },
-    { id: 2, name: 'Slice of Napoli', cuisine: 'Authentic Pizza', rating: 4.9, image_url: '🍕' },
-    { id: 3, name: 'Sushi Samurai', cuisine: 'Japanese Sushi', rating: 4.7, image_url: '🍣' }
+    { id: 1, name: 'Burger King', category: 'Fast Food', rating: 4.2, delivery_time: '25-35 min', min_order: 150, image_url: '🍔' },
+    { id: 2, name: 'Pizza Hut', category: 'Pizza', rating: 4.0, delivery_time: '35-45 min', min_order: 300, image_url: '🍕' },
+    { id: 3, name: 'Sushi Express', category: 'Asian', rating: 4.6, delivery_time: '40-50 min', min_order: 500, image_url: '🍣' },
+    { id: 4, name: 'Apollo Pharmacy', category: 'Pharmacy', rating: 4.8, delivery_time: '15-25 min', min_order: 100, image_url: '💊' },
+    { id: 5, name: 'Wellness Forever', category: 'Pharmacy', rating: 4.7, delivery_time: '10-20 min', min_order: 100, image_url: '💊' },
+    { id: 6, name: 'MedPlus', category: 'Pharmacy', rating: 4.5, delivery_time: '15-30 min', min_order: 100, image_url: '💊' },
+    { id: 7, name: 'Delhi Medicos', category: 'Pharmacy', rating: 4.4, delivery_time: '20-30 min', min_order: 150, image_url: '💊' },
+    { id: 8, name: 'Netmeds Store', category: 'Pharmacy', rating: 4.6, delivery_time: '25-40 min', min_order: 200, image_url: '💊' },
+    { id: 9, name: 'Sanjivani Pharmacy', category: 'Pharmacy', rating: 4.3, delivery_time: '15-25 min', min_order: 100, image_url: '💊' },
+    { id: 10, name: 'Guardian Pharmacy', category: 'Pharmacy', rating: 4.5, delivery_time: '20-35 min', min_order: 150, image_url: '💊' },
+    { id: 11, name: 'Frank Ross Pharmacy', category: 'Pharmacy', rating: 4.4, delivery_time: '20-30 min', min_order: 150, image_url: '💊' },
+    { id: 12, name: '98.4 Degrees', category: 'Pharmacy', rating: 4.7, delivery_time: '10-20 min', min_order: 200, image_url: '💊' },
+    { id: 13, name: 'PharmaEasy Local', category: 'Pharmacy', rating: 4.6, delivery_time: '15-30 min', min_order: 100, image_url: '💊' },
+    { id: 14, name: 'Truemeds', category: 'Pharmacy', rating: 4.5, delivery_time: '20-35 min', min_order: 200, image_url: '💊' },
+    { id: 15, name: 'Tata 1mg Store', category: 'Pharmacy', rating: 4.8, delivery_time: '15-25 min', min_order: 150, image_url: '💊' },
+    { id: 16, name: 'HealthKart', category: 'Pharmacy', rating: 4.3, delivery_time: '20-40 min', min_order: 300, image_url: '💊' },
+    { id: 17, name: 'Patanjali Chikitsalaya', category: 'Pharmacy', rating: 4.2, delivery_time: '25-45 min', min_order: 100, image_url: '💊' },
+    { id: 18, name: 'Ayurveda Kendra', category: 'Pharmacy', rating: 4.1, delivery_time: '30-50 min', min_order: 150, image_url: '💊' },
+    { id: 19, name: 'City Health', category: 'Pharmacy', rating: 4.4, delivery_time: '15-25 min', min_order: 100, image_url: '💊' },
+    { id: 20, name: 'LifeCare Meds', category: 'Pharmacy', rating: 4.5, delivery_time: '10-20 min', min_order: 100, image_url: '💊' },
+    { id: 21, name: 'Global Pharmacy', category: 'Pharmacy', rating: 4.3, delivery_time: '20-30 min', min_order: 150, image_url: '💊' },
+    { id: 22, name: 'Metro Medicals', category: 'Pharmacy', rating: 4.6, delivery_time: '15-30 min', min_order: 100, image_url: '💊' },
+    { id: 23, name: 'Suburban Pharma', category: 'Pharmacy', rating: 4.2, delivery_time: '25-40 min', min_order: 200, image_url: '💊' }
   ],
   menu_items: [
     { id: 1, restaurant_id: 1, name: 'Double Cheese Burger', description: 'Two juicy beef patties with cheddar cheese.', price: 12.99, is_veg: false, image_url: '🍔' },
@@ -130,7 +150,12 @@ const inMemoryDb = {
     { id: 4, restaurant_id: 2, name: 'Margherita Pizza', description: 'Classic tomato sauce, fresh mozzarella, basil.', price: 16.00, is_veg: true, image_url: '🍕' },
     { id: 5, restaurant_id: 2, name: 'Pepperoni Pizza', description: 'Loaded with premium pepperoni.', price: 18.50, is_veg: false, image_url: '🍕' },
     { id: 6, restaurant_id: 3, name: 'Dragon Roll', description: 'Eel, cucumber, and avocado.', price: 14.00, is_veg: false, image_url: '🍣' },
-    { id: 7, restaurant_id: 3, name: 'Spicy Tuna Roll', description: 'Fresh tuna with spicy sauce.', price: 12.00, is_veg: false, image_url: '🍣' }
+    { id: 7, restaurant_id: 3, name: 'Spicy Tuna Roll', description: 'Fresh tuna with spicy sauce.', price: 12.00, is_veg: false, image_url: '🍣' },
+    { id: 8, restaurant_id: 4, name: 'Paracetamol 500mg', description: 'Pain relief and fever reduction (10 tablets)', price: 40.00, is_veg: true, image_url: '💊' },
+    { id: 9, restaurant_id: 4, name: 'First Aid Kit', description: 'Essential first aid items for home.', price: 250.00, is_veg: true, image_url: '🩹' },
+    { id: 10, restaurant_id: 4, name: 'Vitamin C Tablets', description: 'Immunity booster.', price: 120.00, is_veg: true, image_url: '💊' },
+    { id: 11, restaurant_id: 5, name: 'Cough Syrup', description: 'Dry cough relief 100ml.', price: 95.00, is_veg: true, image_url: '🍾' },
+    { id: 12, restaurant_id: 5, name: 'Thermometer', description: 'Digital thermometer for precise readings.', price: 150.00, is_veg: true, image_url: '🌡️' }
   ],
   orders: [],
   chat_messages: [],
@@ -202,7 +227,10 @@ const query = async (text, params = []) => {
   if (sql.includes('select * from users where email =')) {
     const email = params[0].toLowerCase();
     const user = inMemoryDb.users.find(u => u.email.toLowerCase() === email);
-    return { rows: user ? [user] : [] };
+    if (user) {
+      return { rows: [{ ...user, password: user.password_hash }] };
+    }
+    return { rows: [] };
   }
 
   // 2. Fetch User & Driver profile: JOIN users and drivers
