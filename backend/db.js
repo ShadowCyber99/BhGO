@@ -196,6 +196,23 @@ const initDb = async () => {
   try {
     const client = await pool.connect();
     console.log('✅ PostgreSQL Connected Successfully!');
+    
+    // Seed admin user for demo purposes if not exists
+    try {
+      const adminRes = await client.query('SELECT * FROM users WHERE email = $1', ['admin@BharatGo.com']);
+      if (adminRes.rows.length === 0) {
+        const bcrypt = require('bcryptjs');
+        const hash = bcrypt.hashSync('password123', 10);
+        await client.query(
+          'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)',
+          ['System Admin', 'admin@BharatGo.com', hash, 'admin']
+        );
+        console.log('🛡️ Admin user seeded into PostgreSQL!');
+      }
+    } catch (seedErr) {
+      console.warn('⚠️ Could not seed admin user:', seedErr.message);
+    }
+
     client.release();
     useFallback = false;
   } catch (err) {
