@@ -52,6 +52,10 @@ async function seed() {
       "INSERT INTO users (name, email, password, role) VALUES ('Test Driver', 'driver@test.com', $1, 'driver') ON CONFLICT (email) DO NOTHING RETURNING id",
       [hash]
     );
+    const adminRes = await pool.query(
+      "INSERT INTO users (name, email, password, role) VALUES ('System Admin', 'admin@BharatGo.com', $1, 'admin') ON CONFLICT (email) DO NOTHING RETURNING id",
+      [hash]
+    );
 
     if (driverRes.rows.length > 0) {
       await pool.query(
