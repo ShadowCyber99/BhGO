@@ -14,7 +14,7 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('rider', 'driver')),
+    role VARCHAR(20) NOT NULL CHECK (role IN ('rider', 'driver', 'admin')),
     rating DECIMAL(3,2) DEFAULT 5.00,
     wallet_balance DECIMAL(10,2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -133,16 +133,24 @@ INSERT INTO restaurants (id, name, cuisine, rating, image_url, category) VALUES
 (19, 'D-Mart Specials', 'Discount Groceries', 4.6, '🏪', 'grocery'),
 (20, 'Nature''s Basket', 'Premium Grocery', 4.8, '🥑', 'grocery'),
 (21, 'Local Kirana', 'Neighborhood Store', 4.4, '🏪', 'grocery'),
+(27, 'Zepto Fast', 'Quick Commerce', 4.7, '⚡', 'grocery'),
+(28, 'Swiggy Instamart', 'Instant Groceries', 4.6, '🥡', 'grocery'),
 
--- New Additions
-(22, 'Apollo Pharmacy', 'Medicines & Health', 4.8, '💊', 'grocery'),
+-- Medical & Pharmacies
+(22, 'Apollo Pharmacy', 'Medicines & Health', 4.8, '💊', 'pharmacy'),
+(29, 'Netmeds', 'Online Pharmacy', 4.7, '💉', 'pharmacy'),
+(30, 'PharmEasy', 'Healthcare Essentials', 4.5, '🩺', 'pharmacy'),
+(31, '1mg Health', 'Medicines & Labs', 4.9, '🧪', 'pharmacy'),
+(32, 'Truemeds', 'Discount Medicines', 4.4, '🩹', 'pharmacy'),
+
+-- Others
 (23, 'Croma Express', 'Electronics', 4.5, '🔌', 'grocery'),
 (24, 'Licious', 'Fresh Meat & Seafood', 4.7, '🥩', 'grocery'),
 (25, 'Sweet Tooth Desserts', 'Desserts & Cakes', 4.9, '🎂', 'food'),
 (26, 'Subway Sandwiches', 'Healthy Fast Food', 4.3, '🥪', 'food');
 
 -- Reset Sequence for restaurants
-SELECT setval('restaurants_id_seq', 26);
+SELECT setval('restaurants_id_seq', 32);
 
 -- Seed Menu Items (30+ Food)
 INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_url) VALUES 
@@ -244,6 +252,31 @@ INSERT INTO menu_items (restaurant_id, name, description, price, is_veg, image_u
 (22, 'Paracetamol (10 Tablets)', 'Fever reducer.', 35.00, TRUE, '💊'),
 (22, 'First Aid Kit', 'Bandages and antiseptics.', 250.00, TRUE, '🩹'),
 (22, 'Vitamin C (30 Tablets)', 'Immunity booster.', 120.00, TRUE, '🍋'),
+
+-- Netmeds
+(29, 'Cough Syrup (100ml)', 'Soothes dry cough.', 95.00, TRUE, '🧴'),
+(29, 'Vicks Vaporub (50g)', 'Cold relief balm.', 85.00, TRUE, '💆'),
+(29, 'Digital Thermometer', 'Fast and accurate.', 200.00, TRUE, '🌡️'),
+
+-- PharmEasy
+(30, 'Dolo 650 (15 Tablets)', 'Fever and pain relief.', 30.00, TRUE, '💊'),
+(30, 'Volini Spray (50g)', 'Pain relief spray.', 140.00, TRUE, '💨'),
+(30, 'Eno Fruit Salt', 'Acidity relief.', 45.00, TRUE, '🥤'),
+
+-- 1mg Health
+(31, 'Blood Pressure Monitor', 'Automatic digital BP machine.', 1250.00, TRUE, '🩺'),
+(31, 'Diabetic Test Strips', 'Pack of 50.', 800.00, TRUE, '🩸'),
+(31, 'Multivitamins (60 Caps)', 'Daily essential vitamins.', 350.00, TRUE, '💊'),
+
+-- Truemeds
+(32, 'Ibuprofen (10 Tablets)', 'Anti-inflammatory.', 25.00, TRUE, '💊'),
+(32, 'Antacid Liquid (200ml)', 'Relieves heartburn.', 110.00, TRUE, '🧴'),
+
+-- Zepto & Instamart
+(27, 'Lay''s Classic Salted', 'Potato chips.', 20.00, TRUE, '🥔'),
+(27, 'Coca-Cola (750ml)', 'Cold drink.', 40.00, TRUE, '🥤'),
+(28, 'Cadbury Dairy Milk', 'Milk chocolate.', 100.00, TRUE, '🍫'),
+(28, 'Red Bull Energy Drink', '250ml can.', 125.00, TRUE, '⚡'),
 
 -- Croma Express
 (23, 'USB-C Charging Cable', 'Fast charging cable 1m.', 350.00, TRUE, '🔌'),

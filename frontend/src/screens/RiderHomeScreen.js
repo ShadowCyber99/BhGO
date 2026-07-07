@@ -719,7 +719,7 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
                     const isPharmacy = r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health') || r.category === 'pharmacy';
                     if (isPharmacy) return false;
                     const isMatchCategory = r.category === foodCategoryTab || (!r.category && foodCategoryTab === 'food');
-                    const isCityMatch = (r.city && r.city === selectedCity.name) || r.category === 'grocery'; // Make groceries global for now, or use real city mapping if updated
+                    const isCityMatch = r.city === selectedCity.name;
                     return isMatchCategory && isCityMatch;
                   }).map(r => (
                     <TouchableOpacity key={r.id} style={styles.restaurantCard} onPress={() => openRestaurant(r)}>
@@ -791,12 +791,12 @@ export default function RiderHomeScreen({ onNavigateToActiveRide }) {
               </View>
 
               <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
-                {restaurants.filter(r => r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health')).length === 0 ? (
+                {restaurants.filter(r => (r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health') || r.category === 'pharmacy') && r.city === selectedCity.name).length === 0 ? (
                   <View style={{ padding: 20, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: colors.danger, width: '100%' }}>
                     <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>⚠️ No Pharmacies Found</Text>
                   </View>
                 ) : (
-                  restaurants.filter(r => r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health') || r.category === 'pharmacy').map(r => (
+                  restaurants.filter(r => (r.name.toLowerCase().includes('pharmacy') || r.name.toLowerCase().includes('health') || r.category === 'pharmacy') && r.city === selectedCity.name).map(r => (
                     <TouchableOpacity key={r.id} style={styles.restaurantCard} onPress={() => openRestaurant(r)}>
                       <Text style={{ fontSize: 40 }}>{r.image_url || '💊'}</Text>
                       <Text style={styles.restaurantName}>{r.name}</Text>
