@@ -11,6 +11,9 @@ const pgConfig = {
   database: process.env.DB_NAME || 'cab_ride',
 };
 
+const DEMO_ADMIN_EMAIL = 'admin@BharatGo.com';
+const DEMO_ADMIN_PASSWORD = 'Admin@123';
+
 const pool = new Pool(pgConfig);
 
 async function seed() {
@@ -43,6 +46,7 @@ async function seed() {
     const bcrypt = require('bcryptjs');
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash('password123', salt);
+    const adminHash = await bcrypt.hash(DEMO_ADMIN_PASSWORD, salt);
 
     const riderRes = await pool.query(
       "INSERT INTO users (name, email, password, role) VALUES ('Test Rider', 'rider@test.com', $1, 'rider') ON CONFLICT (email) DO NOTHING RETURNING id",
@@ -53,8 +57,8 @@ async function seed() {
       [hash]
     );
     const adminRes = await pool.query(
-      "INSERT INTO users (name, email, password, role) VALUES ('System Admin', 'admin@BharatGo.com', $1, 'admin') ON CONFLICT (email) DO NOTHING RETURNING id",
-      [hash]
+      "INSERT INTO users (name, email, password, role) VALUES ('System Admin', $1, $2, 'admin') ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, password = EXCLUDED.password, role = EXCLUDED.role RETURNING id",
+      [DEMO_ADMIN_EMAIL, adminHash]
     );
 
     if (driverRes.rows.length > 0) {
@@ -68,6 +72,7 @@ async function seed() {
       );
     }
     console.log('✅ Seeded dummy users (rider@test.com & driver@test.com) with password: password123');
+    console.log(`✅ Admin demo ready (${DEMO_ADMIN_EMAIL} / ${DEMO_ADMIN_PASSWORD})`);
     
   } catch (err) {
     console.error('❌ Error seeding database:', err.message);

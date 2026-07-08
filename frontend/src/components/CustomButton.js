@@ -1,9 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ActivityIndicator, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import Icon from './Icon';
 
 export default function CustomButton({ 
   title, 
+  icon,
   onPress, 
   variant = 'primary', 
   loading = false, 
@@ -47,7 +49,17 @@ export default function CustomButton({
           size="small" 
         />
       ) : (
-        <Text style={textStyles}>{title}</Text>
+        <>
+          {icon ? (
+            <Icon
+              name={icon}
+              size={18}
+              color={isOutline ? colors.primary : isDanger ? '#FFFFFF' : '#000000'}
+              style={{ marginRight: 8 }}
+            />
+          ) : null}
+          <Text style={textStyles}>{title}</Text>
+        </>
       )}
     </TouchableOpacity>
   );

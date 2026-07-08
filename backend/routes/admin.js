@@ -115,4 +115,25 @@ router.post('/complaints/:id/resolve', adminAuth, async (req, res) => {
   }
 });
 
+// GET /api/admin/users - All users
+router.get('/users', adminAuth, async (req, res) => {
+  try {
+    if (db.getUseFallback()) {
+      const memDb = db.getInMemoryDb();
+      res.json(memDb.users.filter(u => u.role !== 'admin'));
+    } else {
+      const result = await db.query(`SELECT id, name, email, role, rating, wallet_balance, created_at FROM users WHERE role != 'admin' ORDER BY created_at DESC`);
+      res.json(result.rows);
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/admin/users/:id/suspend
+router.post('/users/:id/suspend', adminAuth, async (req, res) => {
+  // Mock suspend logic for demo
+  res.json({ success: true, message: 'User suspended successfully' });
+});
+
 module.exports = router;

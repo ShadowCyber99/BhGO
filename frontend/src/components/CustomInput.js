@@ -42,33 +42,35 @@ export default function CustomInput({
 
 const getStyles = (colors) => StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 20,
     width: '100%',
   },
   label: {
-    color: colors.textMuted,
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
     marginBottom: 8,
-    paddingLeft: 2,
+    paddingLeft: 4,
   },
   inputWrapper: {
-    height: 52,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderWidth: 1.5,
-    borderColor: colors.surfaceLight,
+    height: 54,
+    backgroundColor: colors.surfaceLight,
+    borderWidth: 1,
+    borderColor: colors.overlayBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     justifyContent: 'center',
-    transition: 'border-color 0.2s, background-color 0.2s',
+    transition: 'border-color 0.2s, background-color 0.2s, box-shadow 0.2s',
   },
   focusedWrapper: {
     borderColor: colors.primary,
-    backgroundColor: 'rgba(99, 102, 241, 0.05)',
+    backgroundColor: colors.surface,
+    boxShadow: `0 0 0 2px ${colors.primary}33`,
   },
   input: {
     color: colors.text,
     fontSize: 16,
+    fontWeight: '500',
     height: '100%',
     width: '100%',
     outlineStyle: 'none', // Remove default web input ring outline

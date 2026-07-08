@@ -108,6 +108,15 @@ CREATE TABLE reviews (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE complaints (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    subject VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(20) DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Seed Restaurants (15 Food, 6 Groceries)
 INSERT INTO restaurants (id, name, cuisine, rating, image_url, category) VALUES 
 (1, 'Bukhara Authentic', 'North Indian', 4.9, '🥘', 'food'),

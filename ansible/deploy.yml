@@ -1,0 +1,36 @@
+---
+- name: Deploy BharatGo application
+  hosts: web
+  become: yes
+  tasks:
+    - name: Ensure target directory exists
+      file:
+        path: /home/ubuntu/cab-ride-app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy application code to EC2
+      synchronize:
+        src: ../
+        dest: /home/ubuntu/cab-ride-app/
+        delete: yes
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=node_modules"
+          - "--exclude=ansible"
+
+    - name: Make sure old containers are stopped and removed
+      command: docker compose down
+      args:
+        chdir: /home/ubuntu/cab-ride-app
+      ignore_errors: yes
+
+    - name: Build and start Docker containers
+      command: docker compose up -d --build
+      args:
+        chdir: /home/ubuntu/cab-ride-app
+
+    - name: Run database seed
+      command: docker exec BharatGo-backend npm run seed
+      ignore_errors: yes

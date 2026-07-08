@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
+import { IconText } from '../components/Icon';
 
 export default function RegisterScreen({ onNavigateToLogin }) {
   const { register } = useAuth();
@@ -162,7 +163,9 @@ export default function RegisterScreen({ onNavigateToLogin }) {
           {/* DYNAMIC VEHICLE SECTIONS FOR DRIVERS */}
           {role === 'driver' && (
             <View style={styles.driverSection}>
-              <Text style={styles.sectionHeader}>🚗 Vehicle Details</Text>
+              <IconText name="car" color={colors.primary} size={18} textStyle={styles.sectionHeader}>
+                Vehicle Details
+              </IconText>
               
               <CustomInput
                 label="Vehicle Model"
@@ -179,7 +182,9 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                 autoCapitalize="characters"
               />
 
-              <Text style={[styles.sectionHeader, { marginTop: 12 }]}>🆔 Verification Details</Text>
+              <IconText name="shield" color={colors.primary} size={18} style={{ marginTop: 12 }} textStyle={styles.sectionHeader}>
+                Verification Details
+              </IconText>
               
               <CustomInput
                 label="Aadhar Card Number"

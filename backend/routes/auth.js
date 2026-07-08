@@ -108,7 +108,7 @@ router.post('/login', [
 
   try {
     // Fetch user
-    const userRes = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    const userRes = await db.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [email]);
     if (userRes.rows.length === 0) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }

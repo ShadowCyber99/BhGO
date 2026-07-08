@@ -5,6 +5,7 @@ import { api } from '../utils/api';
 import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomButton from '../components/CustomButton';
+import Icon, { IconText } from '../components/Icon';
 
 export default function HistoryScreen({ onNavigateBack }) {
   const { user } = useAuth();
@@ -38,10 +39,10 @@ export default function HistoryScreen({ onNavigateBack }) {
 
   const getServiceIcon = (service) => {
     switch (service) {
-      case 'ambulance': return '🚑';
-      case 'parcel': return '📦';
-      case 'food': return '🍔';
-      default: return '🚕';
+      case 'ambulance': return 'ambulance';
+      case 'parcel': return 'package';
+      case 'food': return 'restaurant';
+      default: return 'car';
     }
   };
 
@@ -63,7 +64,9 @@ export default function HistoryScreen({ onNavigateBack }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={onNavigateBack} style={styles.backBtn}>
-          <Text style={{ color: colors.text, fontWeight: 'bold' }}>← Back</Text>
+          <IconText name="arrowLeft" color={colors.text} size={16} textStyle={{ color: colors.text, fontWeight: 'bold' }}>
+            Back
+          </IconText>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile & History</Text>
       </View>
@@ -72,7 +75,9 @@ export default function HistoryScreen({ onNavigateBack }) {
         
         {/* Personal Details Profile Card */}
         <GlassCard style={styles.profileCard}>
-          <Text style={styles.profileSectionTitle}>👤 Personal Details</Text>
+          <IconText name="user" color={colors.primary} size={20} textStyle={styles.profileSectionTitle}>
+            Personal Details
+          </IconText>
           <View style={styles.profileRow}>
             <Text style={styles.profileLabel}>Name</Text>
             <Text style={styles.profileValue}>{user?.name}</Text>
@@ -87,11 +92,15 @@ export default function HistoryScreen({ onNavigateBack }) {
           </View>
           <View style={styles.profileRow}>
             <Text style={styles.profileLabel}>User Rating</Text>
-            <Text style={styles.profileValue}>⭐ {user?.rating || '5.0'}</Text>
+            <IconText name="star" color={colors.warning} size={15} textStyle={styles.profileValue}>
+              {user?.rating || '5.0'}
+            </IconText>
           </View>
         </GlassCard>
 
-        <Text style={[styles.profileSectionTitle, { marginTop: 20, marginBottom: 10 }]}>🕒 Recent Activity</Text>
+        <IconText name="clock" color={colors.primary} size={20} style={{ marginTop: 20, marginBottom: 10 }} textStyle={styles.profileSectionTitle}>
+          Recent Activity
+        </IconText>
 
         {error ? (
           <Text style={{ color: colors.danger }}>{error}</Text>
@@ -101,7 +110,9 @@ export default function HistoryScreen({ onNavigateBack }) {
           history.map(item => (
             <GlassCard key={item.id} style={styles.historyCard}>
               <View style={styles.cardHeader}>
-                <Text style={styles.serviceTitle}>{getServiceIcon(item.serviceCategory)} {item.serviceCategory.toUpperCase()}</Text>
+                <IconText name={getServiceIcon(item.serviceCategory)} color={colors.primary} size={18} textStyle={styles.serviceTitle}>
+                  {item.serviceCategory.toUpperCase()}
+                </IconText>
                 <View style={[styles.statusBadge, { backgroundColor: item.status === 'completed' ? colors.success : item.status === 'cancelled' ? colors.danger : colors.warning }]}>
                   <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
                 </View>
@@ -113,19 +124,25 @@ export default function HistoryScreen({ onNavigateBack }) {
               </View>
               
               <View style={styles.routeBox}>
-                <Text style={styles.addressText} numberOfLines={1}>📍 {item.pickupAddress}</Text>
-                <Text style={styles.addressText} numberOfLines={1}>🏁 {item.dropoffAddress}</Text>
+                <IconText name="mapPin" color={colors.success} size={15} textStyle={styles.addressText}>
+                  {item.pickupAddress}
+                </IconText>
+                <IconText name="location" color={colors.danger} size={15} textStyle={styles.addressText}>
+                  {item.dropoffAddress}
+                </IconText>
               </View>
 
               <View style={styles.footerRow}>
                 <View>
                   <Text style={styles.fareText}>₹{item.fare?.toFixed(2)}</Text>
-                  <Text style={styles.paymentText}>
-                    {item.payment_mode === 'digital' ? '💳 Digital' : '💵 Cash'} • {item.payment_status?.toUpperCase()}
-                  </Text>
+                  <IconText name={item.payment_mode === 'digital' ? 'creditCard' : 'wallet'} color={colors.textDim} size={14} textStyle={styles.paymentText}>
+                    {item.payment_mode === 'digital' ? 'Digital' : 'Cash'} - {item.payment_status?.toUpperCase()}
+                  </IconText>
                 </View>
                 <TouchableOpacity style={styles.invoiceBtn} onPress={() => setSelectedInvoice(item)}>
-                  <Text style={styles.invoiceBtnText}>📄 Invoice</Text>
+                  <IconText name="invoice" color="#000" size={14} textStyle={styles.invoiceBtnText}>
+                    Invoice
+                  </IconText>
                 </TouchableOpacity>
               </View>
             </GlassCard>

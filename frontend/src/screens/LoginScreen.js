@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
+import Icon, { IconText } from '../components/Icon';
 
 export default function LoginScreen({ onNavigateToRegister }) {
   const { login } = useAuth();
@@ -77,6 +78,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
 
           <CustomButton
             title="Log In to Ride"
+            icon="logOut"
             onPress={handleLogin}
             loading={loading}
             style={styles.button}
@@ -84,7 +86,9 @@ export default function LoginScreen({ onNavigateToRegister }) {
 
           {/* Quick Demo Pre-fill helpers */}
           <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>💡 Quick Test Accounts</Text>
+            <IconText name="activity" color={colors.textMuted} size={14} style={{ justifyContent: 'center', marginBottom: 8 }} textStyle={styles.demoTitle}>
+              Quick Test Accounts
+            </IconText>
             <View style={styles.demoButtons}>
               <TouchableOpacity 
                 style={styles.demoBadge}
@@ -93,7 +97,9 @@ export default function LoginScreen({ onNavigateToRegister }) {
                   setPassword('Rider@123');
                 }}
               >
-                <Text style={styles.demoBadgeText}>👤 Rider Demo</Text>
+                <IconText name="user" color={colors.primary} size={14} textStyle={styles.demoBadgeText}>
+                  Rider Demo
+                </IconText>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.demoBadge, { borderColor: colors.secondary }]}
@@ -102,16 +108,20 @@ export default function LoginScreen({ onNavigateToRegister }) {
                   setPassword('Driver@123');
                 }}
               >
-                <Text style={[styles.demoBadgeText, { color: colors.secondary }]}>🚗 Driver Demo</Text>
+                <IconText name="car" color={colors.secondary} size={14} textStyle={[styles.demoBadgeText, { color: colors.secondary }]}>
+                  Driver Demo
+                </IconText>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.demoBadge, { borderColor: colors.danger }]}
                 onPress={() => {
                   setEmail('admin@BharatGo.com');
-                  setPassword('password123');
+                  setPassword('Admin@123');
                 }}
               >
-                <Text style={[styles.demoBadgeText, { color: colors.danger }]}>🛠️ Admin Demo</Text>
+                <IconText name="shield" color={colors.danger} size={14} textStyle={[styles.demoBadgeText, { color: colors.danger }]}>
+                  Admin Demo
+                </IconText>
               </TouchableOpacity>
             </View>
           </View>

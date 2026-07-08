@@ -13,6 +13,9 @@ const pgConfig = {
   connectionTimeoutMillis: 3000, // Timeout fast if Postgres is offline
 };
 
+const DEMO_ADMIN_EMAIL = 'admin@BharatGo.com';
+const DEMO_ADMIN_PASSWORD = 'Admin@123';
+
 let pool = null;
 let useFallback = false;
 
@@ -62,8 +65,8 @@ const inMemoryDb = {
     {
       id: 5,
       name: 'System Admin',
-      email: 'admin@BharatGo.com',
-      password_hash: bcrypt.hashSync('password123', 10),
+      email: DEMO_ADMIN_EMAIL,
+      password_hash: bcrypt.hashSync(DEMO_ADMIN_PASSWORD, 10),
       role: 'admin',
       rating: 5.0,
       wallet_balance: 0.00,
@@ -199,15 +202,20 @@ const initDb = async () => {
     
     // Seed admin user for demo purposes if not exists
     try {
-      const adminRes = await client.query('SELECT * FROM users WHERE email = $1', ['admin@BharatGo.com']);
+      const hash = bcrypt.hashSync(DEMO_ADMIN_PASSWORD, 10);
+      const adminRes = await client.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [DEMO_ADMIN_EMAIL]);
       if (adminRes.rows.length === 0) {
-        const bcrypt = require('bcryptjs');
-        const hash = bcrypt.hashSync('password123', 10);
         await client.query(
           'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)',
-          ['System Admin', 'admin@BharatGo.com', hash, 'admin']
+          ['System Admin', DEMO_ADMIN_EMAIL, hash, 'admin']
         );
         console.log('🛡️ Admin user seeded into PostgreSQL!');
+      } else {
+        await client.query(
+          'UPDATE users SET name = $1, password = $2, role = $3 WHERE id = $4',
+          ['System Admin', hash, 'admin', adminRes.rows[0].id]
+        );
+        console.log('🛡️ Admin demo credentials refreshed in PostgreSQL!');
       }
     } catch (seedErr) {
       console.warn('⚠️ Could not seed admin user:', seedErr.message);
@@ -241,7 +249,7 @@ const query = async (text, params = []) => {
   const sql = text.toLowerCase().trim().replace(/\s+/g, ' ');
 
   // 1. Fetch User by Email: `SELECT * FROM users WHERE email = $1`
-  if (sql.includes('select * from users where email =')) {
+  if (sql.includes('select * from users where email =') || sql.includes('select * from users where lower(email) = lower(')) {
     const email = params[0].toLowerCase();
     const user = inMemoryDb.users.find(u => u.email.toLowerCase() === email);
     if (user) {

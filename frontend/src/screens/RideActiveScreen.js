@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
 import CustomButton from '../components/CustomButton';
 import MapView from '../components/MapView';
+import Icon, { IconText } from '../components/Icon';
 
 export default function RideActiveScreen({ onNavigateToHome }) {
   const { user, socket } = useAuth();
@@ -181,13 +182,13 @@ export default function RideActiveScreen({ onNavigateToHome }) {
     const vehicleTerm = service === 'ambulance' ? 'Ambulance' : service === 'parcel' ? 'Courier Van' : service === 'food' ? 'Food Delivery' : 'Cab';
 
     switch (ride.status) {
-      case 'requested': return { title: `🚨 Searching for Nearby ${driverTerm}s`, subtitle: 'Dispatching matching request...', color: colors.warning };
-      case 'accepted': return { title: `⚡ ${driverTerm} En Route`, subtitle: `${ride.driverName || driverTerm} is driving to pickup.`, color: colors.info };
-      case 'arrived': return { title: `👋 Your ${vehicleTerm} Has Arrived!`, subtitle: 'Please proceed to the vehicle.', color: colors.success };
-      case 'started': return { title: `🚗 Active ${service} in Progress`, subtitle: 'Cruising smoothly.', color: colors.primary };
-      case 'completed': return { title: '🎉 Arrived Safely', subtitle: `Thank you for choosing SuperApp.`, color: colors.success };
-      case 'cancelled': return { title: '🚫 Request Cancelled', subtitle: `This ${service} has been cancelled.`, color: colors.danger };
-      default: return { title: 'Active Request', subtitle: 'Syncing details...', color: colors.textMuted };
+      case 'requested': return { icon: 'siren', title: `Searching for Nearby ${driverTerm}s`, subtitle: 'Dispatching matching request...', color: colors.warning };
+      case 'accepted': return { icon: 'route', title: `${driverTerm} En Route`, subtitle: `${ride.driverName || driverTerm} is driving to pickup.`, color: colors.info };
+      case 'arrived': return { icon: 'mapPin', title: `Your ${vehicleTerm} Has Arrived`, subtitle: 'Please proceed to the vehicle.', color: colors.success };
+      case 'started': return { icon: 'car', title: `Active ${service} in Progress`, subtitle: 'Cruising smoothly.', color: colors.primary };
+      case 'completed': return { icon: 'check', title: 'Arrived Safely', subtitle: `Thank you for choosing SuperApp.`, color: colors.success };
+      case 'cancelled': return { icon: 'warning', title: 'Request Cancelled', subtitle: `This ${service} has been cancelled.`, color: colors.danger };
+      default: return { icon: 'activity', title: 'Active Request', subtitle: 'Syncing details...', color: colors.textMuted };
     }
   };
 
@@ -216,7 +217,9 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <View style={[styles.statusHeader, { flex: 1 }]}>
-            <Text style={{ color: statusMeta.color, fontSize: 24, fontWeight: '900', marginBottom: 6 }}>{statusMeta.title}</Text>
+            <IconText name={statusMeta.icon} color={statusMeta.color} size={26} gap={10} textStyle={{ color: statusMeta.color, fontSize: 24, fontWeight: '900', marginBottom: 6 }}>
+              {statusMeta.title}
+            </IconText>
             <Text style={{ color: colors.textMuted, fontSize: 14, fontWeight: '500' }}>{statusMeta.subtitle}</Text>
           </View>
           {eta !== null && !['completed', 'cancelled', 'requested'].includes(ride.status) && (
@@ -258,9 +261,11 @@ export default function RideActiveScreen({ onNavigateToHome }) {
         {ride.status === 'requested' && (
           <View style={styles.searchPulseBox}>
             <View style={styles.radarRing} />
-            <Text style={styles.radarText}>📡 Sending coordinate ping...</Text>
+            <IconText name="activity" color={colors.primary} size={16} textStyle={styles.radarText}>
+              Sending coordinate ping...
+            </IconText>
             <Text style={{ color: colors.warning, fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>
-              ⏳ {Math.floor((180 - requestTimeElapsed) / 60)}:{(180 - requestTimeElapsed) % 60 < 10 ? '0' : ''}{(180 - requestTimeElapsed) % 60}
+              {Math.floor((180 - requestTimeElapsed) / 60)}:{(180 - requestTimeElapsed) % 60 < 10 ? '0' : ''}{(180 - requestTimeElapsed) % 60}
             </Text>
           </View>
         )}
@@ -278,10 +283,14 @@ export default function RideActiveScreen({ onNavigateToHome }) {
             </View>
             <View style={styles.actionCol}>
               <TouchableOpacity style={styles.sosToggleBtn} onPress={() => setSosOpen(true)}>
-                <Text style={{ color: '#FFF', fontWeight: 'bold' }}>🚨 SOS</Text>
+                <IconText name="siren" color="#FFF" size={15} textStyle={{ color: '#FFF', fontWeight: 'bold' }}>
+                  SOS
+                </IconText>
               </TouchableOpacity>
               <TouchableOpacity style={styles.chatToggleBtn} onPress={() => setChatOpen(!chatOpen)}>
-                <Text style={{ color: colors.text }}>💬 Chat</Text>
+                <IconText name="message" color={colors.text} size={15} textStyle={{ color: colors.text }}>
+                  Chat
+                </IconText>
               </TouchableOpacity>
             </View>
           </View>
@@ -289,7 +298,9 @@ export default function RideActiveScreen({ onNavigateToHome }) {
 
         {ride.status === 'arrived' && (
           <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.danger, marginBottom: 16 }}>
-            <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>🛡️ Pre-Ride Safety Checklist</Text>
+            <IconText name="shield" color={colors.danger} size={18} textStyle={{ color: colors.danger, fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>
+              Pre-Ride Safety Checklist
+            </IconText>
             {ride.serviceCategory === 'ambulance' ? (
               <Text style={{ color: colors.text, fontSize: 14 }}>• Ensure seatbelts are buckled securely{'\n'}• Check stretcher is secured & medical equipment is ready</Text>
             ) : ride.vehicleType === 'bike' || ride.vehiclePreference === 'bike' ? (
@@ -340,7 +351,7 @@ export default function RideActiveScreen({ onNavigateToHome }) {
           <View style={styles.receiptBox}>
             <View style={{ marginBottom: 20, borderBottomWidth: 1, borderColor: colors.surfaceLight, paddingBottom: 16 }}>
               <Text style={{ color: colors.success, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>
-                {ride.serviceCategory === 'ambulance' ? '🚑 ' : '✅ '}Arrived Safely
+                Arrived Safely
               </Text>
             </View>
 
@@ -348,12 +359,15 @@ export default function RideActiveScreen({ onNavigateToHome }) {
               <Text style={{ color: colors.success, fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>Thanks for your feedback!</Text>
             ) : (
               <>
-                <Text style={styles.receiptHeader}>🎫 HOW WAS YOUR TRIP?</Text>
+                <IconText name="star" color={colors.warning} size={18} style={{ justifyContent: 'center' }} textStyle={styles.receiptHeader}>
+                  HOW WAS YOUR TRIP?
+                </IconText>
                 <Text style={{ color: colors.text, textAlign: 'center', marginBottom: 16 }}>Rate {ride.driverName}</Text>
                 <View style={styles.starsContainer}>
                   {[1, 2, 3, 4, 5].map(s => (
                     <TouchableOpacity key={s} onPress={() => setRating(s)}>
                       <Text style={{ fontSize: 32, opacity: rating >= s ? 1 : 0.3 }}>⭐</Text>
+                      <Icon name="star" size={32} color={rating >= s ? colors.warning : colors.textDim} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -387,7 +401,8 @@ export default function RideActiveScreen({ onNavigateToHome }) {
 
                 <CustomButton title="Submit Feedback" onPress={submitRating} variant="primary" style={styles.doneBtn} />
                 <CustomButton 
-                  title="📄 View Full Invoice" 
+                  title="View Full Invoice" 
+                  icon="invoice"
                   onPress={() => window.setRiderScreen?.('history')} 
                   variant="outline" 
                   style={{ width: '100%', marginTop: 12 }} 
@@ -399,11 +414,15 @@ export default function RideActiveScreen({ onNavigateToHome }) {
 
         {ride.status === 'cancelled' && (
           <View style={styles.receiptBox}>
-            <Text style={[styles.receiptHeader, { color: colors.danger }]}>🚫 TRIP CANCELLED</Text>
+            <IconText name="warning" color={colors.danger} size={18} style={{ justifyContent: 'center' }} textStyle={[styles.receiptHeader, { color: colors.danger }]}>
+              TRIP CANCELLED
+            </IconText>
             
             {ride.payment_status === 'refunded' ? (
               <View style={{ backgroundColor: 'rgba(163,230,53,0.1)', padding: 16, borderRadius: 8, borderWidth: 1, borderColor: colors.primary, marginBottom: 16 }}>
-                <Text style={{ color: colors.text, fontWeight: 'bold', textAlign: 'center', marginBottom: 6, fontSize: 16 }}>💸 Refund Processed</Text>
+                <IconText name="wallet" color={colors.primary} size={17} style={{ justifyContent: 'center', marginBottom: 6 }} textStyle={{ color: colors.text, fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>
+                  Refund Processed
+                </IconText>
                 <Text style={{ color: colors.textMuted, textAlign: 'center', fontSize: 13 }}>
                   ₹{ride.fare?.toFixed(2)} has been successfully returned to your Digital Wallet.
                 </Text>
@@ -430,12 +449,14 @@ export default function RideActiveScreen({ onNavigateToHome }) {
       {sosOpen && (
         <View style={styles.sosModalOverlay}>
           <GlassCard style={styles.sosModal}>
-            <Text style={styles.sosTitle}>🚨 EMERGENCY SOS</Text>
+            <IconText name="siren" color={colors.danger} size={24} style={{ justifyContent: 'center' }} textStyle={styles.sosTitle}>
+              EMERGENCY SOS
+            </IconText>
             <Text style={styles.sosDesc}>Your live location coordinates ({ride.pickupLat?.toFixed(4)}, {ride.pickupLng?.toFixed(4)}) are ready to be shared.</Text>
             
-            <CustomButton title="📞 Call Police (100)" onPress={() => { alert('Dialing Police...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF003C'}} />
-            <CustomButton title="🚑 Call Ambulance (108)" onPress={() => { alert('Dialing Ambulance...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF1111'}} />
-            <CustomButton title="🎧 BharatGo 24/7 Support" onPress={() => { alert('Connecting to Live Support...'); setSosOpen(false); }} variant="primary" style={{marginBottom: 20}} />
+            <CustomButton title="Call Police (100)" icon="phone" onPress={() => { alert('Dialing Police...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF003C'}} />
+            <CustomButton title="Call Ambulance (108)" icon="ambulance" onPress={() => { alert('Dialing Ambulance...'); setSosOpen(false); }} variant="danger" style={{marginBottom: 12, backgroundColor: '#FF1111'}} />
+            <CustomButton title="BharatGo 24/7 Support" icon="headset" onPress={() => { alert('Connecting to Live Support...'); setSosOpen(false); }} variant="primary" style={{marginBottom: 20}} />
             
             <CustomButton title="Cancel SOS" onPress={() => setSosOpen(false)} variant="outline" />
           </GlassCard>
