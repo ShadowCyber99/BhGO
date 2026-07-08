@@ -375,11 +375,11 @@ export default function DriverHomeScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.nav}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 180, height: 60, mixBlendMode: isDarkMode ? 'screen' : 'multiply' }} resizeMode="contain" />
-              <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold', marginLeft: 4}}>Driver</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 120, height: 40 }} resizeMode="contain" />
+              <Text style={{fontSize: 14, color: colors.primary, fontWeight: 'bold', marginLeft: 8}}>Driver</Text>
             </View>
             <View style={{ marginTop: 6 }}>
               <Text style={styles.vehicleSubtitle} numberOfLines={1}>{user?.driverDetails?.vehicleName} ({user?.driverDetails?.vehicleNumber})</Text>

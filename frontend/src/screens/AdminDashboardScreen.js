@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import GlassCard from '../components/GlassCard';
@@ -183,7 +183,7 @@ export default function AdminDashboardScreen() {
     <View style={styles.container}>
       {/* SIDEBAR */}
       <View style={styles.sidebar}>
-        <Text style={styles.sidebarLogo}>BharatGo Admin</Text>
+        <Image source={isDarkMode ? require('../../assets/logo_dark.jpg') : require('../../assets/logo_light.jpg')} style={{ width: 150, height: 50, marginBottom: 40 }} resizeMode="contain" />
         
         <TouchableOpacity style={[styles.navItem, activeTab === 'dashboard' && styles.navItemActive]} onPress={() => setActiveTab('dashboard')}>
           <IconText name="barChart" color={activeTab === 'dashboard' ? colors.primary : colors.textMuted} size={18} textStyle={[styles.navText, activeTab === 'dashboard' && styles.navTextActive]}>
@@ -276,6 +276,11 @@ export default function AdminDashboardScreen() {
                         <View style={[styles.badge, { backgroundColor: r.status === 'completed' ? 'rgba(34,197,94,0.2)' : r.status === 'cancelled' ? 'rgba(239,68,68,0.2)' : 'rgba(99,102,241,0.2)' }]}>
                            <Text style={{ color: r.status === 'completed' ? colors.success : r.status === 'cancelled' ? colors.danger : colors.primary, fontSize: 12, fontWeight: 'bold' }}>{r.status.toUpperCase()}</Text>
                         </View>
+                        {r.status === 'cancelled' && (
+                          <Text style={{ fontSize: 10, color: r.payment_status === 'paid' ? colors.success : colors.danger, marginTop: 4, fontWeight: 'bold', textAlign: 'center' }}>
+                            {r.payment_status === 'paid' ? 'REFUNDABLE' : 'NON-REFUNDED'}
+                          </Text>
+                        )}
                       </View>
                       <Text style={[styles.td, { flex: 0.5 }]}>₹{r.fare}</Text>
                     </View>

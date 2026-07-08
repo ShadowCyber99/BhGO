@@ -31,13 +31,18 @@ router.get('/dashboard', adminAuth, async (req, res) => {
       const driverRes = await db.query(`SELECT COUNT(*) FROM drivers`);
       const riderRes = await db.query(`SELECT COUNT(*) FROM users WHERE role = 'rider'`);
       
+      const rideRevenueRes = await db.query(`SELECT SUM(fare) as total FROM rides WHERE status = 'completed'`);
+      const orderRevenueRes = await db.query(`SELECT SUM(total_amount) as total FROM orders`);
+      
+      const totalRevenue = (parseFloat(rideRevenueRes.rows[0].total) || 0) + (parseFloat(orderRevenueRes.rows[0].total) || 0);
+
       res.json({
         activeRides: parseInt(activeRes.rows[0].count),
         completedRides: parseInt(completedRes.rows[0].count),
         cancelledRides: parseInt(cancelledRes.rows[0].count),
         totalDrivers: parseInt(driverRes.rows[0].count),
         totalRiders: parseInt(riderRes.rows[0].count),
-        totalRevenue: 0 
+        totalRevenue: totalRevenue 
       });
     }
   } catch (err) {
